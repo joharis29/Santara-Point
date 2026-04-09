@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { ShoppingBag, User, Calculator, LogOut, ShieldCheck, Search, Minus, Plus, Coffee } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 // MOCK DATA: Daftar Produk Awal (sama dengan Login.jsx)
 const PRODUCTS = [
@@ -12,7 +13,8 @@ const PRODUCTS = [
     { id: 6, name: 'Kurma Sukari 250g', price: 35000, stock: 25, category: 'Oleh-oleh' },
 ];
 
-export default function POSDashboard({ onLogout }) {
+export default function POSDashboard() {
+    const router = useRouter();
     const [cart, setCart] = useState([]);
     const [includeZakat, setIncludeZakat] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -54,7 +56,7 @@ export default function POSDashboard({ onLogout }) {
                     <button className="p-3 hover:bg-emerald-700 rounded-xl transition text-emerald-300"><User /></button>
                     <button className="p-3 hover:bg-emerald-700 rounded-xl transition text-emerald-300"><Calculator /></button>
                 </div>
-                <button onClick={onLogout} className="p-3 hover:bg-red-500 rounded-xl transition"><LogOut /></button>
+                <button onClick={() => router.push('/login')} className="p-3 hover:bg-red-500 rounded-xl transition"><LogOut /></button>
             </div>
 
             {/* Main Product Grid */}
