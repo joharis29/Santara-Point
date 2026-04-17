@@ -29,17 +29,21 @@ export default function App() {
       router.push('/register');
     } else if (type === 'order') {
       router.push('/posin-cus');
+    } else if (type === 'kontak') {
+      router.push('/kontak');
+    } else if (type === 'dokumentasi') {
+      router.push('/dokumentasi');
     } else {
       console.log(`Navigating to: ${type}`);
     }
   };
 
   return (
-    <div className="relative min-h-screen font-sans overflow-x-hidden selection:bg-emerald-200 selection:text-emerald-900">
+    <div className="relative h-screen w-full flex flex-col font-sans overflow-hidden selection:bg-emerald-200 selection:text-emerald-900">
 
       {/* 1. Background Layer (Kompilasi Makanan) */}
       <div
-        className="fixed inset-0 z-0 bg-cover bg-center"
+        className="absolute inset-0 z-0 bg-cover bg-center"
         style={{
           backgroundImage: `url('/santara-bg-clean-hd.png')`
         }}
@@ -49,24 +53,36 @@ export default function App() {
       </div>
 
       {/* 2. Navigation Bar */}
-      <nav className="relative z-20 flex justify-between items-center px-6 py-8 lg:px-16 border-b border-white/10 backdrop-blur-sm">
-        <div className="flex items-center gap-3">
-          <img src="/santara-logo.png" alt="Santara Point Logo" className="w-12 h-12 object-contain bg-white rounded-full p-0.5 shadow-lg shadow-black/20" />
-          <h1 className="text-2xl font-black text-white tracking-tighter">
+      <nav className="relative z-20 flex justify-between items-center px-4 lg:px-12 py-3 border-b border-white/10 backdrop-blur-sm flex-none">
+        <div className="flex items-center gap-2 lg:gap-3">
+          <img src="/santara-logo.png" alt="Santara Point Logo" className="w-8 h-8 lg:w-10 lg:h-10 object-contain bg-white rounded-full p-0.5 shadow-lg shadow-black/20" />
+          <h1 className="text-lg lg:text-xl font-black text-white tracking-tighter">
             Santara<span className="text-emerald-500">Point</span>
           </h1>
         </div>
 
-        <div className="flex items-center gap-4 lg:gap-8">
+        <div className="flex items-center gap-2 lg:gap-4">
           <button
             onClick={() => handleAction('login')}
-            className="hidden md:flex items-center gap-2 text-white font-semibold hover:text-emerald-400 transition ease-in-out"
+            className="hidden md:flex items-center gap-2 text-white font-semibold hover:text-emerald-400 transition ease-in-out text-sm mr-1"
           >
-            <User size={18} /> Masuk
+            <User size={16} /> Masuk
+          </button>
+          <button
+            onClick={() => handleAction('dokumentasi')}
+            className="hidden md:block text-gray-300 hover:text-white px-2 py-1.5 font-bold text-xs lg:text-sm transition-colors"
+          >
+            Dokumentasi
+          </button>
+          <button
+            onClick={() => handleAction('kontak')}
+            className="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm backdrop-blur-md transition-all active:scale-95"
+          >
+            Kontak Kami
           </button>
           <button
             onClick={() => handleAction('register')}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-7 py-2.5 rounded-full font-bold shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 lg:px-6 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
           >
             Daftar Pelanggan Baru
           </button>
@@ -74,69 +90,69 @@ export default function App() {
       </nav>
 
       {/* 3. Hero Section Content */}
-      <main className="relative z-10 px-6 lg:px-16 pt-24 lg:pt-40 pb-20">
-        <div className="max-w-3xl">
+      <main className="relative z-10 px-4 lg:px-12 py-2 lg:py-4 flex-1 flex flex-col justify-around min-h-0">
+        <div className="max-w-2xl mt-4">
           {/* Badge Syariah */}
-          <div className="inline-flex items-center gap-2 bg-emerald-600/20 border border-emerald-500/40 px-4 py-1.5 rounded-full text-emerald-300 text-xs font-bold mb-8 backdrop-blur-xl animate-fade-in">
-            <ShieldCheck size={16} /> POS Full Online Berbasis Syariah
+          <div className="inline-flex items-center gap-1.5 bg-emerald-600/20 border border-emerald-500/40 px-3 py-1 rounded-full text-emerald-300 text-[10px] lg:text-xs font-bold mb-3 backdrop-blur-xl animate-fade-in">
+            <ShieldCheck size={14} /> POS Full Online Berbasis Syariah
           </div>
 
-          <h2 className="text-5xl lg:text-8xl font-black text-white mb-8 leading-[1.1] tracking-tight">
+          <h2 className="text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-3 leading-[1.1] tracking-tight">
             Hidangan Lezat, <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">
               Penuh Keberkahan.
             </span>
           </h2>
 
-          <p className="text-gray-300 text-lg lg:text-xl mb-12 leading-relaxed max-w-xl font-medium">
+          <p className="text-gray-300 text-xs lg:text-sm mb-5 leading-relaxed max-w-lg font-medium">
             Nikmati kemudahan memesan menu pilihan Anda secara online. Sistem yang mudah dan cepat serta ada keberkahan dalam setiap transaksinya.
           </p>
 
-          <div className="flex flex-wrap gap-5">
+          <div className="flex flex-wrap gap-3">
             <button
               onClick={() => handleAction('order')}
-              className="bg-white text-emerald-900 hover:bg-emerald-50 px-10 py-5 rounded-2xl font-black text-xl flex items-center gap-3 transition-all shadow-2xl hover:-translate-y-1 active:scale-95"
+              className="bg-white text-emerald-900 hover:bg-emerald-50 px-6 py-2.5 lg:px-8 lg:py-3 rounded-xl font-black text-sm lg:text-base flex items-center gap-2 transition-all shadow-xl hover:-translate-y-1 active:scale-95"
             >
-              <ShoppingCart size={24} /> Pesan Sekarang
+              <ShoppingCart size={20} /> Pesan Sekarang
             </button>
           </div>
         </div>
 
         {/* 4. Features Section (Bottom Grid) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-32">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-5 mt-4 pb-2">
           {[
             {
-              icon: <MessageCircle className="text-emerald-400" size={28} />,
+              icon: <MessageCircle className="text-emerald-400" size={20} />,
               title: "Belanja Sambil Beramal",
-              desc: "Setiap menu yang Anda pesan sudah termasuk dana kepedulian 2,5%. Nikmati hidangan lezat sekaligus tebarkan manfaat bagi yang membutuhkan."
+              desc: "Setiap pesanan termasuk dana kepedulian 2,5%. Nikmati hidangan lezat sekaligus tebarkan manfaat bagi yang membutuhkan."
             },
             {
-              icon: <ShieldCheck className="text-emerald-400" size={28} />,
-              title: "Transparansi Amanah Penyaluran Dana",
-              desc: "Sistem kami secara otomatis memisahkan 2,5% dari pesanan Anda untuk disalurkan secara rutin dan tepat sasaran kepada fakir, miskin, dan golongan yang berhak (mustahiq). Nota digital akan merinci secara transparan."
+              icon: <ShieldCheck className="text-emerald-400" size={20} />,
+              title: "Penyaluran Transparan",
+              desc: "Sistem otomatis memisahkan 2,5% pesanan untuk disalurkan rutin kepada mustahiq. Nota digital merinci secara transparan."
             },
             {
-              icon: <ShoppingBag className="text-emerald-400" size={28} />,
-              title: "Akad Syariah yang Jelas",
-              desc: "Transaksi Anda diproses dengan prinsip muamalah yang benar. Kami memastikan harga, kualitas, dan tujuan dana amal terkelola dengan amanah."
+              icon: <ShoppingBag className="text-emerald-400" size={20} />,
+              title: "Akad Syariah Jelas",
+              desc: "Transaksi diproses dengan prinsip muamalah yang benar. Kami memastikan harga dan tujuan dana amal terkelola amanah."
             }
           ].map((feature, index) => (
             <div
               key={index}
-              className="group bg-white/5 border border-white/10 backdrop-blur-2xl p-8 rounded-[2.5rem] hover:bg-white/10 hover:border-emerald-500/50 transition-all duration-300 shadow-2xl"
+              className="group bg-white/5 border border-white/10 backdrop-blur-2xl p-4 lg:p-5 rounded-2xl hover:bg-white/10 hover:border-emerald-500/50 transition-all duration-300 shadow-xl"
             >
-              <div className="mb-6 p-3 bg-emerald-500/10 rounded-2xl w-fit group-hover:scale-110 transition-transform">
+              <div className="mb-3 p-2 bg-emerald-500/10 rounded-lg w-fit group-hover:scale-110 transition-transform">
                 {feature.icon}
               </div>
-              <h4 className="text-white font-extrabold text-xl mb-3 tracking-tight">{feature.title}</h4>
-              <p className="text-gray-400 text-sm leading-relaxed">{feature.desc}</p>
+              <h4 className="text-white font-extrabold text-sm xl:text-base mb-1.5 tracking-tight">{feature.title}</h4>
+              <p className="text-gray-400 text-[10px] xl:text-xs leading-relaxed">{feature.desc}</p>
             </div>
           ))}
         </div>
       </main>
 
-      {/* 5. Footer Kecil */}
-      <footer className="relative z-10 px-6 lg:px-16 py-10 flex justify-between items-center text-gray-500 text-xs border-t border-white/5">
+      {/* 5. Footer Kecil (Branding Bawah) */}
+      <footer className="relative z-10 px-4 lg:px-12 py-3 flex-none flex justify-between items-center text-gray-500 text-[10px] lg:text-xs border-t border-white/5 bg-black/40">
         <p>© 2024 Santara Point. Dikembangkan dengan prinsip Amanah.</p>
         <div className="flex gap-4">
           <span className="hover:text-white cursor-pointer transition">Syarat & Ketentuan</span>

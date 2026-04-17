@@ -22,7 +22,7 @@ import {
     CheckCircle2,
     X
 } from 'lucide-react';
-import WaitingOverlay from './WaitingOverlay';
+import WaitingOverlay from '../posin-cus/WaitingOverlay';
 
 const PRODUCTS = [
     { id: 7, name: 'Nasi Kuning', price: 15000, stock: 15, category: 'Makanan', img: '/nasi-kuning-baru.jpg', images: ['/nasi-kuning-baru.jpg'], rating: 4.8 },
@@ -152,7 +152,7 @@ export default function App() {
         }
         const storedFavs = JSON.parse(localStorage.getItem('santaraFavorites') || '[]');
         setFavorites(storedFavs);
-        
+
         const storedProducts = localStorage.getItem('santaraProducts');
         if (storedProducts) {
             setProducts(JSON.parse(storedProducts));
@@ -196,6 +196,7 @@ export default function App() {
     const totalAmount = Math.round(menuTotal); // Total yang dibayar tetap
 
     const filteredProducts = products.filter(p =>
+        favorites.includes(p.id) &&
         (activeCategory === 'Semua' || p.category === activeCategory) &&
         p.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -305,9 +306,9 @@ export default function App() {
                     <img src="/santara-logo.png" alt="Santara Logo" className="w-10 h-10 object-contain" />
                 </button>
                 <nav className="flex-1 flex flex-col gap-8">
-                    <button className="p-3 text-emerald-600 bg-white rounded-2xl shadow-md" title="Menu Utama"><ShoppingBag size={24} /></button>
+                    <button onClick={() => router.push('/posin-cus')} className="p-3 text-slate-300 hover:text-emerald-600 transition-colors" title="Buka Menu Utama"><ShoppingBag size={24} /></button>
                     <button onClick={() => router.push('/customer-history')} className="p-3 text-slate-300 hover:text-emerald-600 transition-colors" title="Riwayat Pesanan"><Clock size={24} /></button>
-                    <button onClick={() => router.push('/favorites')} className="p-3 text-slate-300 hover:text-red-500 transition-colors" title="Menu Favorit">
+                    <button className="p-3 text-red-500 bg-white rounded-2xl shadow-md" title="Menu Favorit">
                         <Heart size={24} />
                     </button>
                 </nav>
@@ -329,7 +330,7 @@ export default function App() {
             <main className="flex-1 flex flex-col overflow-hidden">
                 <header className="px-6 py-8 md:px-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
-                        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Pilih Menu Favorit</h1>
+                        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Daftar Menu Favorit Anda</h1>
                         <div className="flex items-center gap-2 mt-2">
                             <span className="bg-emerald-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-emerald-100">
                                 <ShieldCheck size={12} /> Syariah Verified

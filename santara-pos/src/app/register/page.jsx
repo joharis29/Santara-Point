@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import { User, Mail, Lock, ShieldCheck, AlertCircle, ArrowRight, Phone, ArrowLeft } from 'lucide-react';
+import { User, Mail, Lock, ShieldCheck, AlertCircle, ArrowRight, Phone, ArrowLeft, MapPin } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function Register() {
@@ -9,6 +9,7 @@ export default function Register() {
         name: '',
         email: '',
         whatsapp: '',
+        address: '',
         password: '',
         confirmPassword: ''
     });
@@ -16,6 +17,7 @@ export default function Register() {
         name: false,
         email: false,
         whatsapp: false,
+        address: false,
         password: false,
         confirmPassword: false
     });
@@ -31,7 +33,7 @@ export default function Register() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!formData.name || !formData.email || !formData.whatsapp || !formData.password || !formData.confirmPassword) {
+        if (!formData.name || !formData.email || !formData.whatsapp || !formData.address || !formData.password || !formData.confirmPassword) {
             alert('Tolong lengkapi data yang masih kosong!');
             return;
         }
@@ -134,6 +136,24 @@ export default function Register() {
                                 />
                             </div>
                             {touched.whatsapp && !formData.whatsapp && (
+                                <p className="text-red-500 text-xs mt-1 font-medium">Wajib diisi!</p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Alamat Lengkap</label>
+                            <div className="mt-1 relative">
+                                <MapPin className="absolute left-3 top-3 text-gray-400" size={18} />
+                                <textarea
+                                    name="address"
+                                    value={formData.address}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all resize-none h-20"
+                                    placeholder="Jl. Merdeka No. 10, RT 01/RW 02..."
+                                    required
+                                />
+                            </div>
+                            {touched.address && !formData.address && (
                                 <p className="text-red-500 text-xs mt-1 font-medium">Wajib diisi!</p>
                             )}
                         </div>
