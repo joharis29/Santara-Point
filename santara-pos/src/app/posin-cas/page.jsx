@@ -106,6 +106,7 @@ export default function App() {
     const [activeShift, setActiveShift] = useState('Pagi (Zaid)');
     const [toppingModalProduct, setToppingModalProduct] = useState(null);
     const [isCartModalOpen, setIsCartModalOpen] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState('CASH');
 
     const [products, setProducts] = useState(PRODUCTS);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
@@ -161,7 +162,7 @@ export default function App() {
     const confirmAddToCart = (product, topping = null) => {
         const finalId = topping && topping !== 'Tanpa Toping' ? `${product.id}-${topping}` : product.id;
         const finalName = topping && topping !== 'Tanpa Toping' ? `${product.name} (${topping})` : product.name;
-        
+
         const exist = cart.find(x => x.id === finalId);
         if (exist) {
             setCart(cart.map(x => x.id === finalId ? { ...x, quantity: x.quantity + 1 } : x));
@@ -464,9 +465,9 @@ export default function App() {
 
             {/* Bottom Navigation (Mobile Only) */}
             <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-3 flex justify-between items-center z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
-                <button 
-                  onClick={() => router.push('/homepage')} 
-                  className="flex flex-col items-center gap-1 text-slate-400"
+                <button
+                    onClick={() => router.push('/homepage')}
+                    className="flex flex-col items-center gap-1 text-slate-400"
                 >
                     <Home size={20} />
                     <span className="text-[10px] font-bold uppercase tracking-tight">Beranda</span>
@@ -475,16 +476,16 @@ export default function App() {
                     <ShoppingBag size={20} />
                     <span className="text-[10px] font-bold uppercase tracking-tight">POS</span>
                 </button>
-                <button 
-                  onClick={() => router.push('/history?role=cashier')} 
-                  className="flex flex-col items-center gap-1 text-slate-400"
+                <button
+                    onClick={() => router.push('/history?role=cashier')}
+                    className="flex flex-col items-center gap-1 text-slate-400"
                 >
                     <History size={20} />
                     <span className="text-[10px] font-bold uppercase tracking-tight">Riwayat</span>
                 </button>
-                <button 
-                  onClick={() => router.push('/waiting-list')} 
-                  className="flex flex-col items-center gap-1 text-slate-400"
+                <button
+                    onClick={() => router.push('/waiting-list')}
+                    className="flex flex-col items-center gap-1 text-slate-400"
                 >
                     <ChefHat size={20} />
                     <span className="text-[10px] font-bold uppercase tracking-tight">Antrean</span>
