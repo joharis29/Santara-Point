@@ -16,7 +16,9 @@ import {
     PlusCircle,
     ArrowLeft,
     X,
-    Image as ImageIcon
+    Image as ImageIcon,
+    Home,
+    History
 } from 'lucide-react';
 
 const INITIAL_PRODUCTS = [
@@ -148,9 +150,9 @@ export default function ManajemenStok() {
     };
 
     return (
-        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
+        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden pb-20 lg:pb-0">
             {/* Sidebar Navigasi (Eksklusif Owner) */}
-            <aside className="w-20 lg:w-64 bg-emerald-900 text-white flex flex-col transition-all duration-300">
+            <aside className="hidden lg:flex w-20 lg:w-64 bg-emerald-900 text-white flex-col transition-all duration-300">
                 <div className="p-6 flex items-center gap-3 border-b border-emerald-800">
                     <button onClick={() => router.push('/homepage')} className="bg-white p-1.5 rounded-lg flex items-center justify-center hover:scale-105 transition-transform cursor-pointer" title="Ke Beranda">
                         <img src="/santara-logo.png" alt="Santara" className="w-6 h-6 object-contain" />
@@ -183,18 +185,18 @@ export default function ManajemenStok() {
             {/* Area Utama */}
             <main className="flex-1 flex flex-col overflow-hidden">
                 {/* Header */}
-                <header className="bg-white border-b border-slate-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <header className="bg-white border-b border-slate-200 p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h2 className="text-2xl font-black text-slate-800 tracking-tight">Manajemen Stok</h2>
-                        <p className="text-slate-400 text-xs font-medium mt-1">Kelola ketersediaan produk dan inventaris.</p>
+                        <h2 className="text-xl lg:text-2xl font-black text-slate-800 tracking-tight">Manajemen Stok</h2>
+                        <p className="text-slate-400 text-[10px] lg:text-xs font-medium mt-0.5 lg:mt-1">Kelola ketersediaan produk dan inventaris.</p>
                     </div>
 
-                    <div className="relative w-full md:w-96">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <div className="relative w-full sm:w-80 lg:w-96">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                         <input
                             type="text"
-                            placeholder="Cari menu untuk dikelola..."
-                            className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border-none rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm"
+                            placeholder="Cari menu..."
+                            className="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -213,61 +215,132 @@ export default function ManajemenStok() {
                     </div>
 
                     <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50 border-b border-slate-200 text-sm">
-                                    <th className="p-4 font-bold text-slate-500">Nama Produk</th>
-                                    <th className="p-4 font-bold text-slate-500">Kategori</th>
-                                    <th className="p-4 font-bold text-slate-500">Harga</th>
-                                    <th className="p-4 font-bold text-slate-500">Sisa Stok</th>
-                                    <th className="p-4 font-bold text-slate-500 text-right">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredProducts.map(product => (
-                                    <tr key={product.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition">
-                                        <td className="p-4">
-                                            <div className="flex items-center gap-3">
-                                                <img src={product.img} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
-                                                <span className="font-bold text-slate-800">{product.name}</span>
+                        <div className="p-4 lg:p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center lg:hidden">
+                            <h2 className="font-bold text-slate-700 text-xs">Semua Produk ({filteredProducts.length})</h2>
+                        </div>
+
+                        {/* Mobile View: Card List */}
+                        <div className="lg:hidden divide-y divide-slate-100">
+                            {filteredProducts.map(product => (
+                                <div key={product.id} className="p-4 space-y-4 hover:bg-slate-50/50 transition-colors">
+                                    <div className="flex gap-4">
+                                        <img src={product.img} alt={product.name} className="w-16 h-16 rounded-xl object-cover shadow-sm" />
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-bold text-sm text-slate-800 truncate mb-1">{product.name}</h4>
+                                            <div className="flex items-center gap-2">
+                                                <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest">{product.category}</span>
+                                                <span className="text-emerald-700 font-bold text-[10px]">Rp {product.price.toLocaleString('id-ID')}</span>
                                             </div>
-                                        </td>
-                                        <td className="p-4">
-                                            <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-md text-xs font-bold">{product.category}</span>
-                                        </td>
-                                        <td className="p-4 font-medium text-slate-700">Rp {product.price.toLocaleString('id-ID')}</td>
-                                        <td className="p-4">
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-end justify-between gap-4 pt-1">
+                                        <div className="flex-1">
+                                            <label className="block text-[10px] uppercase font-black text-slate-400 mb-1.5 ml-1">Update Stok</label>
                                             <div className="flex items-center gap-2">
                                                 <input 
                                                     type="number" 
                                                     value={product.stock} 
                                                     onChange={(e) => handleUpdateStock(product.id, parseInt(e.target.value) || 0)} 
-                                                    className="w-20 border border-slate-200 rounded-lg px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                                    className="w-full border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                                 />
-                                                <span className="text-xs text-slate-400">Porsi / Pcs</span>
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter w-12 leading-tight">Portion / Pcs</span>
                                             </div>
-                                        </td>
-                                        <td className="p-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button className="p-2 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-lg transition" title="Edit Detail">
-                                                    <Edit3 size={16} />
-                                                </button>
-                                                <button onClick={() => handleDeleteProduct(product.id)} className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition" title="Hapus Produk">
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button className="p-2.5 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-xl transition shadow-sm border border-amber-100" title="Edit Detail">
+                                                <Edit3 size={18} />
+                                            </button>
+                                            <button onClick={() => handleDeleteProduct(product.id)} className="p-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition shadow-sm border border-red-100" title="Hapus Produk">
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                            {filteredProducts.length === 0 && (
+                                <div className="p-10 text-center text-slate-400 text-sm font-medium">Pecarian tidak ditemukan...</div>
+                            )}
+                        </div>
+
+                        {/* Desktop View: Table */}
+                        <div className="hidden lg:block overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50 border-b border-slate-200 text-sm">
+                                        <th className="p-4 font-bold text-slate-500">Nama Produk</th>
+                                        <th className="p-4 font-bold text-slate-500">Kategori</th>
+                                        <th className="p-4 font-bold text-slate-500">Harga</th>
+                                        <th className="p-4 font-bold text-slate-500">Sisa Stok</th>
+                                        <th className="p-4 font-bold text-slate-500 text-right">Aksi</th>
                                     </tr>
-                                ))}
-                                {filteredProducts.length === 0 && (
-                                    <tr>
-                                        <td colSpan="5" className="p-8 text-center text-slate-400 font-medium">Pencarian tidak ditemukan...</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {filteredProducts.map(product => (
+                                        <tr key={product.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition">
+                                            <td className="p-4">
+                                                <div className="flex items-center gap-3">
+                                                    <img src={product.img} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
+                                                    <span className="font-bold text-slate-800">{product.name}</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-4">
+                                                <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-md text-xs font-bold">{product.category}</span>
+                                            </td>
+                                            <td className="p-4 font-medium text-slate-700">Rp {product.price.toLocaleString('id-ID')}</td>
+                                            <td className="p-4">
+                                                <div className="flex items-center gap-2">
+                                                    <input 
+                                                        type="number" 
+                                                        value={product.stock} 
+                                                        onChange={(e) => handleUpdateStock(product.id, parseInt(e.target.value) || 0)} 
+                                                        className="w-20 border border-slate-200 rounded-lg px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                                    />
+                                                    <span className="text-xs text-slate-400">Porsi / Pcs</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-4 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button className="p-2 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-lg transition" title="Edit Detail">
+                                                        <Edit3 size={16} />
+                                                    </button>
+                                                    <button onClick={() => handleDeleteProduct(product.id)} className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition" title="Hapus Produk">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {filteredProducts.length === 0 && (
+                                        <tr>
+                                            <td colSpan="5" className="p-8 text-center text-slate-400 font-medium">Pencarian tidak ditemukan...</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
+
+                {/* Mobile Bottom Navigation */}
+                <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-4 flex justify-around items-center z-50">
+                    <button onClick={() => router.push('/homepage')} className="flex flex-col items-center gap-1 text-slate-400">
+                        <Home size={20} />
+                        <span className="text-[10px] font-bold uppercase tracking-tight">Home</span>
+                    </button>
+                    <button onClick={() => router.push('/posin-adm')} className="flex flex-col items-center gap-1 text-slate-400">
+                        <ShoppingBag size={20} />
+                        <span className="text-[10px] font-bold uppercase tracking-tight">POS</span>
+                    </button>
+                    <button onClick={() => router.push('/history?role=admin')} className="flex flex-col items-center gap-1 text-slate-400">
+                        <History size={20} />
+                        <span className="text-[10px] font-bold uppercase tracking-tight">Riwayat</span>
+                    </button>
+                    <button className="flex flex-col items-center gap-1 text-emerald-600">
+                        <ClipboardList size={20} />
+                        <span className="text-[10px] font-bold uppercase tracking-tight">Stok</span>
+                    </button>
+                </nav>
             </main>
 
             {/* Modal Tambah Produk */}

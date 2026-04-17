@@ -1,10 +1,30 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Mail, Lock, ShieldCheck, AlertCircle, ArrowRight, Phone, ArrowLeft, MapPin } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+const DEFAULT_SETTINGS = {
+    storeName: 'Santara Point',
+    storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
+    whatsapp: '6285846802177',
+    email: 'santarapoint@gmail.com',
+    address: 'Jl. Raya Santara No. 123, Bandung',
+    zakatPercent: 2.5,
+    footerText: '© 2024 Santara Point. Berkah setiap saat.',
+    zakatEnabledDefault: true
+};
+
 export default function Register() {
     const router = useRouter();
+    const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
+
+    useEffect(() => {
+        const stored = localStorage.getItem('santaraStoreSettings');
+        if (stored) {
+            setStoreSettings(JSON.parse(stored));
+        }
+    }, []);
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -46,7 +66,7 @@ export default function Register() {
         // Simpan data nama untuk simulasi saat login nanti
         localStorage.setItem('registeredName', formData.name);
 
-        alert(`Alhamdulillah! Anda telah berhasil mendaftar akun pelanggan Santara Point.\n\nInformasi pendaftaran Anda telah dikirimkan melalui Email dan nomor WhatsApp yang terdaftar.\n\nTerima kasih telah bergabung bersama kami. Mari mulai memesan sajian penuh keberkahan!`);
+        alert(`Alhamdulillah! Anda telah berhasil mendaftar akun pelanggan ${storeSettings.storeName}.\n\nInformasi pendaftaran Anda telah dikirimkan melalui Email dan nomor WhatsApp yang terdaftar.\n\nTerima kasih telah bergabung bersama kami. Mari mulai memesan sajian penuh keberkahan!`);
 
         // Setelah daftar sukses, arahkan ke login
         router.push('/login');
@@ -64,7 +84,7 @@ export default function Register() {
                         <img src="/santara-logo.png" alt="Santara Logo" className="w-16 h-16 object-contain rounded-full" />
                     </div>
                     <h1 className="text-3xl font-bold">Daftar Akun Baru</h1>
-                    <p className="text-emerald-100 mt-2  italic">Santara Point</p>
+                    <p className="text-emerald-100 mt-2  italic">{storeSettings.storeName}</p>
                 </div>
 
                 <div className="p-8">

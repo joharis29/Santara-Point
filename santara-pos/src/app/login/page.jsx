@@ -20,10 +20,16 @@ import {
   ArrowLeft
 } from 'lucide-react';
 
-/**
- * SANTARA POINT - POS SYARIAH
- * Tech Stack: React, Tailwind CSS, Lucide Icons
- */
+const DEFAULT_SETTINGS = {
+    storeName: 'Santara Point',
+    storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
+    whatsapp: '6285846802177',
+    email: 'santarapoint@gmail.com',
+    address: 'Jl. Raya Santara No. 123, Bandung',
+    zakatPercent: 2.5,
+    footerText: '© 2024 Santara Point. Berkah setiap saat.',
+    zakatEnabledDefault: true
+};
 
 // --- Mock Data Produk F&B ---
 const PRODUCTS = [
@@ -40,6 +46,14 @@ const Login = () => {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
+
+  React.useEffect(() => {
+    const stored = localStorage.getItem('santaraStoreSettings');
+    if (stored) {
+      setStoreSettings(JSON.parse(stored));
+    }
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -83,7 +97,7 @@ const Login = () => {
             <img src="/santara-logo.png" alt="Santara Logo" className="w-16 h-16 object-contain rounded-full" />
           </div>
           <h1 className="text-3xl font-bold">LOGIN</h1>
-          <p className="text-emerald-100 mt-2  italic">Santara Point</p>
+          <p className="text-emerald-100 mt-2  italic">{storeSettings.storeName}</p>
         </div>
         <div className="p-8">
           <div className="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded text-emerald-800 text-sm italic">

@@ -11,12 +11,27 @@ import {
     User,
     ListTodo,
     ChevronRight,
-    Utensils
+    Utensils,
+    Home,
+    ShoppingBag,
+    History
 } from 'lucide-react';
+
+const DEFAULT_SETTINGS = {
+    storeName: 'Santara Point',
+    storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
+    whatsapp: '6285846802177',
+    email: 'santarapoint@gmail.com',
+    address: 'Jl. Raya Santara No. 123, Bandung',
+    zakatPercent: 2.5,
+    footerText: '© 2024 Santara Point. Berkah setiap saat.',
+    zakatEnabledDefault: true
+};
 
 export default function WaitingListPage() {
     const router = useRouter();
     const [transactions, setTransactions] = useState([]);
+    const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
 
     const loadData = () => {
         const history = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
@@ -36,6 +51,12 @@ export default function WaitingListPage() {
         loadData();
         // Polling setiap 2 detik untuk efek real-time multiple tabs
         const timer = setInterval(loadData, 2000);
+
+        const storedSettings = localStorage.getItem('santaraStoreSettings');
+        if (storedSettings) {
+            setStoreSettings(JSON.parse(storedSettings));
+        }
+
         return () => clearInterval(timer);
     }, []);
 
@@ -125,34 +146,34 @@ export default function WaitingListPage() {
     );
 
     return (
-        <div className="flex flex-col h-screen bg-slate-100 font-sans text-slate-900 overflow-hidden">
+        <div className="flex flex-col h-screen bg-slate-100 font-sans text-slate-900 overflow-hidden pb-20 lg:pb-0">
             {/* Header */}
-            <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shrink-0 shadow-sm z-10">
+            <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shrink-0 shadow-sm z-10 transition-all">
                 <div className="flex items-center gap-4">
                     <button 
                         onClick={() => router.back()}
-                        className="w-10 h-10 flex items-center justify-center bg-slate-50 hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 rounded-xl transition-colors"
+                        className="hidden sm:flex w-10 h-10 items-center justify-center bg-slate-50 hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 rounded-xl transition-colors"
                         title="Kembali"
                     >
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <h1 className="text-xl font-black text-slate-800 flex items-center gap-2">
-                            <ListTodo className="text-emerald-500" /> Papan Manajemen Dapur (Kitchen Display)
+                        <h1 className="text-lg lg:text-xl font-black text-slate-800 flex items-center gap-2">
+                            <ListTodo className="text-emerald-500" /> <span className="hidden sm:inline">Papan Manajemen</span> Dapur
                         </h1>
-                        <p className="text-xs font-bold text-slate-400">Kelola dan update status pesanan The Santara Point secara Real-Time.</p>
+                        <p className="text-[10px] lg:text-xs font-bold text-slate-400">Update status pesanan secara Real-Time.</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
-                        <RefreshCw size={12} className="animate-spin" /> Live Sync Aktif
+                    <span className="flex items-center gap-1.5 text-[10px] lg:text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
+                        <RefreshCw size={12} className="animate-spin" /> <span className="hidden sm:inline">Live</span> Sync
                     </span>
                 </div>
             </header>
 
             {/* Kanban Board */}
-            <main className="flex-1 overflow-x-auto overflow-y-hidden p-6">
-                <div className="flex gap-6 h-full min-w-[900px]">
+            <main className="flex-1 overflow-x-auto lg:overflow-x-hidden overflow-y-auto lg:overflow-y-hidden p-4 lg:p-6 bg-slate-100">
+                <div className="flex flex-col lg:flex-row gap-6 h-full min-w-0">
                     
                     {/* Kolom 1: Menunggu */}
                     <div className="flex-1 flex flex-col bg-slate-50 border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
@@ -209,6 +230,26 @@ export default function WaitingListPage() {
                     </div>
 
                 </div>
+
+                {/* Mobile Bottom Navigation */}
+                <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-4 flex justify-around items-center z-50">
+                    <button onClick={() => router.push('/homepage')} className="flex flex-col items-center gap-1 text-slate-400">
+                        <Home size={20} />
+                        <span className="text-[10px] font-bold uppercase tracking-tight">Home</span>
+                    </button>
+                    <button onClick={() => router.push('/posin-adm')} className="flex flex-col items-center gap-1 text-slate-400">
+                        <ShoppingBag size={20} />
+                        <span className="text-[10px] font-bold uppercase tracking-tight">POS</span>
+                    </button>
+                    <button onClick={() => router.push('/history?role=admin')} className="flex flex-col items-center gap-1 text-slate-400">
+                        <History size={20} />
+                        <span className="text-[10px] font-bold uppercase tracking-tight">Riwayat</span>
+                    </button>
+                    <button className="flex flex-col items-center gap-1 text-emerald-600">
+                        <ChefHat size={20} />
+                        <span className="text-[10px] font-bold uppercase tracking-tight">Antrean</span>
+                    </button>
+                </nav>
             </main>
         </div>
     );

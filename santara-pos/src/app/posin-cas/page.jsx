@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
+    Home,
     ShoppingBag,
     ShieldCheck,
     Search,
@@ -17,10 +18,10 @@ import {
     Store,
     Clock,
     History,
+    ChefHat,
     CreditCard,
     UserCircle,
     ShoppingCart, // Ditambahkan untuk memperbaiki ReferenceError
-    ChefHat,
     X
 } from 'lucide-react';
 
@@ -28,6 +29,17 @@ import {
  * SANTARA POINT - POS INPUT (KASIR ROLE)
  * Fokus: Kecepatan Transaksi, Kemudahan Navigasi, & Notifikasi Nota Otomatis.
  */
+
+const DEFAULT_SETTINGS = {
+    storeName: 'Santara Point',
+    storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
+    whatsapp: '6285846802177',
+    email: 'santarapoint@gmail.com',
+    address: 'Jl. Raya Santara No. 123, Bandung',
+    zakatPercent: 2.5,
+    footerText: '© 2024 Santara Point. Berkah setiap saat.',
+    zakatEnabledDefault: true
+};
 
 const PRODUCTS = [
     { id: 7, name: 'Nasi Kuning', price: 15000, stock: 15, category: 'Makanan', img: '/nasi-kuning-baru.jpg' },
@@ -91,11 +103,12 @@ export default function App() {
     const [customerName, setCustomerName] = useState('');
     const [queueNumber, setQueueNumber] = useState('');
     const [usedQueueNumbers, setUsedQueueNumbers] = useState([]);
-    const [paymentMethod, setPaymentMethod] = useState('');
-    const [toppingModalProduct, setToppingModalProduct] = useState(null);
     const [activeShift, setActiveShift] = useState('Pagi (Zaid)');
+    const [toppingModalProduct, setToppingModalProduct] = useState(null);
+    const [isCartModalOpen, setIsCartModalOpen] = useState(false);
 
     const [products, setProducts] = useState(PRODUCTS);
+    const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
 
     React.useEffect(() => {
         const storedShift = localStorage.getItem('activeCashierShift');
@@ -111,6 +124,15 @@ export default function App() {
             setProducts(JSON.parse(storedProducts));
         } else {
             localStorage.setItem('santaraProducts', JSON.stringify(PRODUCTS));
+        }
+
+        const storedSettings = localStorage.getItem('santaraStoreSettings');
+        if (storedSettings) {
+            const parsed = JSON.parse(storedSettings);
+            setStoreSettings(parsed);
+            setZakatEnabled(parsed.zakatEnabledDefault);
+        } else {
+            setZakatEnabled(DEFAULT_SETTINGS.zakatEnabledDefault);
         }
     }, []);
 
@@ -195,7 +217,7 @@ export default function App() {
         <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
 
             {/* 1. Sidebar Navigasi Kasir (Simplified) */}
-            <aside className="w-20 lg:w-24 bg-white border-r border-slate-200 flex flex-col items-center py-8 gap-10">
+            <aside className="hidden lg:flex w-20 lg:w-24 bg-white border-r border-slate-200 flex-col items-center py-8 gap-10">
                 <button onClick={() => router.push('/homepage')} className="bg-white p-2.5 rounded-2xl shadow-lg shadow-slate-200 border border-slate-100 flex items-center justify-center hover:scale-105 transition-transform cursor-pointer" title="Ke Beranda">
                     <img src="/santara-logo.png" alt="Santara Logo" className="w-8 h-8 object-contain" />
                 </button>
@@ -230,7 +252,7 @@ export default function App() {
                 <header className="p-6 bg-white border-b border-slate-100 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <div className="hidden md:block">
-                            <h2 className="text-xl font-bold text-slate-800">Layar Kasir</h2>
+                            <h2 className="text-xl font-bold text-slate-800">{storeSettings.storeName}</h2>
                             <div className="flex items-center gap-2 mt-0.5">
                                 <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 uppercase">
                                     <ShieldCheck size={12} /> Syariah Verified
@@ -268,8 +290,8 @@ export default function App() {
                 </div>
 
                 {/* Scrollable Products */}
-                <section className="flex-1 overflow-y-auto p-6 scroll-smooth">
-                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
+                <section className="flex-1 overflow-y-auto p-6 scroll-smooth pb-20 lg:pb-6">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
                         {filteredProducts.map(product => (
                             <div
                                 key={product.id}
@@ -302,7 +324,7 @@ export default function App() {
             </main>
 
             {/* 3. Panel Transaksi (Right Sidebar) */}
-            <aside className="w-[350px] lg:w-[400px] bg-white border-l border-slate-100 flex flex-col shadow-2xl">
+            <aside className="hidden md:flex w-[350px] lg:w-[400px] bg-white border-l border-slate-100 flex-col shadow-2xl">
                 <div className="p-5 lg:p-6 flex-1 overflow-y-auto">
                     <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-2">
@@ -425,6 +447,152 @@ export default function App() {
                     </div>
                 </div>
             </aside>
+            {/* Floating Cart Button (Mobile Only) */}
+            <div className="md:hidden fixed bottom-24 right-6 z-40">
+                <button
+                    onClick={() => setIsCartModalOpen(true)}
+                    className="relative bg-emerald-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all outline-none"
+                >
+                    <ShoppingBag size={24} />
+                    {cart.length > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-2 border-white animate-bounce">
+                            {cart.length}
+                        </span>
+                    )}
+                </button>
+            </div>
+
+            {/* Bottom Navigation (Mobile Only) */}
+            <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-3 flex justify-between items-center z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
+                <button 
+                  onClick={() => router.push('/homepage')} 
+                  className="flex flex-col items-center gap-1 text-slate-400"
+                >
+                    <Home size={20} />
+                    <span className="text-[10px] font-bold uppercase tracking-tight">Beranda</span>
+                </button>
+                <button className="flex flex-col items-center gap-1 text-emerald-600">
+                    <ShoppingBag size={20} />
+                    <span className="text-[10px] font-bold uppercase tracking-tight">POS</span>
+                </button>
+                <button 
+                  onClick={() => router.push('/history?role=cashier')} 
+                  className="flex flex-col items-center gap-1 text-slate-400"
+                >
+                    <History size={20} />
+                    <span className="text-[10px] font-bold uppercase tracking-tight">Riwayat</span>
+                </button>
+                <button 
+                  onClick={() => router.push('/waiting-list')} 
+                  className="flex flex-col items-center gap-1 text-slate-400"
+                >
+                    <ChefHat size={20} />
+                    <span className="text-[10px] font-bold uppercase tracking-tight">Antrean</span>
+                </button>
+            </nav>
+
+            {/* Cart Modal for Mobile (Cashier) */}
+            {isCartModalOpen && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] md:hidden">
+                    <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+                        <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                                <ShoppingBag size={20} className="text-emerald-600" />
+                                Pesanan Baru
+                            </h3>
+                            <button onClick={() => setIsCartModalOpen(false)} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6 bg-white space-y-6">
+                            {cart.length === 0 ? (
+                                <div className="h-full flex flex-col items-center justify-center text-slate-300 opacity-50 py-10">
+                                    <ShoppingBag size={64} className="mb-4" />
+                                    <p className="font-bold">Keranjang kosong</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {cart.map(item => (
+                                        <div key={item.id} className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                            <img src={item.img} className="w-16 h-16 rounded-xl object-cover" />
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-sm text-slate-800">{item.name}</h4>
+                                                <p className="text-xs text-emerald-600 font-bold mt-1 uppercase">Rp {item.price.toLocaleString('en-US')}</p>
+                                                <div className="flex items-center gap-3 mt-3">
+                                                    <button onClick={() => updateQty(item.id, -1)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-600 shadow-sm">
+                                                        <Minus size={14} />
+                                                    </button>
+                                                    <span className="text-sm font-black w-6 text-center">{item.quantity}</span>
+                                                    <button onClick={() => addToCart(item)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-600 shadow-sm">
+                                                        <Plus size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <button onClick={() => updateQty(item.id, -item.quantity)} className="text-slate-300 hover:text-red-500 transition-colors self-start p-1">
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
+                                    ))}
+
+                                    <div className="pt-6 space-y-4">
+                                        <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                            <h3 className="text-[10px] font-black text-slate-800 uppercase mb-1">Data Pemesan</h3>
+                                            <input type="text" placeholder="Nama Pemesan" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
+                                            <select
+                                                value={queueNumber}
+                                                onChange={(e) => setQueueNumber(e.target.value)}
+                                                className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold"
+                                            >
+                                                <option value="" disabled>Pilih Nomor Antrian</option>
+                                                {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
+                                                    const isUsed = usedQueueNumbers.includes(num.toString());
+                                                    return (
+                                                        <option key={num} value={num} disabled={isUsed}>
+                                                            Antrian {num} {isUsed ? '(Terpakai)' : ''}
+                                                        </option>
+                                                    );
+                                                })}
+                                            </select>
+                                        </div>
+
+                                        <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl">
+                                            <div className="flex justify-between items-center mb-6">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic mb-1">Total Tunai</span>
+                                                    <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</span>
+                                                </div>
+                                                <button onClick={() => setZakatEnabled(!zakatEnabled)} className="text-[9px] font-bold text-white/50 underline px-2 py-1 bg-white/5 rounded">
+                                                    Zakat: {zakatEnabled ? 'Aktif' : 'Off'}
+                                                </button>
+                                            </div>
+                                            <div className="space-y-3 pb-4">
+                                                <select
+                                                    value={paymentMethod}
+                                                    onChange={(e) => setPaymentMethod(e.target.value)}
+                                                    className="w-full text-xs px-4 py-3 bg-white/10 border border-white/20 rounded-xl outline-none focus:border-white font-black text-white uppercase tracking-widest text-center"
+                                                >
+                                                    <option value="" disabled className="text-slate-800">Metode Pembayaran</option>
+                                                    <option value="Tunai" className="text-slate-800">Tunai</option>
+                                                    <option value="Transfer" className="text-slate-800">Transfer</option>
+                                                </select>
+                                                <button
+                                                    onClick={() => {
+                                                        setIsCartModalOpen(false);
+                                                        handlePayment();
+                                                    }}
+                                                    className="w-full py-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-emerald-500/20 transition-all active:scale-95"
+                                                >
+                                                    Proses Pembayaran
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
             {toppingModalProduct && (
                 <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl relative">

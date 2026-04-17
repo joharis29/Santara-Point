@@ -3,9 +3,29 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Mail, Phone, ArrowLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
+
+const DEFAULT_SETTINGS = {
+    storeName: 'Santara Point',
+    storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
+    whatsapp: '6285846802177',
+    email: 'santarapoint@gmail.com',
+    address: 'Jl. Raya Santara No. 123, Bandung',
+    zakatPercent: 2.5,
+    footerText: '© 2024 Santara Point. Berkah setiap saat.',
+    zakatEnabledDefault: true
+};
 
 export default function ContactPage() {
   const router = useRouter();
+  const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('santaraStoreSettings');
+    if (stored) {
+      setStoreSettings(JSON.parse(stored));
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col justify-center items-center p-6 selection:bg-emerald-200 selection:text-emerald-900 relative overflow-hidden">
@@ -30,7 +50,7 @@ export default function ContactPage() {
         <div className="space-y-4">
           {/* Email */}
           <a 
-            href="mailto:santarapoint@gmail.com"
+            href={`mailto:${storeSettings.email}`}
             className="group flex items-center p-5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-emerald-500/50 transition-all duration-300"
           >
             <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl group-hover:scale-110 transition-transform mr-5">
@@ -38,13 +58,13 @@ export default function ContactPage() {
             </div>
             <div>
               <p className="text-sm text-gray-400 mb-1">Email</p>
-              <p className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">santarapoint@gmail.com</p>
+              <p className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">{storeSettings.email}</p>
             </div>
           </a>
 
           {/* WhatsApp */}
           <a 
-            href="https://wa.me/6285846802177"
+            href={`https://wa.me/${storeSettings.whatsapp}`}
             target="_blank"
             rel="noopener noreferrer"
             className="group flex items-center p-5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-emerald-500/50 transition-all duration-300"
@@ -54,13 +74,13 @@ export default function ContactPage() {
             </div>
             <div>
               <p className="text-sm text-gray-400 mb-1">WhatsApp</p>
-              <p className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">0858-4680-2177</p>
+              <p className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">+{storeSettings.whatsapp}</p>
             </div>
           </a>
         </div>
 
         <div className="mt-12 text-center text-sm text-gray-500">
-          © 2024 Santara Point. Berkah setiap saat.
+          {storeSettings.footerText}
         </div>
       </div>
     </div>

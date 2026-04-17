@@ -19,10 +19,22 @@ import {
     ShoppingCart,
     Heart,
     Star,
-    CheckCircle2,
-    X
+    X,
+    Filter,
+    HeartOff
 } from 'lucide-react';
 import WaitingOverlay from '../posin-cus/WaitingOverlay';
+
+const DEFAULT_SETTINGS = {
+    storeName: 'Santara Point',
+    storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
+    whatsapp: '6285846802177',
+    email: 'santarapoint@gmail.com',
+    address: 'Jl. Raya Santara No. 123, Bandung',
+    zakatPercent: 2.5,
+    footerText: '© 2024 Santara Point. Berkah setiap saat.',
+    zakatEnabledDefault: true
+};
 
 const PRODUCTS = [
     { id: 7, name: 'Nasi Kuning', price: 15000, stock: 15, category: 'Makanan', img: '/nasi-kuning-baru.jpg', images: ['/nasi-kuning-baru.jpg'], rating: 4.8 },
@@ -143,6 +155,7 @@ export default function App() {
     const [favorites, setFavorites] = useState([]);
 
     const [products, setProducts] = useState(PRODUCTS);
+    const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
 
     React.useEffect(() => {
         const storedName = localStorage.getItem('customerName');
@@ -158,6 +171,11 @@ export default function App() {
             setProducts(JSON.parse(storedProducts));
         } else {
             localStorage.setItem('santaraProducts', JSON.stringify(PRODUCTS));
+        }
+
+        const storedSettings = localStorage.getItem('santaraStoreSettings');
+        if (storedSettings) {
+            setStoreSettings(JSON.parse(storedSettings));
         }
     }, []);
 
@@ -186,6 +204,7 @@ export default function App() {
     const [isQrisOpen, setIsQrisOpen] = useState(false);
     const [isCodOpen, setIsCodOpen] = useState(false);
     const [isTransferOpen, setIsTransferOpen] = useState(false);
+    const [isCartModalOpen, setIsCartModalOpen] = useState(false);
 
     const categories = ['Semua', 'Makanan', 'Minuman', 'Snack', 'Frozen Food'];
 
@@ -299,7 +318,7 @@ export default function App() {
     };
 
     return (
-        <div className="flex h-screen bg-white font-sans text-slate-900 overflow-hidden">
+        <div className="flex h-screen bg-white font-sans text-slate-900 overflow-hidden relative">
             {/* Sidebar Navigasi Customer */}
             <aside className="hidden lg:flex w-24 bg-slate-50 border-r border-slate-100 flex-col items-center py-10 gap-12">
                 <button onClick={() => router.push('/homepage')} className="hover:scale-105 transition-transform" title="Ke Beranda">
@@ -330,12 +349,12 @@ export default function App() {
             <main className="flex-1 flex flex-col overflow-hidden">
                 <header className="px-6 py-8 md:px-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
-                        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Daftar Menu Favorit Anda</h1>
-                        <div className="flex items-center gap-2 mt-2">
-                            <span className="bg-emerald-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-emerald-100">
-                                <ShieldCheck size={12} /> Syariah Verified
+                        <h1 className="text-xl lg:text-3xl font-black text-slate-800 tracking-tight">Menu Favorit</h1>
+                        <div className="flex items-center gap-2 mt-1 lg:mt-2">
+                            <span className="bg-emerald-600 text-white px-2 py-0.5 lg:px-3 lg:py-1 rounded-full text-[8px] lg:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-emerald-100">
+                                <ShieldCheck size={10} className="lg:w-3 lg:h-3" /> Syariah
                             </span>
-                            <span className="text-slate-400 text-xs font-bold">Halo, {customerName}!</span>
+                            <span className="text-slate-400 text-[10px] lg:text-xs font-bold">Halo, {customerName}!</span>
                         </div>
                     </div>
                     <div className="relative w-full md:w-80">
@@ -364,42 +383,83 @@ export default function App() {
                     </div>
                 </div>
 
-                <section className="flex-1 overflow-y-auto px-6 md:px-10 pb-10">
-                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
-                        {filteredProducts.map(product => (
-                            <div
-                                key={product.id}
-                                onClick={() => addToCart(product)}
-                                className={`bg-white p-3 rounded-[2rem] shadow-sm hover:shadow-xl transition-all border border-transparent hover:border-emerald-500 cursor-pointer group flex flex-col ${product.stock <= 0 ? 'opacity-60 grayscale' : ''}`}
-                            >
-                                <div className="relative">
-                                    <button 
-                                        onClick={(e) => toggleFavorite(e, product.id)}
-                                        className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur rounded-full shadow-sm z-30 hover:scale-110 active:scale-95 transition-transform"
-                                        title="Tambahkan ke Favorit"
-                                    >
-                                        <Heart size={16} fill={favorites.includes(product.id) ? "#ef4444" : "transparent"} color={favorites.includes(product.id) ? "#ef4444" : "#94a3b8"} />
-                                    </button>
-                                    <ProductImageSlider product={product} />
-                                </div>
-                                <div className="px-2 flex-1 flex flex-col justify-between">
-                                    <div>
-                                        <div className="flex justify-between items-start mb-1">
-                                            <h4 className="font-bold text-slate-800 text-sm line-clamp-2">{product.name}</h4>
+                <section className="flex-1 overflow-y-auto px-6 md:px-10 pb-32">
+                    {filteredProducts.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-slate-300 gap-4 opacity-70">
+                            <HeartOff size={64} strokeWidth={1.5} />
+                            <p className="font-bold text-lg">Belum ada menu favorit</p>
+                            <button onClick={() => router.push('/posin-cus')} className="text-emerald-600 font-black text-sm hover:underline">Lihat Semua Menu</button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
+                            {filteredProducts.map(product => (
+                                <div
+                                    key={product.id}
+                                    onClick={() => addToCart(product)}
+                                    className={`bg-white p-3 rounded-[1.5rem] lg:rounded-[2rem] shadow-sm hover:shadow-xl transition-all border border-transparent hover:border-emerald-500 cursor-pointer group flex flex-col ${product.stock <= 0 ? 'opacity-60 grayscale' : ''}`}
+                                >
+                                    <div className="relative">
+                                        <button 
+                                            onClick={(e) => toggleFavorite(e, product.id)}
+                                            className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur rounded-full shadow-sm z-30 hover:scale-110 active:scale-95 transition-transform"
+                                            title="Hapus dari Favorit"
+                                        >
+                                            <Heart size={16} fill={favorites.includes(product.id) ? "#ef4444" : "transparent"} color={favorites.includes(product.id) ? "#ef4444" : "#94a3b8"} />
+                                        </button>
+                                        <ProductImageSlider product={product} />
+                                    </div>
+                                    <div className="px-1 lg:px-2 flex-1 flex flex-col justify-between">
+                                        <div>
+                                            <div className="flex justify-between items-start mb-1">
+                                                <h4 className="font-bold text-slate-800 text-[11px] lg:text-sm line-clamp-2 leading-tight">{product.name}</h4>
+                                            </div>
+                                            <p className="text-emerald-600 font-black text-sm lg:text-base italic">Rp {product.price.toLocaleString('en-US')}</p>
                                         </div>
-                                        <p className="text-emerald-600 font-black text-base italic">Rp {product.price.toLocaleString('en-US')}</p>
-                                    </div>
-                                    <div className="mt-3 flex items-center justify-between text-[10px] font-bold text-slate-400">
-                                        <span>{product.category}</span>
-                                        <span className={`text-[10px] font-black uppercase tracking-tighter ${product.stock > 10 ? 'text-emerald-400' : product.stock > 0 ? 'text-amber-500 animate-pulse' : 'text-slate-400'}`}>
-                                            {product.stock > 10 ? 'Tersedia' : product.stock > 0 ? 'Stok Terbatas' : 'Habis'}
-                                        </span>
+                                        <div className="mt-2 lg:mt-3 flex items-center justify-between text-[8px] lg:text-[10px] font-bold text-slate-400">
+                                            <span className="truncate max-w-[50px]">{product.category}</span>
+                                            <span className={`font-black uppercase tracking-tighter ${product.stock > 10 ? 'text-emerald-400' : product.stock > 0 ? 'text-amber-500' : 'text-slate-400'}`}>
+                                                {product.stock > 10 ? 'Ada' : product.stock > 0 ? 'Limit' : 'Habis'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </section>
+
+                {/* Mobile Bottom Navigation */}
+                <nav className="lg:hidden fixed bottom-6 left-6 right-6 bg-white/90 backdrop-blur-2xl border border-slate-200/50 px-8 py-4 rounded-[2.5rem] flex justify-between items-center z-50 shadow-2xl">
+                    <button onClick={() => router.push('/homepage')} className="flex flex-col items-center gap-1 text-slate-400">
+                        <Home size={22} />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Home</span>
+                    </button>
+                    <button onClick={() => router.push('/posin-cus')} className="flex flex-col items-center gap-1 text-slate-400">
+                        <ShoppingBag size={22} />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Menu</span>
+                    </button>
+                    <button className="flex flex-col items-center gap-1 text-red-500">
+                        <Heart size={22} fill="currentColor" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Favorit</span>
+                    </button>
+                    <button onClick={() => router.push('/customer-history')} className="flex flex-col items-center gap-1 text-slate-400">
+                        <Clock size={22} />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Riwayat</span>
+                    </button>
+                </nav>
+
+                {/* Floating Cart Button (Mobile Only) */}
+                {cart.length > 0 && (
+                    <button 
+                        onClick={() => setIsCartModalOpen(true)}
+                        className="lg:hidden fixed bottom-28 right-6 bg-emerald-600 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-2xl z-50 animate-bounce group active:scale-95 transition-all"
+                    >
+                        <ShoppingCart size={28} />
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-2 border-white">
+                            {cart.length}
+                        </span>
+                    </button>
+                )}
             </main>
 
             {/* Right Side: Order Summary */}
@@ -549,7 +609,7 @@ export default function App() {
                         <p className="text-sm text-slate-500 mb-4">Silakan konfirmasi pesanan Anda dengan menekan tombol dibawah ini: </p>
 
                         <a
-                            href={`https://wa.me/6285846802177?text=Halo%20Santara%20Point%2C%20saya%20${customerName}%20ingin%20mengonfirmasi%20pesanan%20COD%20saya%20sebesar%20Rp%20${totalAmount.toLocaleString('en-US')}.`}
+                            href={`https://wa.me/${storeSettings.whatsapp}?text=Halo%20${encodeURIComponent(storeSettings.storeName)}%2C%20saya%20${encodeURIComponent(customerName)}%20ingin%20mengonfirmasi%20pesanan%20COD%20saya%20sebesar%20Rp%20${totalAmount.toLocaleString('en-US')}.`}
                             target="_blank"
                             rel="noreferrer"
                             className="bg-slate-50 border border-slate-200 text-emerald-600 font-bold px-4 py-3 rounded-xl mb-6 flex items-center gap-2 hover:bg-emerald-50 transition w-full justify-center"
@@ -623,6 +683,95 @@ export default function App() {
                                     {toping}
                                 </button>
                             ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
+            {/* Mobile Cart Modal Overlay */}
+            {isCartModalOpen && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xl z-[60] lg:hidden animate-in fade-in duration-300">
+                    <div className="absolute inset-x-0 bottom-0 top-10 bg-white rounded-t-[3rem] shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-20 duration-500">
+                        <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-white/50 backdrop-blur-md sticky top-0 z-10">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600">
+                                    <ShoppingBag size={24} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-black text-slate-800">Keranjang Belanja</h2>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{cart.length} Menu Terpilih</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => setIsCartModalOpen(false)}
+                                className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                            {cart.map(item => (
+                                <div key={item.id} className="flex items-center gap-5 bg-slate-50 p-4 rounded-[2rem] border border-slate-100 transition-all active:scale-[0.98]">
+                                    <img src={item.img} className="w-20 h-20 rounded-2xl object-cover shadow-md" />
+                                    <div className="flex-1">
+                                        <h4 className="font-black text-slate-800 mb-1">{item.name}</h4>
+                                        <p className="text-emerald-600 font-black text-sm mb-3">Rp {item.price.toLocaleString('en-US')}</p>
+                                        <div className="flex items-center gap-4">
+                                            <button onClick={() => updateQty(item.id, -1)} className="w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm text-slate-500 border border-slate-100">
+                                                <Minus size={14} />
+                                            </button>
+                                            <span className="text-sm font-black text-slate-800">{item.quantity}</span>
+                                            <button onClick={() => addToCart(item)} className="w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm text-slate-400 border border-slate-100">
+                                                <Plus size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => updateQty(item.id, -item.quantity)} className="p-2 text-slate-300 hover:text-red-500 transition-colors">
+                                        <Trash2 size={20} />
+                                    </button>
+                                </div>
+                            ))}
+
+                            {/* Data Pemesan in Mobile Modal */}
+                            <div className="bg-emerald-50/50 p-6 rounded-[2rem] border border-emerald-100 space-y-4">
+                                <h3 className="text-xs font-black text-emerald-800 uppercase tracking-widest mb-2">Data Pemesan</h3>
+                                <input type="text" placeholder="Nama Lengkap" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full px-5 py-4 bg-white border border-emerald-100 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10 text-sm font-bold placeholder:text-slate-300" />
+                                <input type="email" placeholder="Email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} className="w-full px-5 py-4 bg-white border border-emerald-100 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10 text-sm font-bold placeholder:text-slate-300" />
+                                <input type="tel" placeholder="WhatsApp" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full px-5 py-4 bg-white border border-emerald-100 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10 text-sm font-bold placeholder:text-slate-300" />
+                                <select 
+                                    value={paymentMethod} 
+                                    onChange={(e) => setPaymentMethod(e.target.value)}
+                                    className="w-full px-5 py-4 bg-white border border-emerald-100 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10 text-sm font-black text-slate-700 appearance-none bg-[url('https://cdn-icons-png.flaticon.com/512/60/60995.png')] bg-[length:12px] bg-[right_20px_center] bg-no-repeat"
+                                >
+                                    <option value="" disabled>Pilih Metode Pembayaran</option>
+                                    <option value="COD">COD (Tunai)</option>
+                                    <option value="Gopay">Gopay</option>
+                                    <option value="Dana">Dana</option>
+                                    <option value="Transfer Bank">Transfer Bank</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="p-8 bg-slate-50 border-t border-slate-100 p-safe-bottom">
+                            <div className="flex justify-between items-center mb-6">
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Pembayaran</p>
+                                    <p className="text-3xl font-black text-emerald-600 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[10px] font-black text-emerald-600/50 uppercase tracking-widest mb-1">Sudah Termasuk Zakat</p>
+                                    <p className="font-bold text-emerald-600/70">Rp {zakatValue.toLocaleString('en-US')}</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={handleCheckout}
+                                disabled={isProcessing || cart.length === 0}
+                                className="w-full py-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-lg shadow-xl shadow-emerald-200 active:scale-95 transition-all disabled:bg-slate-200 disabled:shadow-none"
+                            >
+                                {isProcessing ? 'Memproses...' : 'Checkout Sekarang'}
+                            </button>
                         </div>
                     </div>
                 </div>
