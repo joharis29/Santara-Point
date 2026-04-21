@@ -44,7 +44,7 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                     if (data.status === 'Diproses') setStatus('DISIAPKAN');
                     if (data.status === 'Selesai') setStatus('SELESAI');
                     if (data.status === 'Ditolak') setStatus('DITOLAK');
-                    
+
                     if (data.total_amount) setDisplayAmount(data.total_amount);
                     if (data.items) setDbItems(data.items);
                 }
@@ -57,7 +57,7 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                     if (t.status === 'Diproses') setStatus('DISIAPKAN');
                     if (t.status === 'Selesai') setStatus('SELESAI');
                     if (t.status === 'Ditolak') setStatus('DITOLAK');
-                    
+
                     if (t.totalAmount || t.total_amount) setDisplayAmount(t.totalAmount || t.total_amount);
                 }
             }
@@ -86,7 +86,7 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                         <h2 className="text-xl font-black text-slate-800">Pelacakan Pesanan</h2>
                         <p className="text-sm text-slate-500 font-medium">Bpk/Ibu {customerName}</p>
                         <div className="mt-2 bg-emerald-50 px-4 py-1.5 rounded-full border border-emerald-100">
-                             <p className="text-xs font-black text-emerald-700">Total Tagihan: Rp {displayAmount?.toLocaleString('id-ID')}</p>
+                            <p className="text-xs font-black text-emerald-700">Total Tagihan: Rp {displayAmount?.toLocaleString('id-ID')}</p>
                         </div>
                         {transactionId && (
                             <span className="mt-2 bg-white border border-slate-200 px-3 py-1 text-[10px] rounded-full font-mono text-slate-400">ID: {transactionId}</span>
@@ -110,11 +110,11 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                                 </div>
                                 <h3 className="text-2xl font-black text-slate-800 mb-2 tracking-tight">Pesanan Selesai!</h3>
                                 <p className="text-sm text-slate-500 mb-6 font-medium">Hidangan Anda telah siap. Terima kasih telah memesan di Santara Point.</p>
-                                
+
                                 <div className="w-full bg-slate-50 rounded-3xl p-6 border border-slate-100">
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Pembayaran</p>
                                     <p className="text-3xl font-black text-emerald-600 tracking-tighter">Rp {displayAmount?.toLocaleString('id-ID')}</p>
-                                    
+
                                     <div className="mt-4 pt-4 border-t border-slate-200 flex flex-col gap-2">
                                         {dbItems.map((item, idx) => (
                                             <div key={idx} className="flex justify-between text-xs font-bold text-slate-500">

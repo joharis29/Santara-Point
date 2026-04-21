@@ -151,6 +151,9 @@ export default function App() {
     const [products, setProducts] = useState(INITIAL_PRODUCTS);
     const [cart, setCart] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isWaitingOpen, setIsWaitingOpen] = useState(false);
+    const [currentTxId, setCurrentTxId] = useState(null);
+
     // Pajak Daerah strictly mandatory
     const [activeCategory, setActiveCategory] = useState('Semua');
     const [customerName, setCustomerName] = useState('');
@@ -161,7 +164,6 @@ export default function App() {
     const [paymentMethod, setPaymentMethod] = useState('');
     const [orderType, setOrderType] = useState('Dine-In');
     const [toppingModalProduct, setToppingModalProduct] = useState(null);
-    const [currentTxId, setCurrentTxId] = useState(null);
 
     const handleCloseWaiting = () => {
         setIsWaitingOpen(false);
@@ -187,7 +189,6 @@ export default function App() {
     const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
-    const [isWaitingOpen, setIsWaitingOpen] = useState(false);
 
     React.useEffect(() => {
         // Security Check
