@@ -180,6 +180,7 @@ export default function App() {
     const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
     const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+    const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
 
     React.useEffect(() => {
         // Security Check

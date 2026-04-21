@@ -156,6 +156,7 @@ export default function App() {
     const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
     const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+    const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
 
     React.useEffect(() => {
         // Security Check
@@ -205,6 +206,8 @@ export default function App() {
             } catch (e) {
                 console.error("Error parsing settings", e);
             }
+        } else {
+            localStorage.setItem('santaraStoreSettings', JSON.stringify(DEFAULT_SETTINGS));
         }
 
         // Restore active transaction overlay if any

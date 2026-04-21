@@ -30,6 +30,10 @@ export default function ShiftPage() {
     const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
     const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+    const [storeSettings, setStoreSettings] = useState({
+        storeName: 'Santara Point',
+        storeTagline: 'Hidangan Lezat, Penuh Keberkahan.'
+    });
 
     const shiftSchedules = [
         { id: 1, name: 'Zaid', shift: 'Pagi', time: '08:00 - 15:00', role: 'Kasir Utama' },

@@ -17,12 +17,35 @@ import {
     ShoppingBag as ShoppingBagIcon,
     Receipt,
     ArrowLeft,
-    Settings
-} from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
-import CustomerHeader from '@/components/CustomerHeader';
-import CustomerBottomNav from '@/components/CustomerBottomNav';
-import SettingsModal from '@/components/SettingsModal';
+const DEFAULT_SETTINGS = {
+    storeName: 'Santara Point',
+    storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
+    whatsapp: '6285846802177',
+    email: 'santarapoint@gmail.com',
+    address: 'Jl. Raya Santara No. 123, Bandung',
+    footerText: '© 2024 Santara Point. Berkah setiap saat.',
+    // Info Perusahaan
+    companyCategory: 'Retailer',
+    companyField: 'Restoran',
+    startDate: '',
+    accountingPeriod: 'Januari - Desember',
+    currency: 'IDR',
+    // Pajak
+    taxCompanyName: '',
+    pkpDate: '',
+    pkpNumber: '',
+    companyType: 'PT',
+    companyNpwp: '',
+    klu: '',
+    nitku: '',
+    taxAddress: '',
+    // Pengguna
+    authorizedUsers: [
+        { contact: 'santarapoint@gmail.com', role: 'Administrator' }
+    ],
+    // Pengaturan Pajak
+    isPajakActive: true
+};
 
 export default function CustomerHistory() {
     const router = useRouter();
@@ -47,6 +70,7 @@ export default function CustomerHistory() {
     const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
     const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+    const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -123,6 +147,16 @@ export default function CustomerHistory() {
             }
         };
 
+        const storedSettings = localStorage.getItem('santaraStoreSettings');
+        if (storedSettings) {
+            try {
+                const parsed = JSON.parse(storedSettings);
+                setStoreSettings({ ...DEFAULT_SETTINGS, ...parsed });
+            } catch (e) {
+                console.error("Error parsing settings", e);
+            }
+        }
+
         fetchUserData();
     }, []);
 
@@ -146,10 +180,6 @@ export default function CustomerHistory() {
     const addAddress = () => {
         const newAddr = { id: Date.now(), label: '', details: '' };
         setUserProfile({ ...userProfile, addresses: [...userProfile.addresses, newAddr] });
-    };
-
-    const removeAddress = (id) => {
-        setUserProfile({ ...userProfile, addresses: userProfile.addresses.filter(a => a.id !== id) });
     };
 
     const updateAddress = (id, field, value) => {
@@ -300,6 +330,7 @@ export default function CustomerHistory() {
                 setIsChangeEmailOpen={setIsChangeEmailOpen}
                 setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
                 setIsChangePasswordOpen={setIsChangePasswordOpen}
+                storeSettings={storeSettings}
                 addAddress={addAddress}
                 removeAddress={removeAddress}
                 updateAddress={updateAddress}
