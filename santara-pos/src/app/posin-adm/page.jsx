@@ -48,8 +48,11 @@ import {
     Clock,
     Users,
     Menu,
-    ShoppingCart
+    ShoppingCart,
+    User,
+    CheckCircle2
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 /**
  * SANTARA POINT - POS INPUT (OWNER ROLE)
@@ -275,6 +278,19 @@ export default function App() {
             status: 'Menunggu',
             items: cart.map(({ name, quantity, price }) => ({ name, quantity, price }))
         };
+
+        const syncToSupabase = async (trx) => {
+            try {
+                const { error } = await supabase.from('transactions').insert([trx]);
+                if (error) throw error;
+                console.log("Admin transaction synced to Supabase");
+            } catch (err) {
+                console.error("Supabase sync failed:", err);
+            }
+        };
+
+        syncToSupabase(newTransaction);
+
         const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
         localStorage.setItem('santaraTransactionHistory', JSON.stringify([newTransaction, ...existingHistory]));
 

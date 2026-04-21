@@ -21,6 +21,7 @@ import {
     Hash,
     Truck
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 const DEFAULT_SETTINGS = {
     storeName: 'Santara Point',
@@ -36,38 +37,83 @@ export default function WaitingListPage() {
     const [transactions, setTransactions] = useState([]);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
 
-    const loadData = () => {
-        const history = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
-        
-        // Kita hanya mengambil transaksi hari ini atau yang masih aktif untuk papan antrean.
-        // Untuk prototype, kita akan mengambil yang statusnya belum diarsipkan (Selain Selesai jika mau difilter, tapi kita tampilkan Selesai juga)
-        // Sortir: Terlama ke Terbaru (FIFO) untuk Antrean
-        const queueOrders = history
-            .filter(t => t.status === 'Menunggu' || t.status === 'Diproses' || t.status === 'Selesai')
-            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    const loadData = async () => {
+        try {
+            // Priority 1: Get from Supabase
+            const { data, error } = await supabase
+                .from('transactions')
+                .select('*')
+                .in('status', ['Menunggu', 'Diproses', 'Selesai'])
+                .order('timestamp', { ascending: true })
+                .limit(60);
 
-        // Tampilkan maks 60 terakhir agar tidak berat
-        setTransactions(queueOrders.slice(-60));
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                setTransactions(data);
+            } else {
+                // Priority 2: Fallback to LocalStorage if DB empty or offline
+                const history = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
+                const queueOrders = history
+                    .filter(t => t.status === 'Menunggu' || t.status === 'Diproses' || t.status === 'Selesai')
+                    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                setTransactions(queueOrders.slice(-60));
+            }
+        } catch (err) {
+            console.error("Error loading Supabase queue:", err);
+            // Silent fallback to local
+            const history = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
+            setTransactions(history.filter(t => ['Menunggu', 'Diproses', 'Selesai'].includes(t.status)).slice(-60));
+        }
     };
 
     useEffect(() => {
         loadData();
-        // Polling setiap 2 detik untuk efek real-time multiple tabs
-        const timer = setInterval(loadData, 2000);
+
+        // 1. Realtime Subscription for Cross-Device Sync
+        const channel = supabase
+            .channel('transaction-updates')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, (payload) => {
+                console.log('Realtime update received!', payload);
+                loadData();
+            })
+            .subscribe();
+
+        // 2. Polling Fallback (setiap 10 detik, lebih jarang karena sudah ada realtime)
+        const timer = setInterval(loadData, 10000);
 
         const storedSettings = localStorage.getItem('santaraStoreSettings');
         if (storedSettings) {
             setStoreSettings(JSON.parse(storedSettings));
         }
 
-        return () => clearInterval(timer);
+        return () => {
+            clearInterval(timer);
+            supabase.removeChannel(channel);
+        };
     }, []);
 
-    const handleChangeStatus = (id, newStatus) => {
-        const history = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
-        const updated = history.map(t => t.id === id ? { ...t, status: newStatus } : t);
-        localStorage.setItem('santaraTransactionHistory', JSON.stringify(updated));
-        loadData();
+    const handleChangeStatus = async (id, newStatus) => {
+        try {
+            // Update Supabase
+            const { error } = await supabase
+                .from('transactions')
+                .update({ status: newStatus })
+                .eq('id', id);
+            
+            if (error) throw error;
+            
+            // Also update local for immediate feedback
+            setTransactions(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
+
+            // Sync back to localstorage for other pages
+            const history = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
+            const updated = history.map(t => t.id === id ? { ...t, status: newStatus } : t);
+            localStorage.setItem('santaraTransactionHistory', JSON.stringify(updated));
+        } catch (err) {
+            console.error("Error updating status:", err);
+            alert("Gagal merubah status di database.");
+        }
     };
 
     const menungguList = transactions.filter(t => t.status === 'Menunggu');

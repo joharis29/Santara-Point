@@ -27,7 +27,8 @@ import {
     EyeOff,
     ArrowUpDown,
     MapPin,
-    ChevronRight
+    ChevronRight,
+    MessageCircle
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import WaitingOverlay from './WaitingOverlay';
@@ -539,28 +540,43 @@ function CustomerPortalContent() {
         }).filter(item => item.quantity > 0));
     };
 
-    const processTransactionData = () => {
+    const processTransactionData = async () => {
         const tId = 'TRX-' + Math.floor(Math.random() * 1000000);
         const newTransaction = {
             id: tId,
             timestamp: new Date().toISOString(),
             customerName: customerName || 'Pelanggan Online',
-            queueNumber: 'Online',
+            customerPhone: customerPhone || 'N/A',
+            deliveryAddress: customerAddress || 'Dine-in / Ambil di Toko',
+            queueNumber: 'P-' + Math.floor(Math.random() * 100),
+            orderType: customerAddress ? 'Delivery' : 'Dine-in',
+            keterangan: orderNote,
             paymentMethod,
-            source: 'Customer',
-            cashierName: 'Online',
+            source: 'Cus',
             totalAmount,
             pajak: pajakValue,
-            deliveryAddress: customerAddress,
-            customerPhone,
-            keterangan: orderNote,
             status: 'Menunggu',
             items: cart.map(({ name, quantity, price }) => ({ name, quantity, price }))
         };
-        const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
-        localStorage.setItem('santaraTransactionHistory', JSON.stringify([newTransaction, ...existingHistory]));
-        setCurrentTxId(tId);
-        setIsWaitingOpen(true);
+
+        try {
+            // Push to Supabase for cross-device sync
+            const { error } = await supabase.from('transactions').insert([newTransaction]);
+            if (error) throw error;
+
+            console.log("Transaction synced to Supabase successfully");
+
+            // Also keep in localStorage for local history
+            const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
+            localStorage.setItem('santaraTransactionHistory', JSON.stringify([newTransaction, ...existingHistory]));
+            
+            setCurrentTxId(tId);
+            setIsWaitingOpen(true);
+            setCart([]);
+        } catch (err) {
+            console.error("Error syncing transaction:", err);
+            alert("Gagal mengirim pesanan ke sistem. Mohon coba lagi.");
+        }
     };
 
     const handleCheckout = async () => {

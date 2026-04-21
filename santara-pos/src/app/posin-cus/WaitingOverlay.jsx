@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
 import { Clock, ChefHat, CheckCircle2, ChevronRight, Receipt, XCircle, Download } from 'lucide-react';
 import { generateReceiptPDF } from '@/lib/receiptPdf';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmount, transactionId }) {
     // states: 'KONFIRMASI' -> 'DISIAPKAN' -> 'SELESAI'
@@ -23,16 +23,35 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
         
         setStatus('KONFIRMASI'); // reset
 
-        const poll = setInterval(() => {
-            const history = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
-            const t = history.find(x => x.id === transactionId);
-            if (t && t.status) {
-                if (t.status === 'Menunggu') setStatus('KONFIRMASI');
-                if (t.status === 'Diproses') setStatus('DISIAPKAN');
-                if (t.status === 'Selesai') setStatus('SELESAI');
-                if (t.status === 'Ditolak') setStatus('DITOLAK');
+        const poll = setInterval(async () => {
+            try {
+                // Priority 1: Supabase for cross-device sync
+                const { data, error } = await supabase
+                    .from('transactions')
+                    .select('status')
+                    .eq('id', transactionId)
+                    .single();
+                
+                if (error) throw error;
+
+                if (data && data.status) {
+                    if (data.status === 'Menunggu') setStatus('KONFIRMASI');
+                    if (data.status === 'Diproses') setStatus('DISIAPKAN');
+                    if (data.status === 'Selesai') setStatus('SELESAI');
+                    if (data.status === 'Ditolak') setStatus('DITOLAK');
+                }
+            } catch (err) {
+                // Fallback to localstorage
+                const history = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
+                const t = history.find(x => x.id === transactionId);
+                if (t && t.status) {
+                    if (t.status === 'Menunggu') setStatus('KONFIRMASI');
+                    if (t.status === 'Diproses') setStatus('DISIAPKAN');
+                    if (t.status === 'Selesai') setStatus('SELESAI');
+                    if (t.status === 'Ditolak') setStatus('DITOLAK');
+                }
             }
-        }, 1000); // Polling setiap 1 detik untuk live update mock DB
+        }, 2000); 
 
         return () => clearInterval(poll);
     }, [isOpen, transactionId]);
