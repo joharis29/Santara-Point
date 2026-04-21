@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     ShoppingBag,
     ShieldCheck,
@@ -150,8 +150,9 @@ const ProductImageSlider = ({ product }) => {
     );
 };
 
-export default function App() {
+function FavoritesContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [customerName, setCustomerName] = useState('Sobat Santara');
     const [favorites, setFavorites] = useState([]);
@@ -162,12 +163,18 @@ export default function App() {
     const [activeCategory, setActiveCategory] = useState('Semua');
     const [customerEmail, setCustomerEmail] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
+    const [customerAddress, setCustomerAddress] = useState('');
+    const [orderNote, setOrderNote] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isWaitingOpen, setIsWaitingOpen] = useState(false);
     const [currentTxId, setCurrentTxId] = useState(null);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [activeSettingsTab, setActiveSettingsTab] = useState('profil');
+    const [toppingModalProduct, setToppingModalProduct] = useState(null);
+    const [isQrisOpen, setIsQrisOpen] = useState(false);
+    const [isCodOpen, setIsCodOpen] = useState(false);
+    const [isTransferOpen, setIsTransferOpen] = useState(false);
     const [userProfile, setUserProfile] = useState({
         firstName: '',
         lastName: '',
@@ -228,7 +235,7 @@ export default function App() {
             setCurrentTxId(activeTxId);
             setIsWaitingOpen(true);
         }
-    }, []);
+    }, [router]);
 
     const handleSaveProfile = async (e) => {
         e.preventDefault();
@@ -273,12 +280,103 @@ export default function App() {
     );
 
     const addToCart = (product) => {
-        const exist = cart.find(x => x.id === product.id);
-        if (exist) {
-            setCart(cart.map(x => x.id === product.id ? { ...x, quantity: x.quantity + 1 } : x));
-        } else {
-            setCart([...cart, { ...product, quantity: 1 }]);
+        if (product.stock <= 0) return;
+        if (product.id === 35) {
+            setToppingModalProduct(product);
+            return;
         }
+        confirmAddToCart(product);
+    };
+
+    const confirmAddToCart = (product, topping = null) => {
+        const finalId = topping && topping !== 'Tanpa Toping' ? `${product.id}-${topping}` : product.id;
+        const finalName = topping && topping !== 'Tanpa Toping' ? `${product.name} (${topping})` : product.name;
+
+        const exist = cart.find(x => x.id === finalId);
+        if (exist) {
+            setCart(cart.map(x => x.id === finalId ? { ...x, quantity: x.quantity + 1 } : x));
+        } else {
+            setCart([...cart, { ...product, id: finalId, name: finalName, quantity: 1, originalId: product.id }]);
+        }
+        setToppingModalProduct(null);
+    };
+
+    const processTransactionData = async () => {
+        const tId = 'TRX-' + Math.floor(Math.random() * 1000000);
+        
+        const dbTransaction = {
+            id: tId,
+            timestamp: new Date().toISOString(),
+            customer_name: customerName || 'Pelanggan Online',
+            customer_phone: customerPhone || 'N/A',
+            delivery_address: customerAddress || 'Dine-in / Ambil di Toko',
+            queue_number: 'P-' + Math.floor(Math.random() * 100),
+            order_type: customerAddress ? 'Delivery' : 'Dine-in',
+            keterangan: orderNote,
+            payment_method: paymentMethod,
+            source: 'Cus',
+            total_amount: totalAmount,
+            pajak: pajakValue,
+            status: 'Menunggu',
+            items: cart.map(({ name, quantity, price }) => ({ name, quantity, price }))
+        };
+
+        try {
+            const { error } = await supabase.from('transactions').insert([dbTransaction]);
+            if (error) throw error;
+
+            const localTransaction = { ...dbTransaction, customerName, customerPhone, deliveryAddress: customerAddress };
+            const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
+            localStorage.setItem('santaraTransactionHistory', JSON.stringify([localTransaction, ...existingHistory]));
+            localStorage.setItem('santaraActiveTxId', tId);
+            
+            setCurrentTxId(tId);
+            setIsWaitingOpen(true);
+            setCart([]);
+        } catch (err) {
+            console.error("Error syncing transaction:", err);
+            alert("Gagal mengirim pesanan ke sistem.");
+        }
+    };
+
+    const handleCheckout = async () => {
+        if (!isLoggedIn) {
+            router.push('/login');
+            return;
+        }
+
+        if (cart.length === 0) return alert('Keranjang masih kosong!');
+        if (!customerName || !customerAddress || !customerPhone || !paymentMethod) {
+            return alert('Mohon lengkapi Data Diri Pemesan (Termasuk Alamat) dan Metode Pembayaran!');
+        }
+
+        setIsProcessing(true);
+        try {
+            await new Promise(resolve => setTimeout(resolve, 700));
+
+            if (paymentMethod === 'Gopay' || paymentMethod === 'Dana') {
+                setIsQrisOpen(true);
+            } else if (paymentMethod === 'COD') {
+                setIsCodOpen(true);
+            } else if (paymentMethod === 'Transfer Bank') {
+                setIsTransferOpen(true);
+            } else {
+                processTransactionData();
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Kesalahan jaringan, gagal memproses pesanan.');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleCloseWaiting = () => {
+        setIsWaitingOpen(false);
+        setCurrentTxId(null);
+        localStorage.removeItem('santaraActiveTxId');
+        setCart([]);
+        setPaymentMethod('');
     };
 
     const updateQty = (id, delta) => {
@@ -687,5 +785,13 @@ export default function App() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function App() {
+    return (
+        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center font-bold text-emerald-600">Loading Favorites...</div>}>
+            <FavoritesContent />
+        </Suspense>
     );
 }
