@@ -11,7 +11,9 @@ import {
   ShoppingCart,
   ChevronRight,
   ArrowRight,
-  LogOut
+  LogOut,
+  Menu,
+  X
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -25,6 +27,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [customerName, setCustomerName] = useState('Sobat Santara');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     // 1. Check initial session
@@ -82,9 +85,22 @@ export default function App() {
       console.log(`Navigating to: ${type}`);
     }
   };
+  
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      localStorage.removeItem('currentUserRole');
+      localStorage.removeItem('currentUserContact');
+      localStorage.removeItem('customerName');
+      setUser(null);
+      router.push('/login');
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
 
   return (
-    <div className="relative h-screen w-full flex flex-col font-sans overflow-hidden selection:bg-emerald-200 selection:text-emerald-900">
+    <div className="relative min-h-screen w-full flex flex-col font-sans overflow-x-hidden selection:bg-emerald-200 selection:text-emerald-900">
 
       {/* 1. Background Layer (Kompilasi Makanan) */}
       <div
@@ -115,19 +131,28 @@ export default function App() {
           </button>
           <button
             onClick={() => handleAction('kontak')}
-            className="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm backdrop-blur-md transition-all active:scale-95"
+            className="hidden sm:block bg-white/10 hover:bg-white/20 border border-white/20 text-white px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm backdrop-blur-md transition-all active:scale-95"
           >
             Kontak Kami
           </button>
-          
+
           {!loading && (
             user ? (
-              <button
-                onClick={() => handleAction('profile')}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 lg:px-6 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95 flex items-center gap-2"
-              >
-                <User size={18} /> Profil Saya
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleAction('profile')}
+                  className="hidden sm:flex bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 lg:px-6 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95 items-center gap-2"
+                >
+                  <User size={18} /> Profil
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500/80 hover:bg-red-600 text-white p-2 lg:px-4 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm shadow-lg transition-all active:scale-95 flex items-center gap-2"
+                  title="Keluar"
+                >
+                  <LogOut size={18} /> <span className="hidden lg:inline">Keluar</span>
+                </button>
+              </div>
             ) : (
               <>
                 <button
@@ -140,12 +165,46 @@ export default function App() {
                   onClick={() => handleAction('register')}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 lg:px-6 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
                 >
-                  Daftar Pelanggan Baru
+                  Daftar
                 </button>
               </>
             )
           )}
+
+          {/* Mobile Menu Toggle */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-all"
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-full left-0 right-0 bg-emerald-950/95 backdrop-blur-xl border-b border-white/10 flex flex-col p-6 gap-4 z-[100] md:hidden animate-fade-in-down shadow-2xl">
+            <button onClick={() => { handleAction('dokumentasi'); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 text-white font-bold text-sm p-3 hover:bg-white/5 rounded-xl transition-all">
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Dokumentasi Layanan
+            </button>
+            <button onClick={() => { handleAction('kontak'); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 text-white font-bold text-sm p-3 hover:bg-white/5 rounded-xl transition-all">
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Kontak Kami
+            </button>
+            {user ? (
+              <>
+                <button onClick={() => { handleAction('profile'); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 text-emerald-400 font-bold text-sm p-3 bg-white/5 rounded-xl transition-all">
+                  <User size={18} /> Profil Saya
+                </button>
+                <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 text-red-400 font-bold text-sm p-3 bg-red-500/10 rounded-xl transition-all">
+                  <LogOut size={18} /> Keluar / Logout
+                </button>
+              </>
+            ) : (
+              <button onClick={() => { handleAction('login'); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 text-emerald-400 font-bold text-sm p-3 bg-white/5 rounded-xl transition-all">
+                <User size={18} /> Masuk Akun
+              </button>
+            )}
+          </div>
+        )}
       </nav>
 
       {/* 3. Hero Section Content */}

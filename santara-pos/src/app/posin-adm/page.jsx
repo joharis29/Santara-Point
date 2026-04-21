@@ -158,6 +158,7 @@ export default function App() {
     const [newUserContact, setNewUserContact] = useState('');
     const [newUserRole, setNewUserRole] = useState('Operator');
     const [isCartModalOpen, setIsCartModalOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
 
     React.useEffect(() => {
@@ -290,15 +291,55 @@ export default function App() {
     };
 
     return (
-        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
-
-            {/* 1. Sidebar Navigasi (Eksklusif Owner) */}
-            <aside className="hidden lg:flex w-64 bg-emerald-900 text-white flex-col transition-all duration-300 shadow-2xl">
-                <div className="p-6 flex items-center gap-3 border-b border-emerald-800">
-                    <button onClick={() => router.push('/homepage')} className="bg-white p-1.5 rounded-lg flex items-center justify-center hover:scale-105 transition-transform cursor-pointer" title="Ke Beranda">
-                        <img src="/santara-logo.png" alt="Santara" className="w-6 h-6 object-contain" />
+        <div className="flex flex-col lg:flex-row h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden relative">
+            
+            {/* Mobile Header (Visible only on mobile/tablet) */}
+            <header className="lg:hidden bg-white border-b border-slate-200 p-4 flex items-center justify-between z-40">
+                <div className="flex items-center gap-3">
+                    <button 
+                        onClick={() => setIsSidebarOpen(true)}
+                        className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-600"
+                    >
+                        <Menu size={24} />
                     </button>
-                    <span className="hidden lg:block font-black tracking-tighter text-xl italic uppercase">SANTARA OPS</span>
+                    <div className="flex items-center gap-2">
+                        <img src="/santara-logo.png" alt="Santara" className="w-6 h-6 object-contain" />
+                        <span className="font-black text-sm italic uppercase tracking-tighter">SANTARA OPS</span>
+                    </div>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-[8px] font-black uppercase border border-amber-200 flex items-center gap-1 shrink-0">
+                        <ShieldCheck size={10} /> Syariah
+                    </div>
+                </div>
+            </header>
+
+            {/* 1. Sidebar Navigasi (Desktop: Permanent, Mobile: Drawer) */}
+            {/* Backdrop for Mobile Sidebar */}
+            {isSidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] lg:hidden animate-fade-in"
+                    onClick={() => setIsSidebarOpen(false)}
+                ></div>
+            )}
+
+            <aside className={`
+                fixed lg:relative inset-y-0 left-0 w-72 lg:w-64 bg-emerald-900 text-white flex flex-col z-[70] transition-transform duration-300 shadow-2xl
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            `}>
+                <div className="p-6 flex items-center justify-between border-b border-emerald-800">
+                    <div className="flex items-center gap-3">
+                        <button onClick={() => router.push('/homepage')} className="bg-white p-1.5 rounded-lg flex items-center justify-center hover:scale-105 transition-transform cursor-pointer" title="Ke Beranda">
+                            <img src="/santara-logo.png" alt="Santara" className="w-6 h-6 object-contain" />
+                        </button>
+                        <span className="font-black tracking-tighter text-xl italic uppercase">SANTARA OPS</span>
+                    </div>
+                    <button 
+                        onClick={() => setIsSidebarOpen(false)}
+                        className="lg:hidden p-2 hover:bg-emerald-800 rounded-xl transition-colors"
+                    >
+                        <X size={20} />
+                    </button>
                 </div>
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                     {[
@@ -323,14 +364,14 @@ export default function App() {
                             <div className={`${item.active ? 'text-white' : 'text-emerald-400 group-hover:text-white'} transition-colors`}>
                                 {item.icon}
                             </div>
-                            <span className="hidden lg:block font-bold text-sm tracking-tight">{item.label}</span>
+                            <span className="font-bold text-sm tracking-tight">{item.label}</span>
                         </button>
                     ))}
                 </nav>
                 <div className="p-4 border-t border-emerald-800">
-                    <button onClick={() => window.location.href = '/login'} className="w-full flex items-center gap-4 p-3 rounded-xl text-red-300 hover:bg-red-500/10 hover:text-red-400 transition-all">
+                    <button onClick={() => window.location.href = '/login'} className="w-full flex items-center gap-4 p-3 rounded-xl text-red-300 hover:bg-red-500/10 hover:text-red-400 transition-all font-bold text-sm">
                         <LogOut size={20} />
-                        <span className="hidden lg:block font-bold text-sm">Keluar</span>
+                        <span>Keluar</span>
                     </button>
                 </div>
             </aside>
@@ -338,8 +379,8 @@ export default function App() {
             {/* 2. Area Utama Produk */}
             <main className="flex-1 flex flex-col overflow-hidden">
                 {/* Header Dashboard */}
-                <header className="bg-white border-b border-slate-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
+                <header className="bg-white border-b border-slate-200 p-4 lg:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div className="hidden lg:block">
                         <div className="flex items-center gap-2 mb-1">
                             <h2 className="text-2xl font-black text-slate-800 tracking-tight">{storeSettings.storeName}</h2>
                             <div className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded flex items-center gap-1 text-[10px] font-black uppercase border border-amber-200">
@@ -349,25 +390,25 @@ export default function App() {
                         <p className="text-slate-400 text-xs font-medium">Selamat Bekerja, <span className="text-emerald-700 font-bold">Owner {storeSettings.storeName}</span></p>
                     </div>
 
-                    <div className="relative w-full md:w-96">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <div className="relative w-full md:w-96 lg:w-[450px]">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                         <input
                             type="text"
-                            placeholder="Cari menu atau kategori..."
-                            className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border-none rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                            placeholder="Cari menu, kategori, atau kode..."
+                            className="w-full pl-12 pr-4 py-3 bg-slate-100 border-none rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm font-medium"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
                 </header>
 
-                <div className="px-6 lg:px-10 mt-6 flex items-center justify-between overflow-x-auto gap-4">
-                    <div className="flex gap-3 pb-2">
+                <div className="px-4 lg:px-10 mt-4 lg:mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between overflow-x-auto gap-4">
+                    <div className="flex gap-2 lg:gap-3 pb-2 overflow-x-auto no-scrollbar">
                         {categories.map(cat => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
-                                className={`px-6 py-2 rounded-full text-xs font-bold transition-all border whitespace-nowrap ${activeCategory === cat ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-100' : 'bg-white border-slate-200 text-slate-400 hover:border-emerald-600 hover:text-emerald-600'}`}
+                                className={`px-4 lg:px-6 py-2 rounded-xl text-[11px] lg:text-xs font-bold transition-all border whitespace-nowrap ${activeCategory === cat ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg' : 'bg-white border-slate-200 text-slate-400 hover:border-emerald-600 hover:text-emerald-600'}`}
                             >
                                 {cat}
                             </button>
@@ -390,45 +431,31 @@ export default function App() {
                 </div>
 
                 {/* Grid Produk */}
-                <section className="flex-1 overflow-y-auto p-6 lg:p-10 pb-20 lg:pb-10">
-                    <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
+                <section className="flex-1 overflow-y-auto p-4 lg:p-10 pb-32 lg:pb-10">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-5">
                         {filteredProducts.map(product => (
                             <div
                                 key={product.id}
                                 onClick={() => addToCart(product)}
-                                className={`bg-white p-3 rounded-[2rem] shadow-sm hover:shadow-xl transition-all border border-transparent hover:border-emerald-500 cursor-pointer group flex flex-col ${product.stock <= 0 ? 'opacity-50 grayscale' : ''}`}
+                                className={`bg-white p-2 lg:p-3 rounded-[1.5rem] lg:rounded-[2rem] shadow-sm hover:shadow-xl transition-all border border-transparent hover:border-emerald-500 cursor-pointer group flex flex-col ${product.stock <= 0 ? 'opacity-50 grayscale' : ''}`}
                             >
-                                <div className="h-36 rounded-[1.5rem] overflow-hidden mb-4 relative">
+                                <div className="h-28 lg:h-36 rounded-xl lg:rounded-[1.5rem] overflow-hidden mb-3 lg:mb-4 relative">
                                     <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
                                     <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition"></div>
                                     {product.discountPercent > 0 && (
-                                        <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest shadow-md z-10">
+                                        <div className="absolute top-2 left-2 bg-red-600 text-white text-[8px] lg:text-[9px] font-black px-1.5 lg:px-2.5 py-0.5 lg:py-1 rounded-full uppercase tracking-widest shadow-md z-10">
                                             -{product.discountPercent}%
                                         </div>
                                     )}
-                                    {product.isNew && (
-                                        <div className="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-md">
-                                            NEW
-                                        </div>
-                                    )}
                                 </div>
-                                <div className="px-2 flex-1 flex flex-col justify-between">
+                                <div className="px-1 lg:px-2 flex-1 flex flex-col justify-between">
                                     <div>
-                                        <div className="flex justify-between items-start mb-1">
-                                            <h4 className="font-bold text-slate-800 text-sm line-clamp-2">{product.name}</h4>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            {product.discountPercent > 0 && (
-                                                <span className="text-[10px] font-bold line-through text-slate-400">Rp {product.originalPrice?.toLocaleString()}</span>
-                                            )}
-                                            <p className="text-emerald-600 font-black text-base italic">Rp {product.price.toLocaleString('en-US')}</p>
-                                        </div>
+                                        <h4 className="font-bold text-slate-800 text-[11px] lg:text-sm line-clamp-2 leading-tight mb-1">{product.name}</h4>
+                                        <p className="text-emerald-700 font-black text-xs lg:text-base italic">Rp {product.price.toLocaleString('en-US')}</p>
                                     </div>
-                                    <div className="mt-3 flex items-center justify-between text-[10px] font-bold text-slate-400">
-                                        <span>{product.category}</span>
+                                    <div className="mt-2 flex items-center justify-between text-[9px] lg:text-[10px] font-bold text-slate-400">
                                         <span className={`flex items-center gap-1 ${product.stock < 10 ? 'text-red-500' : ''}`}>
                                             Stok: {product.stock}
-                                            {product.stock < 10 && product.stock > 0 && <AlertCircle size={10} className="animate-pulse" />}
                                         </span>
                                     </div>
                                 </div>
@@ -438,7 +465,50 @@ export default function App() {
                 </section>
             </main>
 
-            {/* 3. Panel Ringkasan Transaksi (Sidebar Kanan) */}
+            {/* Floating Cart Button (Mobile Only) */}
+            <div className="md:hidden fixed bottom-24 right-5 z-40">
+                <button
+                    onClick={() => setIsCartModalOpen(true)}
+                    className="relative bg-emerald-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all outline-none border-2 border-white/20"
+                >
+                    <ShoppingCart size={24} />
+                    {cart.length > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-2 border-white animate-bounce">
+                            {cart.length}
+                        </span>
+                    )}
+                </button>
+            </div>
+
+            {/* Mobile Bottom Navigation Bar */}
+            <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-emerald-900 border-t border-emerald-800 px-4 py-3 flex justify-between items-center z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.1)] text-emerald-300">
+                <button onClick={() => router.push('/homepage')} className="flex flex-col items-center gap-1">
+                    <Home size={18} />
+                    <span className="text-[9px] font-bold uppercase">Beranda</span>
+                </button>
+                <button className="flex flex-col items-center gap-1 text-white">
+                    <ShoppingBag size={18} />
+                    <span className="text-[9px] font-bold uppercase">POS</span>
+                </button>
+                <button onClick={() => router.push('/waiting-list')} className="flex flex-col items-center gap-1">
+                    <ChefHat size={18} />
+                    <span className="text-[9px] font-bold uppercase">Antrean</span>
+                </button>
+                <button onClick={() => router.push('/manajemen-stok')} className="flex flex-col items-center gap-1">
+                    <ClipboardList size={18} />
+                    <span className="text-[9px] font-bold uppercase">Stok</span>
+                </button>
+                <button onClick={() => router.push('/pembelian')} className="flex flex-col items-center gap-1">
+                    <ShoppingBag size={18} />
+                    <span className="text-[9px] font-bold uppercase">Beli</span>
+                </button>
+                <button onClick={() => setIsSettingsModalOpen(true)} className="flex flex-col items-center gap-1">
+                    <Settings size={18} />
+                    <span className="text-[9px] font-bold uppercase">Toko</span>
+                </button>
+            </nav>
+
+            {/* 3. Panel Ringkasan Transaksi (Sidebar Kanan - Desktop) */}
             <aside className="hidden md:flex w-[350px] lg:w-[400px] bg-white border-l border-slate-200 flex flex-col shadow-2xl relative z-10">
                 <div className="p-5 lg:p-6 flex-1 overflow-y-auto">
                     <div className="flex items-center justify-between mb-5">
@@ -569,6 +639,8 @@ export default function App() {
                     </div>
                 </div>
             </aside>
+
+            {/* 4. Topping Modal (Universal) */}
             {toppingModalProduct && (
                 <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl relative">
@@ -592,6 +664,7 @@ export default function App() {
                 </div>
             )}
 
+            {/* 5. Settings Modal (Global) */}
             {isSettingsModalOpen && (
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
                     <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -607,7 +680,7 @@ export default function App() {
                         </div>
 
                         {/* TABS Navigation */}
-                        <div className="flex bg-slate-100 p-2 mx-8 mt-6 rounded-2xl">
+                        <div className="flex bg-slate-100 p-2 mx-8 mt-6 rounded-2xl shrink-0">
                             <button
                                 onClick={() => setSettingsTab('info')}
                                 className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${settingsTab === 'info' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
@@ -776,7 +849,7 @@ export default function App() {
                                 </div>
                             ) : settingsTab === 'tax' ? (
                                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                    <div className="bg-emerald-50 p-6 rounded-[2rem] border border-emerald-100 mb-6 flex items-center justify-between group">
+                                    <div className="bg-emerald-50 p-6 rounded-[2rem] border border-emerald-100 flex items-center justify-between group">
                                         <div className="flex items-center gap-4">
                                             <div className="p-3 bg-white rounded-2xl shadow-sm text-emerald-600">
                                                 <Calculator size={24} />
@@ -931,15 +1004,11 @@ export default function App() {
                                                     <button
                                                         onClick={() => {
                                                             if (!newUserContact) return alert('Masukkan Email atau Nomor HP!');
-
-                                                            // Validasi Email atau Nomor HP
                                                             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                                                             const phoneRegex = /^\d{7,15}$/;
-
                                                             if (!emailRegex.test(newUserContact) && !phoneRegex.test(newUserContact)) {
                                                                 return alert('Format Email atau Nomor HP tidak valid!');
                                                             }
-
                                                             const updatedUsers = [...storeSettings.authorizedUsers, { contact: newUserContact, role: newUserRole }];
                                                             setStoreSettings({ ...storeSettings, authorizedUsers: updatedUsers });
                                                             setNewUserContact('');
@@ -1008,65 +1077,8 @@ export default function App() {
                     </div>
                 </div>
             )}
-            {/* Floating Cart Button (Mobile Only) */}
-            <div className="md:hidden fixed bottom-24 right-6 z-40">
-                <button
-                    onClick={() => setIsCartModalOpen(true)}
-                    className="relative bg-emerald-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all outline-none"
-                >
-                    <ShoppingBag size={24} />
-                    {cart.length > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-2 border-white animate-bounce">
-                            {cart.length}
-                        </span>
-                    )}
-                </button>
-            </div>
 
-            {/* Bottom Navigation (Mobile Only) */}
-            <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-emerald-900 border-t border-emerald-800 px-4 py-3 flex justify-between items-center z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.1)] text-emerald-300">
-                <button
-                    onClick={() => router.push('/homepage')}
-                    className="flex flex-col items-center gap-1"
-                >
-                    <Home size={18} />
-                    <span className="text-[9px] font-bold uppercase">Beranda</span>
-                </button>
-                <button className="flex flex-col items-center gap-1 text-white">
-                    <ShoppingBag size={18} />
-                    <span className="text-[9px] font-bold uppercase">POS</span>
-                </button>
-                <button
-                    onClick={() => router.push('/waiting-list')}
-                    className="flex flex-col items-center gap-1"
-                >
-                    <ChefHat size={18} />
-                    <span className="text-[9px] font-bold uppercase">Antrean</span>
-                </button>
-                <button
-                    onClick={() => router.push('/manajemen-stok')}
-                    className="flex flex-col items-center gap-1"
-                >
-                    <ClipboardList size={18} />
-                    <span className="text-[9px] font-bold uppercase">Stok</span>
-                </button>
-                <button
-                    onClick={() => router.push('/pembelian')}
-                    className="flex flex-col items-center gap-1"
-                >
-                    <ShoppingBag size={18} />
-                    <span className="text-[9px] font-bold uppercase">Beli</span>
-                </button>
-                <button
-                    onClick={() => setIsSettingsModalOpen(true)}
-                    className="flex flex-col items-center gap-1"
-                >
-                    <Settings size={18} />
-                    <span className="text-[9px] font-bold uppercase">Toko</span>
-                </button>
-            </nav>
-
-            {/* Cart Modal for Mobile (Admin) */}
+            {/* 6. Cart Modal for Mobile (Admin) */}
             {isCartModalOpen && (
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] md:hidden">
                     <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] h-[90vh] flex flex-col overflow-hidden shadow-2xl">
