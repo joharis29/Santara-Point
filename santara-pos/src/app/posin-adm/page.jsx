@@ -281,11 +281,27 @@ export default function App() {
 
         const syncToSupabase = async (trx) => {
             try {
-                const { error } = await supabase.from('transactions').insert([trx]);
+                // Map to snake_case for DB
+                const dbTrx = {
+                    id: trx.id,
+                    timestamp: trx.timestamp,
+                    customer_name: trx.customerName,
+                    queue_number: trx.queueNumber,
+                    order_type: trx.orderType,
+                    keterangan: trx.keterangan,
+                    payment_method: trx.paymentMethod,
+                    source: trx.source,
+                    cashier_name: trx.cashierName,
+                    total_amount: trx.totalAmount,
+                    pajak: trx.pajak,
+                    status: trx.status,
+                    items: trx.items
+                };
+                const { error } = await supabase.from('transactions').insert([dbTrx]);
                 if (error) throw error;
                 console.log("Admin transaction synced to Supabase");
             } catch (err) {
-                console.error("Supabase sync failed:", err);
+                console.error("Supabase sync failed (Admin):", err);
             }
         };
 

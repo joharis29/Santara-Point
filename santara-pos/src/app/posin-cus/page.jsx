@@ -542,7 +542,10 @@ function CustomerPortalContent() {
 
     const processTransactionData = async () => {
         const tId = 'TRX-' + Math.floor(Math.random() * 1000000);
-        const newTransaction = {
+        
+        // Data for LocalStorage (keep camelCase for internal consistency if needed, 
+        // or just use the same as DB)
+        const localTransaction = {
             id: tId,
             timestamp: new Date().toISOString(),
             customerName: customerName || 'Pelanggan Online',
@@ -559,23 +562,41 @@ function CustomerPortalContent() {
             items: cart.map(({ name, quantity, price }) => ({ name, quantity, price }))
         };
 
+        // Data for Supabase (Must match Snake Case column names)
+        const dbTransaction = {
+            id: tId,
+            timestamp: new Date().toISOString(),
+            customer_name: customerName || 'Pelanggan Online',
+            customer_phone: customerPhone || 'N/A',
+            delivery_address: customerAddress || 'Dine-in / Ambil di Toko',
+            queue_number: 'P-' + Math.floor(Math.random() * 100),
+            order_type: customerAddress ? 'Delivery' : 'Dine-in',
+            keterangan: orderNote,
+            payment_method: paymentMethod,
+            source: 'Cus',
+            total_amount: totalAmount,
+            pajak: pajakValue,
+            status: 'Menunggu',
+            items: cart.map(({ name, quantity, price }) => ({ name, quantity, price }))
+        };
+
         try {
             // Push to Supabase for cross-device sync
-            const { error } = await supabase.from('transactions').insert([newTransaction]);
+            const { error } = await supabase.from('transactions').insert([dbTransaction]);
             if (error) throw error;
 
             console.log("Transaction synced to Supabase successfully");
 
             // Also keep in localStorage for local history
             const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
-            localStorage.setItem('santaraTransactionHistory', JSON.stringify([newTransaction, ...existingHistory]));
+            localStorage.setItem('santaraTransactionHistory', JSON.stringify([localTransaction, ...existingHistory]));
             
             setCurrentTxId(tId);
             setIsWaitingOpen(true);
             setCart([]);
         } catch (err) {
             console.error("Error syncing transaction:", err);
-            alert("Gagal mengirim pesanan ke sistem. Mohon coba lagi.");
+            alert("Gagal mengirim pesanan ke sistem. Mohon hubungi admin (Error DB).");
         }
     };
 
