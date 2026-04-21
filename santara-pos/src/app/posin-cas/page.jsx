@@ -157,6 +157,13 @@ export default function App() {
     const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
+    const [isWaitingOpen, setIsWaitingOpen] = useState(false);
+
+    const handleCloseWaiting = () => {
+        setIsWaitingOpen(false);
+        localStorage.removeItem('santaraActiveTxId');
+        setCurrentTxId(null);
+    };
 
     React.useEffect(() => {
         // Security Check

@@ -242,6 +242,12 @@ function FavoritesContent() {
         }
     }, [router]);
 
+    const handleCloseWaiting = () => {
+        setIsWaitingOpen(false);
+        localStorage.removeItem('santaraActiveTxId');
+        setCurrentTxId(null);
+    };
+
     const handleSaveProfile = async (e) => {
         e.preventDefault();
         try {
