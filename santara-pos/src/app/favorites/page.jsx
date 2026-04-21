@@ -171,6 +171,15 @@ function FavoritesContent() {
     const [currentTxId, setCurrentTxId] = useState(null);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [activeSettingsTab, setActiveSettingsTab] = useState('profil');
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    const handleCloseWaiting = () => {
+        setIsWaitingOpen(false);
+        setCurrentTxId(null);
+        localStorage.removeItem('santaraActiveTxId');
+        setCart([]);
+        setPaymentMethod('');
+    };
     const [toppingModalProduct, setToppingModalProduct] = useState(null);
     const [isQrisOpen, setIsQrisOpen] = useState(false);
     const [isCodOpen, setIsCodOpen] = useState(false);
@@ -392,13 +401,6 @@ function FavoritesContent() {
         }
     };
 
-    const handleCloseWaiting = () => {
-        setIsWaitingOpen(false);
-        setCurrentTxId(null);
-        localStorage.removeItem('santaraActiveTxId');
-        setCart([]);
-        setPaymentMethod('');
-    };
 
     const updateQty = (id, delta) => {
         setCart(cart.map(item => {

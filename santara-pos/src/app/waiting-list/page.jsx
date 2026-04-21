@@ -41,12 +41,8 @@ const DEFAULT_SETTINGS = {
 };
 
 export default function WaitingListPage() {
-    const router = useRouter();
-    const [transactions, setTransactions] = useState([]);
-    const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
-    const [activeShift, setActiveShift] = useState('Pagi');
-
     // --- State Standarisasi ---
+    const [searchTerm, setSearchTerm] = useState('');
     const [isAdmin, setIsAdmin] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -59,6 +55,13 @@ export default function WaitingListPage() {
         password: '••••••••',
         addresses: []
     });
+    const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
+    const [isWaitingOpen, setIsWaitingOpen] = useState(false);
+    const [currentTxId, setCurrentTxId] = useState(null);
+
+    // --- State Lainnya ---
+    const [transactions, setTransactions] = useState([]);
+    const [activeShift, setActiveShift] = useState('Pagi');
     const [newUserContact, setNewUserContact] = useState('');
     const [newUserRole, setNewUserRole] = useState('Operator');
 
@@ -66,6 +69,11 @@ export default function WaitingListPage() {
     const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
     const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+
+    const handleCloseWaiting = () => {
+        setIsWaitingOpen(false);
+        setCurrentTxId(null);
+    };
 
     const loadData = async () => {
         try {
