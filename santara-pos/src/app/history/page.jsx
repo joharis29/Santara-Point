@@ -158,6 +158,22 @@ export default function HistoryPage() {
         }
     };
 
+    const addAddress = () => {
+        const newAddr = { id: Date.now(), label: '', details: '' };
+        setUserProfile({ ...userProfile, addresses: [...userProfile.addresses, newAddr] });
+    };
+
+    const removeAddress = (id) => {
+        setUserProfile({ ...userProfile, addresses: userProfile.addresses.filter(a => a.id !== id) });
+    };
+
+    const updateAddress = (id, field, value) => {
+        setUserProfile({
+            ...userProfile,
+            addresses: userProfile.addresses.map(a => a.id === id ? { ...a, [field]: value } : a)
+        });
+    };
+
     // Get unique months from transactions for the 'folder' dropdown
     const availableMonths = Array.from(new Set([
         ...transactions.map(t => new Date(t.timestamp).toISOString().slice(0, 7)),
@@ -380,5 +396,29 @@ export default function HistoryPage() {
                 <div className="h-20 lg:hidden"></div>
             </main>
         </div>
+
+        {/* Standardized Settings Modal (Admin) */}
+        <SettingsModal 
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+            isAdmin={true}
+            activeTab={activeSettingsTab}
+            setActiveTab={setActiveSettingsTab}
+            userProfile={userProfile}
+            setUserProfile={setUserProfile}
+            handleSaveProfile={handleSaveProfile}
+            storeSettings={storeSettings}
+            setStoreSettings={setStoreSettings}
+            newUserContact={newUserContact}
+            setNewUserContact={setNewUserContact}
+            newUserRole={newUserRole}
+            setNewUserRole={setNewUserRole}
+            setIsChangeEmailOpen={setIsChangeEmailOpen}
+            setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+            setIsChangePasswordOpen={setIsChangePasswordOpen}
+            addAddress={addAddress}
+            removeAddress={removeAddress}
+            updateAddress={updateAddress}
+        />
     );
 }

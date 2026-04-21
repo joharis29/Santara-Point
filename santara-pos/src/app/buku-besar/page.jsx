@@ -133,6 +133,22 @@ export default function BukuBesarPage() {
         }
     };
 
+    const addAddress = () => {
+        const newAddr = { id: Date.now(), label: '', details: '' };
+        setUserProfile({ ...userProfile, addresses: [...userProfile.addresses, newAddr] });
+    };
+
+    const removeAddress = (id) => {
+        setUserProfile({ ...userProfile, addresses: userProfile.addresses.filter(a => a.id !== id) });
+    };
+
+    const updateAddress = (id, field, value) => {
+        setUserProfile({
+            ...userProfile,
+            addresses: userProfile.addresses.map(a => a.id === id ? { ...a, [field]: value } : a)
+        });
+    };
+
     const saveCoa = (data) => {
         setCoa(data);
         localStorage.setItem('santaraCoA', JSON.stringify(data));
@@ -315,6 +331,9 @@ export default function BukuBesarPage() {
                 setIsChangeEmailOpen={setIsChangeEmailOpen}
                 setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
                 setIsChangePasswordOpen={setIsChangePasswordOpen}
+                addAddress={addAddress}
+                removeAddress={removeAddress}
+                updateAddress={updateAddress}
             />
 
             {/* Modal Tambah Akun */}

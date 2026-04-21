@@ -259,6 +259,22 @@ function FavoritesContent() {
         }
     };
 
+    const addAddress = () => {
+        const newAddr = { id: Date.now(), label: '', details: '' };
+        setUserProfile({ ...userProfile, addresses: [...userProfile.addresses, newAddr] });
+    };
+
+    const removeAddress = (id) => {
+        setUserProfile({ ...userProfile, addresses: userProfile.addresses.filter(a => a.id !== id) });
+    };
+
+    const updateAddress = (id, field, value) => {
+        setUserProfile({
+            ...userProfile,
+            addresses: userProfile.addresses.map(a => a.id === id ? { ...a, [field]: value } : a)
+        });
+    };
+
     const toggleFavorite = (e, id) => {
         e.stopPropagation();
         let newFavs;
@@ -804,6 +820,9 @@ function FavoritesContent() {
                 setIsChangeEmailOpen={setIsChangeEmailOpen}
                 setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
                 setIsChangePasswordOpen={setIsChangePasswordOpen}
+                addAddress={addAddress}
+                removeAddress={removeAddress}
+                updateAddress={updateAddress}
             />
         </div>
     );
