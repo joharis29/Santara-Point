@@ -47,7 +47,8 @@ import {
     Coins,
     Clock,
     Users,
-    UserPlus
+    Menu,
+    ShoppingCart
 } from 'lucide-react';
 
 /**
