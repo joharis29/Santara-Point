@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { generateReceiptPDF } from '@/lib/receiptPdf';
 import {
     ShoppingBag,
     ShieldCheck,
@@ -13,7 +14,8 @@ import {
     XCircle,
     Calendar,
     ChevronRight,
-    ShoppingBag as ShoppingBagIcon
+    ShoppingBag as ShoppingBagIcon,
+    Receipt
 } from 'lucide-react';
 
 export default function CustomerHistory() {
@@ -140,6 +142,16 @@ export default function CustomerHistory() {
                                         <div className="mt-4 pt-4 border-t border-slate-200">
                                             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Total Dibayar</p>
                                             <p className="font-black text-emerald-600 text-2xl tracking-tighter">Rp {trx.totalAmount?.toLocaleString('id-ID') || 0}</p>
+                                            
+                                            <button
+                                                onClick={() => {
+                                                    const settings = JSON.parse(localStorage.getItem('santaraStoreSettings') || '{}');
+                                                    generateReceiptPDF(trx, settings);
+                                                }}
+                                                className="mt-4 w-full py-2.5 bg-white border-2 border-emerald-500 text-emerald-600 rounded-xl font-bold hover:bg-emerald-50 transition-all flex items-center justify-center gap-2 text-xs"
+                                            >
+                                                <Receipt size={14} /> Cetak Struk (PDF)
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

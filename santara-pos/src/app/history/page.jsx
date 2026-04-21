@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { generateReceiptPDF } from '@/lib/receiptPdf';
 import {
     ArrowLeft,
     Calendar,
@@ -376,6 +377,15 @@ export default function HistoryPage() {
                                                 </td>
                                                 <td className="p-5 align-top text-right">
                                                     <div className="font-black text-sm text-emerald-700">Rp {trx.totalAmount?.toLocaleString()}</div>
+                                                    <button
+                                                        onClick={() => {
+                                                            const settings = JSON.parse(localStorage.getItem('santaraStoreSettings') || '{}');
+                                                            generateReceiptPDF(trx, settings);
+                                                        }}
+                                                        className="mt-2 text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest ml-auto p-2 rounded-lg hover:bg-emerald-50 transition-all border border-transparent hover:border-emerald-100"
+                                                    >
+                                                        <Receipt size={12} /> Cetak
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}

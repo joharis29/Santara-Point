@@ -21,21 +21,47 @@ import { supabase } from '@/lib/supabaseClient';
  */
 
 export default function App() {
+  const router = useRouter();
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [customerName, setCustomerName] = useState('Sobat Santara');
 
   useEffect(() => {
+    // 1. Check initial session
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          const meta = session.user.user_metadata || {};
+          if (meta.first_name || meta.last_name) {
+            setCustomerName(`${meta.first_name || ''} ${meta.last_name || ''}`.trim());
+          }
+        }
+      } catch (err) {
+        console.error("Auth check error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkUser();
+
+    // 2. Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
       if (session?.user) {
-        setUser(session.user);
         const meta = session.user.user_metadata || {};
         if (meta.first_name || meta.last_name) {
           setCustomerName(`${meta.first_name || ''} ${meta.last_name || ''}`.trim());
         }
       }
+      setLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
     };
-    checkUser();
   }, []);
 
   // Fungsi placeholder untuk navigasi
@@ -94,28 +120,30 @@ export default function App() {
             Kontak Kami
           </button>
           
-          {user ? (
-            <button
-              onClick={() => handleAction('profile')}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 lg:px-6 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95 flex items-center gap-2"
-            >
-              <User size={18} /> Profil Saya
-            </button>
-          ) : (
-            <>
+          {!loading && (
+            user ? (
               <button
-                onClick={() => handleAction('login')}
-                className="hidden md:flex items-center gap-2 text-white font-semibold hover:text-emerald-400 transition ease-in-out text-sm mr-1"
+                onClick={() => handleAction('profile')}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 lg:px-6 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95 flex items-center gap-2"
               >
-                <User size={16} /> Masuk
+                <User size={18} /> Profil Saya
               </button>
-              <button
-                onClick={() => handleAction('register')}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 lg:px-6 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
-              >
-                Daftar Pelanggan Baru
-              </button>
-            </>
+            ) : (
+              <>
+                <button
+                  onClick={() => handleAction('login')}
+                  className="hidden md:flex items-center gap-2 text-white font-semibold hover:text-emerald-400 transition ease-in-out text-sm mr-1"
+                >
+                  <User size={16} /> Masuk
+                </button>
+                <button
+                  onClick={() => handleAction('register')}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 lg:px-6 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
+                >
+                  Daftar Pelanggan Baru
+                </button>
+              </>
+            )
           )}
         </div>
       </nav>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, ChefHat, CheckCircle2, ChevronRight, Receipt, XCircle } from 'lucide-react';
+import { Clock, ChefHat, CheckCircle2, ChevronRight, Receipt, XCircle, Download } from 'lucide-react';
+import { generateReceiptPDF } from '@/lib/receiptPdf';
 
 export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmount, transactionId }) {
     // states: 'KONFIRMASI' -> 'DISIAPKAN' -> 'SELESAI'
@@ -136,6 +137,21 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                         {status === 'SELESAI' ? 'Tutup & Selesai' : status === 'DITOLAK' ? 'Pesanan Dibatalkan - Tutup' : 'Sedang Sinkronisasi dengan Dapur...'}
                         {(status === 'SELESAI' || status === 'DITOLAK') && <ChevronRight size={18} />}
                     </button>
+
+                    {transactionId && (
+                        <button
+                            onClick={() => {
+                                const history = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
+                                const t = history.find(x => x.id === transactionId);
+                                const settings = JSON.parse(localStorage.getItem('santaraStoreSettings') || '{}');
+                                if (t) generateReceiptPDF(t, settings);
+                            }}
+                            className="w-full py-3 rounded-xl font-bold bg-white border-2 border-emerald-500 text-emerald-600 transition hover:bg-emerald-50 flex items-center justify-center gap-2"
+                        >
+                            <Download size={18} /> Unduh Nota (PDF)
+                        </button>
+                    )}
+
                     {(status !== 'SELESAI' && status !== 'DITOLAK') && (
                         <p className="text-[9px] text-center text-slate-400 italic">Harap tunggu kasir mengklik Proses di layar Antreannya.</p>
                     )}

@@ -12,8 +12,10 @@ import {
   ChevronRight,
   ArrowRight,
   Menu,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 /**
  * SANTARA POINT - PREMIUM HOMEPAGE
@@ -34,12 +36,51 @@ export default function App() {
   const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [customerName, setCustomerName] = useState('Sobat Santara');
 
   useEffect(() => {
+    // Load store settings
     const stored = localStorage.getItem('santaraStoreSettings');
     if (stored) {
       setStoreSettings(JSON.parse(stored));
     }
+
+    // Auth sync
+    const checkUser = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          const meta = session.user.user_metadata || {};
+          if (meta.first_name || meta.last_name) {
+            setCustomerName(`${meta.first_name || ''} ${meta.last_name || ''}`.trim());
+          }
+        }
+      } catch (err) {
+        console.error("Auth check error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        const meta = session.user.user_metadata || {};
+        if (meta.first_name || meta.last_name) {
+          setCustomerName(`${meta.first_name || ''} ${meta.last_name || ''}`.trim());
+        }
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Fungsi placeholder untuk navigasi
@@ -50,6 +91,8 @@ export default function App() {
       router.push('/register');
     } else if (type === 'order') {
       router.push('/posin-cus');
+    } else if (type === 'profile') {
+      router.push('/posin-cus?settings=true');
     } else if (type === 'kontak') {
       router.push('/kontak');
     } else if (type === 'dokumentasi') {
@@ -84,18 +127,32 @@ export default function App() {
 
         {/* Desktop Menu */}
         <div className="hidden lg:flex items-center gap-6">
-          <button onClick={() => handleAction('login')} className="flex items-center gap-2 text-white font-bold hover:text-emerald-400 transition-all text-sm">
-            <User size={18} /> Masuk
-          </button>
           <button onClick={() => handleAction('dokumentasi')} className="text-gray-300 hover:text-white font-bold text-sm transition-all">
             Dokumentasi
           </button>
           <button onClick={() => handleAction('kontak')} className="text-gray-300 hover:text-white font-bold text-sm transition-all">
             Kontak
           </button>
-          <button onClick={() => handleAction('register')} className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-full font-black text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95">
-            Daftar Baru
-          </button>
+
+          {!loading && (
+            user ? (
+              <button
+                onClick={() => handleAction('profile')}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-full font-black text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95 flex items-center gap-2"
+              >
+                <User size={18} /> Profil Saya
+              </button>
+            ) : (
+              <>
+                <button onClick={() => handleAction('login')} className="flex items-center gap-2 text-white font-bold hover:text-emerald-400 transition-all text-sm">
+                  <User size={18} /> Masuk
+                </button>
+                <button onClick={() => handleAction('register')} className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-full font-black text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95">
+                  Daftar Baru
+                </button>
+              </>
+            )
+          )}
         </div>
 
         {/* Mobile Toggle */}
@@ -106,12 +163,22 @@ export default function App() {
         {/* Mobile Menu Overlay */}
         {isMobileMenuOpen && (
           <div className="fixed inset-0 top-[73px] bg-black/95 backdrop-blur-2xl z-50 flex flex-col p-8 gap-8 lg:hidden animate-in fade-in slide-in-from-top-4 duration-300">
-            <button onClick={() => handleAction('login')} className="text-2xl font-black text-white flex items-center gap-4">
-              <User size={24} className="text-emerald-500" /> Masuk Akun
-            </button>
-            <button onClick={() => handleAction('register')} className="text-2xl font-black text-white flex items-center gap-4">
-              <ShoppingCart size={24} className="text-emerald-500" /> Daftar Sekarang
-            </button>
+            {!loading && (
+              user ? (
+                <button onClick={() => handleAction('profile')} className="text-2xl font-black text-white flex items-center gap-4">
+                  <User size={24} className="text-emerald-500" /> Profil Saya
+                </button>
+              ) : (
+                <>
+                  <button onClick={() => handleAction('login')} className="text-2xl font-black text-white flex items-center gap-4">
+                    <User size={24} className="text-emerald-500" /> Masuk Akun
+                  </button>
+                  <button onClick={() => handleAction('register')} className="text-2xl font-black text-white flex items-center gap-4">
+                    <ShoppingCart size={24} className="text-emerald-500" /> Daftar Sekarang
+                  </button>
+                </>
+              )
+            )}
             <button onClick={() => handleAction('kontak')} className="text-2xl font-black text-white flex items-center gap-4">
               <MessageCircle size={24} className="text-emerald-500" /> Kontak Kami
             </button>

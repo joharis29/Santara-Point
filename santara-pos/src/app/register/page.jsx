@@ -75,7 +75,8 @@ export default function Register() {
                         first_name: formData.firstName,
                         last_name: formData.lastName,
                         whatsapp: formData.whatsapp,
-                        address: formData.address
+                        address: formData.address,
+                        addresses: [{ id: Date.now(), label: 'Utama', details: formData.address }]
                     }
                 }
             });

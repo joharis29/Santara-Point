@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { generateReceiptPDF } from '@/lib/receiptPdf';
 import {
     LayoutDashboard,
     Home,
@@ -273,6 +274,9 @@ export default function App() {
         };
         const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
         localStorage.setItem('santaraTransactionHistory', JSON.stringify([newTransaction, ...existingHistory]));
+
+        // Generate PDF Receipt
+        generateReceiptPDF(newTransaction, storeSettings);
 
         alert(`Transaksi ${paymentMethod} Berhasil!\nNama: ${customerName}\nAntrian: ${queueNumber}\nTotal: Rp ${totalAmount.toLocaleString('en-US')}\nNota terkirim ke WhatsApp Owner.`);
         // Reset state setelah simulasi

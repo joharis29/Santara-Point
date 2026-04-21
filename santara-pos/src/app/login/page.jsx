@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import {
   ShoppingBag,
@@ -40,12 +40,21 @@ const PRODUCTS = [
   { id: 6, name: 'Singkong Goreng', price: 15000, category: 'Snack', icon: <ShoppingBag className="w-6 h-6" /> },
 ];
 
-// --- Sub-Komponen: Login ---
-const Login = () => {
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
+// --- Sub-Komponen Konten Login ---
+const LoginContent = () => {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
+
+    useEffect(() => {
+        if (searchParams.get('message') === 'confirmed') {
+            alert('Selamat Akun Anda Terkonfirmasi');
+            // Bersihkan query param agar alert tidak muncul lagi saat refresh
+            router.replace('/login');
+        }
+    }, [searchParams, router]);
 
   React.useEffect(() => {
     const stored = localStorage.getItem('santaraStoreSettings');
@@ -199,4 +208,18 @@ const Login = () => {
   );
 };
 
-export default Login;
+// --- Komponen Utama: Login Page ---
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-emerald-950">
+                <div className="animate-pulse flex flex-col items-center gap-4">
+                    <img src="/santara-logo.png" alt="Loading" className="w-16 h-16 opacity-50" />
+                    <p className="text-emerald-100 font-bold tracking-widest text-xs uppercase">Memuat Santara...</p>
+                </div>
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
+    );
+}

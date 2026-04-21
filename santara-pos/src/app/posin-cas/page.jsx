@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { generateReceiptPDF } from '@/lib/receiptPdf';
 import {
     Home,
     ShoppingBag,
@@ -220,6 +221,9 @@ export default function App() {
         };
         const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
         localStorage.setItem('santaraTransactionHistory', JSON.stringify([newTransaction, ...existingHistory]));
+
+        // Generate PDF Receipt
+        generateReceiptPDF(newTransaction, storeSettings);
 
         alert(`Pembayaran ${paymentMethod} Berhasil!\nNama: ${customerName}\nAntrian: ${queueNumber}\nNota Digital telah dikirim.\nJazakallahu Khairan.`);
         setCart([]);
