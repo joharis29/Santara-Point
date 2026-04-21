@@ -43,7 +43,7 @@ export const generateReceiptPDF = (transaction, storeSettings) => {
     doc.text(addressLines, pageWidth / 2, currentY, { align: 'center' });
     
     currentY += (addressLines.length * 3) + 2;
-    doc.text(`WA: ${storeSettings.whatsapp || '-'} | Email: ${storeSettings.email || '-'}`, pageWidth / 2, currentY, { align: 'center' });
+    doc.text(`WA: ${storeSettings.whatsapp || '6285846802177'} | Email: ${storeSettings.email || 'santarapoint@gmail.com'}`, pageWidth / 2, currentY, { align: 'center' });
 
     // Divider
     currentY += 4;
