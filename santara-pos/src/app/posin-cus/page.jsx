@@ -270,9 +270,21 @@ function CustomerPortalContent() {
 
         const storedProducts = localStorage.getItem('santaraProducts');
         if (storedProducts) {
-            setProducts(JSON.parse(storedProducts));
+            try {
+                const parsed = JSON.parse(storedProducts);
+                // Merge with master data to ensure new properties like discountPercent are present
+                const merged = PRODUCTS.map(masterItem => {
+                    const storedItem = parsed.find(p => p.id === masterItem.id);
+                    return storedItem ? { ...masterItem, ...storedItem } : masterItem;
+                });
+                setProducts(merged);
+            } catch (e) {
+                console.error("Error parsing products", e);
+                setProducts(PRODUCTS);
+            }
         } else {
             localStorage.setItem('santaraProducts', JSON.stringify(PRODUCTS));
+            setProducts(PRODUCTS);
         }
 
         const storedSettings = localStorage.getItem('santaraStoreSettings');
@@ -702,7 +714,9 @@ function CustomerPortalContent() {
                                         </div>
                                         <div className="flex flex-col">
                                             {product.discountPercent > 0 && (
-                                                <span className="text-[10px] font-bold line-through text-slate-400">Rp {product.originalPrice?.toLocaleString()}</span>
+                                                <span className="text-[10px] font-bold line-through text-slate-400">
+                                                    Rp {(Math.round(product.price / (1 - (product.discountPercent / 100)))).toLocaleString()}
+                                                </span>
                                             )}
                                             <p className="text-emerald-600 font-black text-base italic">Rp {product.price.toLocaleString('en-US')}</p>
                                         </div>
@@ -1121,14 +1135,17 @@ function CustomerPortalContent() {
                                         </div>
 
                                         <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl">
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic mb-1">Total Pembayaran</span>
-                                                <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</span>
-                                            </div>
-                                            <div className="flex flex-col items-end gap-1">
+                                            <div className="flex justify-between items-center bg-white/10 p-3 rounded-xl border border-white/10">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic mb-1">Total Pembayaran</span>
+                                                    <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</span>
+                                                </div>
                                                 {storeSettings.isPajakActive && (
-                                                    <div className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm">
-                                                        Pajak (10%)
+                                                    <div className="flex flex-col items-end">
+                                                        <div className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm">
+                                                            Pajak (10%)
+                                                        </div>
+                                                        <span className="text-[11px] font-bold text-emerald-400/80 mt-1">Rp {pajakValue.toLocaleString('en-US')}</span>
                                                     </div>
                                                 )}
                                             </div>
