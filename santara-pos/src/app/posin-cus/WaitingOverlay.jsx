@@ -1,3 +1,6 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import { Clock, ChefHat, CheckCircle2, ChevronRight, Receipt, XCircle, Download } from 'lucide-react';
 import { generateReceiptPDF } from '@/lib/receiptPdf';
 import { supabase } from '@/lib/supabaseClient';
