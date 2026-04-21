@@ -15,7 +15,9 @@ import {
     Building2,
     Store,
     Menu,
-    X
+    X,
+    Filter,
+    ShoppingBag
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import AdminHeader from '@/components/AdminHeader';

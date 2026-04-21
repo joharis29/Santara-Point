@@ -29,7 +29,9 @@ import {
     MapPin,
     ChevronRight,
     MessageCircle,
-    ArrowLeft
+    ArrowLeft,
+    Store,
+    Menu
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import WaitingOverlay from './WaitingOverlay';
