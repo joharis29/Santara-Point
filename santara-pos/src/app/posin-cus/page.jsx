@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     ShoppingBag,
     ShieldCheck,
@@ -159,8 +159,9 @@ const ProductImageSlider = ({ product }) => {
     );
 };
 
-export default function App() {
+function CustomerPortalContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     // Simulasi status login customer
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [customerName, setCustomerName] = useState('Sobat Santara');
@@ -246,7 +247,13 @@ export default function App() {
         if (storedLang) setLanguage(storedLang);
         const storedTheme = localStorage.getItem('santaraTheme');
         if (storedTheme) setTheme(storedTheme);
-    }, []);
+
+        // Check for settings query param
+        if (searchParams.get('settings') === 'true') {
+            setIsSettingsOpen(true);
+            setActiveSettingsTab('profil');
+        }
+    }, [searchParams]);
 
     const addAddress = () => {
         const newAddress = { id: Date.now(), label: '', details: '' };
@@ -1275,5 +1282,13 @@ export default function App() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function App() {
+    return (
+        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center font-bold text-emerald-600">Loading Santara Point...</div>}>
+            <CustomerPortalContent />
+        </Suspense>
     );
 }

@@ -10,8 +10,10 @@ import {
   User,
   ShoppingCart,
   ChevronRight,
-  ArrowRight
+  ArrowRight,
+  LogOut
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 /**
  * SANTARA POINT - PREMIUM HOMEPAGE
@@ -19,7 +21,22 @@ import {
  */
 
 export default function App() {
-  const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [customerName, setCustomerName] = useState('Sobat Santara');
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        const meta = session.user.user_metadata || {};
+        if (meta.first_name || meta.last_name) {
+          setCustomerName(`${meta.first_name || ''} ${meta.last_name || ''}`.trim());
+        }
+      }
+    };
+    checkUser();
+  }, []);
 
   // Fungsi placeholder untuk navigasi
   const handleAction = (type) => {
@@ -29,6 +46,8 @@ export default function App() {
       router.push('/register');
     } else if (type === 'order') {
       router.push('/posin-cus');
+    } else if (type === 'profile') {
+      router.push('/posin-cus?settings=true');
     } else if (type === 'kontak') {
       router.push('/kontak');
     } else if (type === 'dokumentasi') {
@@ -63,12 +82,6 @@ export default function App() {
 
         <div className="flex items-center gap-2 lg:gap-4">
           <button
-            onClick={() => handleAction('login')}
-            className="hidden md:flex items-center gap-2 text-white font-semibold hover:text-emerald-400 transition ease-in-out text-sm mr-1"
-          >
-            <User size={16} /> Masuk
-          </button>
-          <button
             onClick={() => handleAction('dokumentasi')}
             className="hidden md:block text-gray-300 hover:text-white px-2 py-1.5 font-bold text-xs lg:text-sm transition-colors"
           >
@@ -80,12 +93,30 @@ export default function App() {
           >
             Kontak Kami
           </button>
-          <button
-            onClick={() => handleAction('register')}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 lg:px-6 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
-          >
-            Daftar Pelanggan Baru
-          </button>
+          
+          {user ? (
+            <button
+              onClick={() => handleAction('profile')}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 lg:px-6 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95 flex items-center gap-2"
+            >
+              <User size={18} /> Profil Saya
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => handleAction('login')}
+                className="hidden md:flex items-center gap-2 text-white font-semibold hover:text-emerald-400 transition ease-in-out text-sm mr-1"
+              >
+                <User size={16} /> Masuk
+              </button>
+              <button
+                onClick={() => handleAction('register')}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 lg:px-6 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
+              >
+                Daftar Pelanggan Baru
+              </button>
+            </>
+          )}
         </div>
       </nav>
 
