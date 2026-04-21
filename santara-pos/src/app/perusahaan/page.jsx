@@ -31,7 +31,9 @@ import {
     User,
     CalendarDays,
     Store,
-    Menu
+    Menu,
+    ChevronLeft,
+    ChevronRight
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import AdminHeader from '@/components/AdminHeader';

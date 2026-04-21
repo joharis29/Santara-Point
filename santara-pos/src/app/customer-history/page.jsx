@@ -16,13 +16,13 @@ import {
     ChevronRight,
     ShoppingBag as ShoppingBagIcon,
     Receipt,
-    ArrowLeft
+    ArrowLeft,
+    Settings
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import CustomerHeader from '@/components/CustomerHeader';
 import CustomerBottomNav from '@/components/CustomerBottomNav';
 import SettingsModal from '@/components/SettingsModal';
-import { Settings } from 'lucide-react';
 
 export default function CustomerHistory() {
     const router = useRouter();

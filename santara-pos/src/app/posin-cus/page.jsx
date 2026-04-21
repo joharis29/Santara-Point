@@ -31,7 +31,8 @@ import {
     MessageCircle,
     ArrowLeft,
     Store,
-    Menu
+    Menu,
+    TrendingUp
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import WaitingOverlay from './WaitingOverlay';
