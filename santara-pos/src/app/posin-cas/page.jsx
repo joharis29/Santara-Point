@@ -125,7 +125,9 @@ const categories = ['Semua', 'Makanan', 'Minuman', 'Snack', 'Frozen Food'];
 export default function App() {
     const router = useRouter();
     const [cart, setCart] = useState([]);
+    const [products, setProducts] = useState(PRODUCTS);
     const [searchTerm, setSearchTerm] = useState('');
+    const [currentTxId, setCurrentTxId] = useState(null);
     // Pajak Daerah strictly mandatory
     const [activeCategory, setActiveCategory] = useState('Semua');
     const [customerName, setCustomerName] = useState('');
