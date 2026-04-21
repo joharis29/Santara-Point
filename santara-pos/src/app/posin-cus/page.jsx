@@ -31,6 +31,7 @@ import {
     ArrowUpDown,
     MapPin
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 import WaitingOverlay from './WaitingOverlay';
 
 const DEFAULT_SETTINGS = {
@@ -184,11 +185,47 @@ export default function App() {
     });
 
     React.useEffect(() => {
-        const storedName = localStorage.getItem('customerName');
-        if (storedName) {
-            setCustomerName(storedName);
-            setIsLoggedIn(true);
-        }
+        const fetchUserData = async () => {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (user) {
+                const meta = user.user_metadata || {};
+                const fName = meta.first_name || '';
+                const lName = meta.last_name || '';
+                const fullName = `${fName} ${lName}`.trim() || 'Sobat Santara';
+                
+                setCustomerName(fullName);
+                setIsLoggedIn(true);
+
+                // Load additional data
+                const storedAddresses = JSON.parse(localStorage.getItem('santaraCustomerAddresses') || '[]');
+                
+                setUserProfile({
+                    firstName: fName,
+                    lastName: lName,
+                    email: user.email || '',
+                    whatsapp: meta.whatsapp || '',
+                    password: '••••••••',
+                    addresses: storedAddresses
+                });
+
+                // Sync to localStorage for immediate consistency check in other tabs if needed
+                localStorage.setItem('customerName', fullName);
+                localStorage.setItem('customerFirstName', fName);
+                localStorage.setItem('customerLastName', lName);
+                localStorage.setItem('registeredEmail', user.email || '');
+                if (meta.whatsapp) localStorage.setItem('registeredWhatsapp', meta.whatsapp);
+            } else {
+                // Fallback to localStorage if no session (guest mode or legacy)
+                const storedName = localStorage.getItem('customerName');
+                if (storedName) {
+                    setCustomerName(storedName);
+                    setIsLoggedIn(true);
+                }
+            }
+        };
+
+        fetchUserData();
+
         const storedFavs = JSON.parse(localStorage.getItem('santaraFavorites') || '[]');
         setFavorites(storedFavs);
 
@@ -203,25 +240,6 @@ export default function App() {
         if (storedSettings) {
             setStoreSettings(JSON.parse(storedSettings));
         }
-
-        // Load user profile from registration data if exists
-        const regEmail = localStorage.getItem('registeredEmail') || '';
-        const regWhatsapp = localStorage.getItem('registeredWhatsapp') || '';
-        const regPassword = localStorage.getItem('registeredPassword') || '••••••••';
-
-        const storedFirstName = localStorage.getItem('customerFirstName') || '';
-        const storedLastName = localStorage.getItem('customerLastName') || '';
-
-        const storedAddresses = JSON.parse(localStorage.getItem('santaraCustomerAddresses') || '[]');
-
-        setUserProfile({
-            firstName: storedFirstName || (storedName ? storedName.split(' ')[0] : 'Sobat'),
-            lastName: storedLastName || (storedName ? storedName.split(' ').slice(1).join(' ') : 'Santara'),
-            email: regEmail,
-            whatsapp: regWhatsapp,
-            password: regPassword,
-            addresses: storedAddresses
-        });
 
         // Load language & theme
         const storedLang = localStorage.getItem('santaraLanguage');
@@ -246,18 +264,39 @@ export default function App() {
         });
     };
 
-    const handleSaveProfile = (e) => {
+    const handleSaveProfile = async (e) => {
         e.preventDefault();
         const fullName = `${userProfile.firstName} ${userProfile.lastName}`.trim();
-        localStorage.setItem('customerFirstName', userProfile.firstName);
-        localStorage.setItem('customerLastName', userProfile.lastName);
-        localStorage.setItem('customerName', fullName);
-        localStorage.setItem('registeredEmail', userProfile.email);
-        localStorage.setItem('registeredWhatsapp', userProfile.whatsapp);
-        localStorage.setItem('registeredPassword', userProfile.password);
-        localStorage.setItem('santaraCustomerAddresses', JSON.stringify(userProfile.addresses));
-        setCustomerName(fullName);
-        alert('Profil berhasil diperbaharui!');
+
+        try {
+            // Update Supabase Metadata
+            const { error } = await supabase.auth.updateUser({
+                data: {
+                    first_name: userProfile.firstName,
+                    last_name: userProfile.lastName,
+                    whatsapp: userProfile.whatsapp
+                }
+            });
+
+            if (error) {
+                alert(`Gagal memperbarui profil di server: ${error.message}`);
+                return;
+            }
+
+            // Sync to local storage
+            localStorage.setItem('customerFirstName', userProfile.firstName);
+            localStorage.setItem('customerLastName', userProfile.lastName);
+            localStorage.setItem('customerName', fullName);
+            localStorage.setItem('registeredEmail', userProfile.email);
+            localStorage.setItem('registeredWhatsapp', userProfile.whatsapp);
+            localStorage.setItem('santaraCustomerAddresses', JSON.stringify(userProfile.addresses));
+            
+            setCustomerName(fullName);
+            alert('Profil berhasil diperbaharui!');
+        } catch (err) {
+            console.error("Gagal memperbarui profil:", err);
+            alert("Terjadi kesalahan sistem.");
+        }
     };
 
     const handleSaveLanguage = (lang) => {

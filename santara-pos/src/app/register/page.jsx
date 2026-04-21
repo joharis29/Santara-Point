@@ -82,7 +82,12 @@ export default function Register() {
 
             // 3. Jika Supabase menolak (misal: email sudah terdaftar)
             if (error) {
-                alert(`Gagal Mendaftar: ${error.message}`);
+                if (error.message.toLowerCase().includes('already registered') || error.message.toLowerCase().includes('already in use')) {
+                    alert('Email ini sudah terdaftar. Silakan masuk menggunakan akun Anda.');
+                    router.push('/login');
+                } else {
+                    alert(`Gagal Mendaftar: ${error.message}`);
+                }
                 return;
             }
 

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient';
 import {
   ShoppingBag,
   User,
@@ -53,7 +54,7 @@ const Login = () => {
     }
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -61,46 +62,70 @@ const Login = () => {
       return;
     }
 
-    // 1. Ambil data Authorized Users dari pengaturan toko
-    const storedSettings = localStorage.getItem('santaraStoreSettings');
-    let authorizedUser = null;
-    
-    // Fallback Super Admin
-    if (email === 'santarapoint@gmail.com') {
-      authorizedUser = { contact: 'santarapoint@gmail.com', role: 'Administrator' };
-    } else if (storedSettings) {
-      const settings = JSON.parse(storedSettings);
-      if (settings.authorizedUsers) {
-        authorizedUser = settings.authorizedUsers.find(u => u.contact === email);
-      }
-    }
+    try {
+      // 1. Authenticate with Supabase
+      const { data: { user }, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-    if (authorizedUser) {
-      localStorage.setItem('currentUserRole', authorizedUser.role);
-      localStorage.setItem('currentUserContact', authorizedUser.contact);
+      if (error) {
+        if (error.message.toLowerCase().includes('email not confirmed')) {
+          alert('Email Anda belum terverifikasi. Silakan cek kotak masuk email Anda.');
+        } else {
+          alert(`Gagal Masuk: ${error.message}`);
+        }
+        return;
+      }
+
+      // 2. Jika Berhasil, tentukan role
+      let role = 'Customer';
+      let contact = user.email;
+      let finalName = 'Sobat Santara';
+
+      // Metadata dari Supabase
+      const meta = user.user_metadata || {};
+      if (meta.first_name || meta.last_name) {
+          finalName = `${meta.first_name || ''} ${meta.last_name || ''}`.trim();
+      }
+
+      // Check for Authorized Users from local settings (Admin/Operator)
+      const storedSettings = localStorage.getItem('santaraStoreSettings');
+      if (email === 'santarapoint@gmail.com') {
+        role = 'Administrator';
+      } else if (storedSettings) {
+        const settings = JSON.parse(storedSettings);
+        if (settings.authorizedUsers) {
+          const authorizedUser = settings.authorizedUsers.find(u => u.contact === email);
+          if (authorizedUser) {
+            role = authorizedUser.role;
+          }
+        }
+      }
+
+      // Sync to localStorage (for compatibility with existing modules)
+      localStorage.setItem('currentUserRole', role);
+      localStorage.setItem('currentUserContact', contact);
+      localStorage.setItem('customerName', finalName);
       
-      if (authorizedUser.role === 'Administrator') {
+      if (meta.first_name) localStorage.setItem('customerFirstName', meta.first_name);
+      if (meta.last_name) localStorage.setItem('customerLastName', meta.last_name);
+      if (meta.whatsapp) localStorage.setItem('registeredWhatsapp', meta.whatsapp);
+      if (meta.address) localStorage.setItem('customerAddress', meta.address);
+      localStorage.setItem('registeredEmail', email);
+
+      // 3. Redirect based on role
+      if (role === 'Administrator') {
         router.push('/posin-adm');
-      } else if (authorizedUser.role === 'Operator') {
+      } else if (role === 'Operator') {
         router.push('/posin-cas');
       } else {
         router.push('/posin-cus');
       }
-    } else {
-      // 2. Jika bukan authorized user, anggap sebagai Pelanggan
-      const registeredName = localStorage.getItem('registeredName');
-      let finalName = 'Sobat Santara';
-      
-      if (registeredName) {
-        finalName = registeredName;
-      } else {
-        const nameFallback = email.split('@')[0];
-        finalName = nameFallback.charAt(0).toUpperCase() + nameFallback.slice(1);
-      }
-      
-      localStorage.setItem('customerName', finalName);
-      localStorage.setItem('currentUserRole', 'Customer');
-      router.push('/posin-cus');
+
+    } catch (err) {
+      console.error("Kesalahan sistem:", err);
+      alert("Terjadi kesalahan sistem, mohon coba lagi nanti.");
     }
   };
 
