@@ -13,8 +13,6 @@ import {
     Trash2,
     Calculator,
     ChevronRight,
-    MessageCircle,
-    Mail,
     LogOut,
     Store,
     Clock,
@@ -108,7 +106,7 @@ export default function App() {
     const [activeShift, setActiveShift] = useState('Pagi (Zaid)');
     const [toppingModalProduct, setToppingModalProduct] = useState(null);
     const [isCartModalOpen, setIsCartModalOpen] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState('CASH');
+    const [paymentMethod, setPaymentMethod] = useState('');
     const [orderType, setOrderType] = useState('Dine-In');
 
     const [products, setProducts] = useState(PRODUCTS);
@@ -118,7 +116,8 @@ export default function App() {
         // Security Check
         const userRole = localStorage.getItem('currentUserRole');
         if (userRole !== 'Operator' && userRole !== 'Administrator') {
-            router.push('/Login');
+            console.log('Access denied in POS-CAS: Role is', userRole);
+            router.push('/login');
             return;
         }
 
@@ -225,7 +224,7 @@ export default function App() {
         // Generate PDF Receipt
         generateReceiptPDF(newTransaction, storeSettings);
 
-        alert(`Pembayaran ${paymentMethod} Berhasil!\nNama: ${customerName}\nAntrian: ${queueNumber}\nNota Digital telah dikirim.\nJazakallahu Khairan.`);
+        alert(`Pembayaran ${paymentMethod} Berhasil!\nNama: ${customerName}\nAntrian: ${queueNumber}\nNota Digital/Struk telah berhasil dibuat.\nJazakallahu Khairan.`);
         setCart([]);
         setCustomerName('');
         setQueueNumber('');
@@ -462,18 +461,19 @@ export default function App() {
                         </div>
 
                         {/* Kalkulator Pajak Daerah */}
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between p-3 rounded-xl border bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-900/10">
-                                <div className="flex items-center gap-3">
-                                    <Calculator size={14} />
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black uppercase leading-none">Pajak Daerah (10%)</span>
+                        {storeSettings.isPajakActive && (
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between p-3 rounded-xl border bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-900/10">
+                                    <div className="flex items-center gap-3">
+                                        <Calculator size={14} />
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] font-black uppercase leading-none">Pajak Daerah (10%)</span>
+                                        </div>
                                     </div>
+                                    <span className="text-xs font-black">Rp {pajakValue.toLocaleString('en-US')}</span>
                                 </div>
-                                <span className="text-xs font-black">Rp {pajakValue.toLocaleString('en-US')}</span>
                             </div>
-
-                        </div>
+                        )}
                     </div>
 
                     <div className="flex justify-between items-center mb-5">
@@ -621,11 +621,13 @@ export default function App() {
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic mb-1">Total Tunai</span>
                                                     <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</span>
                                                 </div>
-                                                <div className="flex flex-row items-center gap-2">
+                                             <div className="flex flex-col items-end gap-1">
+                                                {storeSettings.isPajakActive && (
                                                     <div className="text-[8px] font-black uppercase tracking-wider px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                                                         Pajak (10%)
                                                     </div>
-                                                </div>
+                                                )}
+                                            </div>
                                             </div>
                                             <div className="space-y-3 pb-4">
                                                 <select

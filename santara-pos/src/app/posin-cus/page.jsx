@@ -11,9 +11,6 @@ import {
     Trash2,
     Info,
     Calculator,
-    ChevronRight,
-    MessageCircle,
-    Mail,
     LogOut,
     Home,
     Clock,
@@ -792,18 +789,19 @@ function CustomerPortalContent() {
                             </div>
 
                             {/* Toggles & Breakdown Pajak */}
-                            <div className="space-y-2">
-                                <div className="flex justify-between items-center py-2 px-3 rounded-lg border border-emerald-100 bg-emerald-50/50 flex-wrap gap-2 transition-all">
-                                    <div className="flex items-center gap-2">
-                                        <div className="text-emerald-500 flex items-center justify-center w-4 h-4 rounded-full bg-white shadow-sm shrink-0">
-                                            <Info size={10} />
+                            {storeSettings.isPajakActive && (
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center py-2 px-3 rounded-lg border border-emerald-100 bg-emerald-50/50 flex-wrap gap-2 transition-all">
+                                        <div className="flex items-center gap-2">
+                                            <div className="text-emerald-500 flex items-center justify-center w-4 h-4 rounded-full bg-white shadow-sm shrink-0">
+                                                <Info size={10} />
+                                            </div>
+                                            <span className="text-xs font-medium text-emerald-600">Pajak Daerah (10%)</span>
                                         </div>
-                                        <span className="text-xs font-medium text-emerald-600">Pajak Daerah (10%)</span>
+                                        <span className="text-xs font-bold text-emerald-600">Rp {pajakValue.toLocaleString('en-US')}</span>
                                     </div>
-                                    <span className="text-xs font-bold text-emerald-600">Rp {pajakValue.toLocaleString('en-US')}</span>
                                 </div>
-
-                            </div>
+                            )}
                         </div>
 
                         <div className="flex justify-between items-center mb-4">
@@ -1101,9 +1099,11 @@ function CustomerPortalContent() {
                                                 <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</span>
                                             </div>
                                             <div className="flex flex-col items-end gap-1">
-                                                <div className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm">
-                                                    Pajak (10%)
-                                                </div>
+                                                {storeSettings.isPajakActive && (
+                                                    <div className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm">
+                                                        Pajak (10%)
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="space-y-3 pb-4">
                                                 <select

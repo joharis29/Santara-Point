@@ -164,18 +164,19 @@ export default function App() {
         // Security Check
         const userRole = localStorage.getItem('currentUserRole');
         if (userRole !== 'Administrator') {
-            router.push('/Login');
+            console.log('Access denied: Role is', userRole);
+            router.push('/login');
             return;
         }
 
         const stored = localStorage.getItem('santaraUsedQueue');
         if (stored) {
-            try { setUsedQueueNumbers(JSON.parse(stored)); } catch(e) {}
+            try { setUsedQueueNumbers(JSON.parse(stored)); } catch (e) { }
         }
-        
+
         const storedProducts = localStorage.getItem('santaraProducts');
         if (storedProducts) {
-            try { setProducts(JSON.parse(storedProducts)); } catch(e) {}
+            try { setProducts(JSON.parse(storedProducts)); } catch (e) { }
         } else {
             localStorage.setItem('santaraProducts', JSON.stringify(INITIAL_PRODUCTS));
         }
@@ -224,7 +225,7 @@ export default function App() {
     const confirmAddToCart = (product, topping = null) => {
         const finalId = topping && topping !== 'Tanpa Toping' ? `${product.id}-${topping}` : product.id;
         const finalName = topping && topping !== 'Tanpa Toping' ? `${product.name} (${topping})` : product.name;
-        
+
         const exist = cart.find(x => x.id === finalId);
         if (exist) {
             setCart(cart.map(x => x.id === finalId ? { ...x, quantity: x.quantity + 1 } : x));
@@ -278,7 +279,7 @@ export default function App() {
         // Generate PDF Receipt
         generateReceiptPDF(newTransaction, storeSettings);
 
-        alert(`Transaksi ${paymentMethod} Berhasil!\nNama: ${customerName}\nAntrian: ${queueNumber}\nTotal: Rp ${totalAmount.toLocaleString('en-US')}\nNota terkirim ke WhatsApp Owner.`);
+        alert(`Transaksi ${paymentMethod} Berhasil!\nNama: ${customerName}\nAntrian: ${queueNumber}\nTotal: Rp ${totalAmount.toLocaleString('en-US')}\nNota/Struk telah berhasil dibuat.`);
         // Reset state setelah simulasi
         setCart([]);
         setCustomerName('');
@@ -302,7 +303,7 @@ export default function App() {
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                     {[
                         { icon: <LayoutDashboard size={20} />, label: "Dashboard", active: false, action: () => alert('Dashboard akan segera hadir!') },
-                        { icon: <ShoppingBag size={20} />, label: "POS Kasir", active: true, action: () => {} },
+                        { icon: <ShoppingBag size={20} />, label: "POS Kasir", active: true, action: () => { } },
                         { icon: <Tag size={20} />, label: "Penjualan", active: false, action: () => router.push('/penjualan') },
                         { icon: <Landmark size={20} />, label: "Kas \u0026 Bank", active: false, action: () => router.push('/kas-bank') },
                         { icon: <BookOpen size={20} />, label: "Buku Besar", active: false, action: () => router.push('/buku-besar') },
@@ -314,9 +315,9 @@ export default function App() {
                         { icon: <TrendingUp size={20} />, label: "Laporan Keuangan", active: false, action: () => router.push('/history?role=admin') },
                         { icon: <Settings size={20} />, label: "Pengaturan Toko", active: false, action: () => setIsSettingsModalOpen(true) },
                     ].map((item, i) => (
-                        <button 
-                            key={i} 
-                            onClick={item.action} 
+                        <button
+                            key={i}
+                            onClick={item.action}
                             className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all cursor-pointer group ${item.active ? 'bg-emerald-600 shadow-lg shadow-emerald-950/20 text-white' : 'hover:bg-emerald-800 text-emerald-300 hover:text-white'}`}
                         >
                             <div className={`${item.active ? 'text-white' : 'text-emerald-400 group-hover:text-white'} transition-colors`}>
@@ -374,8 +375,8 @@ export default function App() {
                     </div>
                     <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm shrink-0 mb-2">
                         <ArrowUpDown size={14} className="text-slate-400" />
-                        <select 
-                            value={sortBy} 
+                        <select
+                            value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                             className="text-[11px] font-black uppercase tracking-widest text-slate-600 outline-none bg-transparent cursor-pointer"
                         >
@@ -507,10 +508,10 @@ export default function App() {
                                 <option value="Dine-In">Dine-In</option>
                                 <option value="Takeaway">Takeaway</option>
                             </select>
-                            <textarea 
-                                placeholder="Keterangan (Optional)..." 
-                                value={orderNote} 
-                                onChange={(e) => setOrderNote(e.target.value)} 
+                            <textarea
+                                placeholder="Keterangan (Optional)..."
+                                value={orderNote}
+                                onChange={(e) => setOrderNote(e.target.value)}
                                 className="w-full text-[13px] px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-200 min-h-[80px] resize-none"
                             ></textarea>
                         </div>
@@ -607,21 +608,21 @@ export default function App() {
 
                         {/* TABS Navigation */}
                         <div className="flex bg-slate-100 p-2 mx-8 mt-6 rounded-2xl">
-                            <button 
+                            <button
                                 onClick={() => setSettingsTab('info')}
                                 className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${settingsTab === 'info' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                             >
                                 <Building2 size={16} />
                                 Info Perusahaan
                             </button>
-                            <button 
+                            <button
                                 onClick={() => setSettingsTab('tax')}
                                 className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${settingsTab === 'tax' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                             >
                                 <Calculator size={16} />
                                 Pajak
                             </button>
-                            <button 
+                            <button
                                 onClick={() => setSettingsTab('users')}
                                 className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${settingsTab === 'users' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                             >
@@ -629,7 +630,7 @@ export default function App() {
                                 Pengguna
                             </button>
                         </div>
-                        
+
                         <div className="p-8 overflow-y-auto space-y-6 flex-1">
                             {settingsTab === 'info' ? (
                                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -638,11 +639,11 @@ export default function App() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Nama Usaha</label>
                                             <div className="relative">
                                                 <Store className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                                     value={storeSettings.storeName}
-                                                    onChange={(e) => setStoreSettings({...storeSettings, storeName: e.target.value})}
+                                                    onChange={(e) => setStoreSettings({ ...storeSettings, storeName: e.target.value })}
                                                 />
                                             </div>
                                         </div>
@@ -650,10 +651,10 @@ export default function App() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Kategori Usaha</label>
                                             <div className="relative">
                                                 <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                                <select 
+                                                <select
                                                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none cursor-pointer"
                                                     value={storeSettings.companyCategory}
-                                                    onChange={(e) => setStoreSettings({...storeSettings, companyCategory: e.target.value})}
+                                                    onChange={(e) => setStoreSettings({ ...storeSettings, companyCategory: e.target.value })}
                                                 >
                                                     <option value="Manufaktur">Manufaktur</option>
                                                     <option value="Distributor">Distributor</option>
@@ -668,10 +669,10 @@ export default function App() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Bidang Usaha</label>
                                             <div className="relative">
                                                 <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                                <select 
+                                                <select
                                                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none cursor-pointer"
                                                     value={storeSettings.companyField}
-                                                    onChange={(e) => setStoreSettings({...storeSettings, companyField: e.target.value})}
+                                                    onChange={(e) => setStoreSettings({ ...storeSettings, companyField: e.target.value })}
                                                 >
                                                     <option value="Restoran">Restoran</option>
                                                     <option value="Cafe">Cafe</option>
@@ -689,11 +690,11 @@ export default function App() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Telepon</label>
                                             <div className="relative">
                                                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                                     value={storeSettings.whatsapp}
-                                                    onChange={(e) => setStoreSettings({...storeSettings, whatsapp: e.target.value})}
+                                                    onChange={(e) => setStoreSettings({ ...storeSettings, whatsapp: e.target.value })}
                                                 />
                                             </div>
                                         </div>
@@ -701,11 +702,11 @@ export default function App() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email</label>
                                             <div className="relative">
                                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                                <input 
-                                                    type="email" 
+                                                <input
+                                                    type="email"
                                                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                                     value={storeSettings.email}
-                                                    onChange={(e) => setStoreSettings({...storeSettings, email: e.target.value})}
+                                                    onChange={(e) => setStoreSettings({ ...storeSettings, email: e.target.value })}
                                                 />
                                             </div>
                                         </div>
@@ -713,11 +714,11 @@ export default function App() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Tanggal Mulai Data</label>
                                             <div className="relative">
                                                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                                <input 
-                                                    type="date" 
+                                                <input
+                                                    type="date"
                                                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                                     value={storeSettings.startDate}
-                                                    onChange={(e) => setStoreSettings({...storeSettings, startDate: e.target.value})}
+                                                    onChange={(e) => setStoreSettings({ ...storeSettings, startDate: e.target.value })}
                                                 />
                                             </div>
                                         </div>
@@ -725,12 +726,12 @@ export default function App() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Periode Akuntansi</label>
                                             <div className="relative">
                                                 <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                                     placeholder="Januari - Desember"
                                                     value={storeSettings.accountingPeriod}
-                                                    onChange={(e) => setStoreSettings({...storeSettings, accountingPeriod: e.target.value})}
+                                                    onChange={(e) => setStoreSettings({ ...storeSettings, accountingPeriod: e.target.value })}
                                                 />
                                             </div>
                                         </div>
@@ -738,10 +739,10 @@ export default function App() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Mata Uang</label>
                                             <div className="relative">
                                                 <Coins className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                                <select 
+                                                <select
                                                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none cursor-pointer"
                                                     value={storeSettings.currency}
-                                                    onChange={(e) => setStoreSettings({...storeSettings, currency: e.target.value})}
+                                                    onChange={(e) => setStoreSettings({ ...storeSettings, currency: e.target.value })}
                                                 >
                                                     <option value="IDR">IDR - Rupiah Indonesia</option>
                                                     <option value="USD">USD - US Dollar</option>
@@ -756,20 +757,20 @@ export default function App() {
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Alamat Toko</label>
                                         <div className="relative">
                                             <MapPin className="absolute left-4 top-4 text-emerald-500" size={18} />
-                                            <textarea 
+                                            <textarea
                                                 className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 min-h-[80px]"
                                                 value={storeSettings.address}
-                                                onChange={(e) => setStoreSettings({...storeSettings, address: e.target.value})}
+                                                onChange={(e) => setStoreSettings({ ...storeSettings, address: e.target.value })}
                                             ></textarea>
                                         </div>
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Teks Footer (Nota/Web)</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                             value={storeSettings.footerText}
-                                            onChange={(e) => setStoreSettings({...storeSettings, footerText: e.target.value})}
+                                            onChange={(e) => setStoreSettings({ ...storeSettings, footerText: e.target.value })}
                                         />
                                     </div>
                                 </div>
@@ -785,8 +786,8 @@ export default function App() {
                                                 <p className="text-[10px] text-slate-400 font-medium tracking-tight">Hitung breakdown pajak 10% (Inclusive) pada setiap transaksi</p>
                                             </div>
                                         </div>
-                                        <button 
-                                            onClick={() => setStoreSettings({...storeSettings, isPajakActive: !storeSettings.isPajakActive})}
+                                        <button
+                                            onClick={() => setStoreSettings({ ...storeSettings, isPajakActive: !storeSettings.isPajakActive })}
                                             className={`w-14 h-8 rounded-full transition-all relative ${storeSettings.isPajakActive ? 'bg-emerald-600' : 'bg-slate-300'}`}
                                         >
                                             <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all shadow-sm ${storeSettings.isPajakActive ? 'right-1' : 'left-1'}`} />
@@ -798,11 +799,11 @@ export default function App() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Nama Perusahaan</label>
                                             <div className="relative">
                                                 <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 shadow-sm"
                                                     value={storeSettings.taxCompanyName || ''}
-                                                    onChange={(e) => setStoreSettings({...storeSettings, taxCompanyName: e.target.value})}
+                                                    onChange={(e) => setStoreSettings({ ...storeSettings, taxCompanyName: e.target.value })}
                                                 />
                                             </div>
                                         </div>
@@ -810,11 +811,11 @@ export default function App() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Tanggal Pengukuhan PKP</label>
                                             <div className="relative">
                                                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                                <input 
-                                                    type="date" 
+                                                <input
+                                                    type="date"
                                                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                                     value={storeSettings.pkpDate}
-                                                    onChange={(e) => setStoreSettings({...storeSettings, pkpDate: e.target.value})}
+                                                    onChange={(e) => setStoreSettings({ ...storeSettings, pkpDate: e.target.value })}
                                                 />
                                             </div>
                                         </div>
@@ -822,11 +823,11 @@ export default function App() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">No. Pengukuhan PKP</label>
                                             <div className="relative">
                                                 <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                                     value={storeSettings.pkpNumber}
-                                                    onChange={(e) => setStoreSettings({...storeSettings, pkpNumber: e.target.value})}
+                                                    onChange={(e) => setStoreSettings({ ...storeSettings, pkpNumber: e.target.value })}
                                                 />
                                             </div>
                                         </div>
@@ -834,10 +835,10 @@ export default function App() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Tipe Usaha</label>
                                             <div className="relative">
                                                 <LayoutDashboard className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                                <select 
+                                                <select
                                                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none cursor-pointer"
                                                     value={storeSettings.companyType}
-                                                    onChange={(e) => setStoreSettings({...storeSettings, companyType: e.target.value})}
+                                                    onChange={(e) => setStoreSettings({ ...storeSettings, companyType: e.target.value })}
                                                 >
                                                     <option value="PT">PT (Perseroan Terbatas)</option>
                                                     <option value="CV">CV (Commanditaire Vennootschap)</option>
@@ -852,12 +853,12 @@ export default function App() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">NPWP Perusahaan</label>
                                             <div className="relative">
                                                 <Calculator className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     placeholder="00.000.000.0-000.000"
                                                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                                     value={storeSettings.companyNpwp}
-                                                    onChange={(e) => setStoreSettings({...storeSettings, companyNpwp: e.target.value})}
+                                                    onChange={(e) => setStoreSettings({ ...storeSettings, companyNpwp: e.target.value })}
                                                 />
                                             </div>
                                         </div>
@@ -865,11 +866,11 @@ export default function App() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">KLU (Klasifikasi Lapangan Usaha)</label>
                                             <div className="relative">
                                                 <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                                     value={storeSettings.klu}
-                                                    onChange={(e) => setStoreSettings({...storeSettings, klu: e.target.value})}
+                                                    onChange={(e) => setStoreSettings({ ...storeSettings, klu: e.target.value })}
                                                 />
                                             </div>
                                         </div>
@@ -877,11 +878,11 @@ export default function App() {
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">NITKU</label>
                                             <div className="relative">
                                                 <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                                     value={storeSettings.nitku}
-                                                    onChange={(e) => setStoreSettings({...storeSettings, nitku: e.target.value})}
+                                                    onChange={(e) => setStoreSettings({ ...storeSettings, nitku: e.target.value })}
                                                 />
                                             </div>
                                         </div>
@@ -890,10 +891,10 @@ export default function App() {
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Alamat (Pajak)</label>
                                         <div className="relative">
                                             <MapPin className="absolute left-4 top-4 text-emerald-500" size={18} />
-                                            <textarea 
+                                            <textarea
                                                 className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 min-h-[100px]"
                                                 value={storeSettings.taxAddress}
-                                                onChange={(e) => setStoreSettings({...storeSettings, taxAddress: e.target.value})}
+                                                onChange={(e) => setStoreSettings({ ...storeSettings, taxAddress: e.target.value })}
                                             ></textarea>
                                         </div>
                                     </div>
@@ -908,8 +909,8 @@ export default function App() {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-black uppercase tracking-widest text-emerald-600/50 ml-1">Email / No. HP</label>
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     placeholder="contoh@gmail.com"
                                                     className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                                     value={newUserContact}
@@ -919,7 +920,7 @@ export default function App() {
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-black uppercase tracking-widest text-emerald-600/50 ml-1">Peran (Role)</label>
                                                 <div className="flex gap-2">
-                                                    <select 
+                                                    <select
                                                         className="flex-1 px-4 py-3 bg-white border border-emerald-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 cursor-pointer"
                                                         value={newUserRole}
                                                         onChange={(e) => setNewUserRole(e.target.value)}
@@ -927,20 +928,20 @@ export default function App() {
                                                         <option value="Operator">Operator</option>
                                                         <option value="Administrator">Administrator</option>
                                                     </select>
-                                                    <button 
+                                                    <button
                                                         onClick={() => {
                                                             if (!newUserContact) return alert('Masukkan Email atau Nomor HP!');
-                                                            
+
                                                             // Validasi Email atau Nomor HP
                                                             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                                                             const phoneRegex = /^\d{7,15}$/;
-                                                            
+
                                                             if (!emailRegex.test(newUserContact) && !phoneRegex.test(newUserContact)) {
                                                                 return alert('Format Email atau Nomor HP tidak valid!');
                                                             }
 
                                                             const updatedUsers = [...storeSettings.authorizedUsers, { contact: newUserContact, role: newUserRole }];
-                                                            setStoreSettings({...storeSettings, authorizedUsers: updatedUsers});
+                                                            setStoreSettings({ ...storeSettings, authorizedUsers: updatedUsers });
                                                             setNewUserContact('');
                                                         }}
                                                         className="px-6 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase hover:bg-emerald-500 transition-all active:scale-95 shadow-lg shadow-emerald-900/10"
@@ -967,10 +968,10 @@ export default function App() {
                                                         </div>
                                                     </div>
                                                     {user.contact !== 'santarapoint@gmail.com' && (
-                                                        <button 
+                                                        <button
                                                             onClick={() => {
                                                                 const updatedUsers = storeSettings.authorizedUsers.filter((_, i) => i !== idx);
-                                                                setStoreSettings({...storeSettings, authorizedUsers: updatedUsers});
+                                                                setStoreSettings({ ...storeSettings, authorizedUsers: updatedUsers });
                                                             }}
                                                             className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                                                         >
@@ -987,13 +988,13 @@ export default function App() {
 
                         {/* Footer Modal */}
                         <div className="p-8 border-t border-slate-100 bg-slate-50 flex gap-4">
-                            <button 
+                            <button
                                 onClick={() => setIsSettingsModalOpen(false)}
                                 className="flex-1 py-4 px-6 border border-slate-200 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 hover:bg-white hover:text-slate-600 transition-all active:scale-95"
                             >
                                 Batal
                             </button>
-                            <button 
+                            <button
                                 onClick={() => {
                                     localStorage.setItem('santaraStoreSettings', JSON.stringify(storeSettings));
                                     setIsSettingsModalOpen(false);
@@ -1024,9 +1025,9 @@ export default function App() {
 
             {/* Bottom Navigation (Mobile Only) */}
             <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-emerald-900 border-t border-emerald-800 px-4 py-3 flex justify-between items-center z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.1)] text-emerald-300">
-                <button 
-                  onClick={() => router.push('/homepage')} 
-                  className="flex flex-col items-center gap-1"
+                <button
+                    onClick={() => router.push('/homepage')}
+                    className="flex flex-col items-center gap-1"
                 >
                     <Home size={18} />
                     <span className="text-[9px] font-bold uppercase">Beranda</span>
@@ -1035,30 +1036,30 @@ export default function App() {
                     <ShoppingBag size={18} />
                     <span className="text-[9px] font-bold uppercase">POS</span>
                 </button>
-                <button 
-                  onClick={() => router.push('/waiting-list')} 
-                  className="flex flex-col items-center gap-1"
+                <button
+                    onClick={() => router.push('/waiting-list')}
+                    className="flex flex-col items-center gap-1"
                 >
                     <ChefHat size={18} />
                     <span className="text-[9px] font-bold uppercase">Antrean</span>
                 </button>
-                <button 
-                  onClick={() => router.push('/manajemen-stok')} 
-                  className="flex flex-col items-center gap-1"
+                <button
+                    onClick={() => router.push('/manajemen-stok')}
+                    className="flex flex-col items-center gap-1"
                 >
                     <ClipboardList size={18} />
                     <span className="text-[9px] font-bold uppercase">Stok</span>
                 </button>
-                <button 
-                  onClick={() => router.push('/pembelian')} 
-                  className="flex flex-col items-center gap-1"
+                <button
+                    onClick={() => router.push('/pembelian')}
+                    className="flex flex-col items-center gap-1"
                 >
                     <ShoppingBag size={18} />
                     <span className="text-[9px] font-bold uppercase">Beli</span>
                 </button>
-                <button 
-                  onClick={() => setIsSettingsModalOpen(true)} 
-                  className="flex flex-col items-center gap-1"
+                <button
+                    onClick={() => setIsSettingsModalOpen(true)}
+                    className="flex flex-col items-center gap-1"
                 >
                     <Settings size={18} />
                     <span className="text-[9px] font-bold uppercase">Toko</span>
