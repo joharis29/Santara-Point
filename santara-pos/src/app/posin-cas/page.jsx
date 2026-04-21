@@ -36,7 +36,28 @@ const DEFAULT_SETTINGS = {
     whatsapp: '6285846802177',
     email: 'santarapoint@gmail.com',
     address: 'Jl. Raya Santara No. 123, Bandung',
-    footerText: '© 2024 Santara Point. Berkah setiap saat.'
+    footerText: '© 2024 Santara Point. Berkah setiap saat.',
+    // Info Perusahaan
+    companyCategory: 'Retailer',
+    companyField: 'Restoran',
+    startDate: '',
+    accountingPeriod: 'Januari - Desember',
+    currency: 'IDR',
+    // Pajak
+    taxCompanyName: '',
+    pkpDate: '',
+    pkpNumber: '',
+    companyType: 'PT',
+    companyNpwp: '',
+    klu: '',
+    nitku: '',
+    taxAddress: '',
+    // Pengguna
+    authorizedUsers: [
+        { contact: 'santarapoint@gmail.com', role: 'Administrator' }
+    ],
+    // Pengaturan Pajak
+    isPajakActive: true
 };
 
 const PRODUCTS = [
@@ -138,8 +159,12 @@ export default function App() {
 
         const storedSettings = localStorage.getItem('santaraStoreSettings');
         if (storedSettings) {
-            const parsed = JSON.parse(storedSettings);
-            setStoreSettings(parsed);
+            try {
+                const parsed = JSON.parse(storedSettings);
+                setStoreSettings({ ...DEFAULT_SETTINGS, ...parsed });
+            } catch (e) {
+                console.error("Error parsing settings", e);
+            }
         }
     }, [router]);
 

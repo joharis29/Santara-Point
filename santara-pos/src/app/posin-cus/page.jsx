@@ -38,18 +38,39 @@ const DEFAULT_SETTINGS = {
     whatsapp: '6285846802177',
     email: 'santarapoint@gmail.com',
     address: 'Jl. Raya Santara No. 123, Bandung',
-    footerText: '© 2024 Santara Point. Berkah setiap saat.'
+    footerText: '© 2024 Santara Point. Berkah setiap saat.',
+    // Info Perusahaan
+    companyCategory: 'Retailer',
+    companyField: 'Restoran',
+    startDate: '',
+    accountingPeriod: 'Januari - Desember',
+    currency: 'IDR',
+    // Pajak
+    taxCompanyName: '',
+    pkpDate: '',
+    pkpNumber: '',
+    companyType: 'PT',
+    companyNpwp: '',
+    klu: '',
+    nitku: '',
+    taxAddress: '',
+    // Pengguna
+    authorizedUsers: [
+        { contact: 'santarapoint@gmail.com', role: 'Administrator' }
+    ],
+    // Pengaturan Pajak
+    isPajakActive: true
 };
 
 const PRODUCTS = [
-    { id: 7, name: 'Nasi Kuning', price: 15000, stock: 15, category: 'Makanan', img: '/nasi-kuning-baru.jpg', images: ['/nasi-kuning-baru.jpg'], rating: 4.8 },
-    { id: 8, name: 'Nasi Uduk', price: 15000, stock: 20, category: 'Makanan', img: '/nasi-uduk-asli.jpg', images: ['/nasi-uduk-asli.jpg'], rating: 4.7 },
-    { id: 9, name: 'Soto Ayam', price: 15000, stock: 15, category: 'Makanan', img: '/soto-ayam-asli.jpg', images: ['/soto-ayam-asli.jpg'], rating: 4.8 },
-    { id: 10, name: 'Bubur Ayam', price: 15000, stock: 20, category: 'Makanan', img: '/bubur-ayam-asli.jpg', images: ['/bubur-ayam-asli.jpg'], rating: 4.8 },
-    { id: 11, name: 'Ketoprak', price: 15000, stock: 15, category: 'Makanan', img: '/ketoprak-asli.jpg', images: ['/ketoprak-asli.jpg'], rating: 4.8 },
-    { id: 12, name: 'Nasi Ayam Pop', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-pop-asli.jpg', images: ['/nasi-ayam-pop-asli.jpg'], rating: 4.8 },
-    { id: 13, name: 'Nasi Ayam Kecap', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-kecap-asli.jpg', images: ['/nasi-ayam-kecap-asli.jpg'], rating: 4.8 },
-    { id: 14, name: 'Nasi Ayam Balado', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-balado-asli.jpg', images: ['/nasi-ayam-balado-asli.jpg'], rating: 4.8 },
+    { id: 7, name: 'Nasi Kuning', price: 15000, stock: 15, category: 'Makanan', img: '/nasi-kuning-baru.jpg', images: ['/nasi-kuning-baru.jpg'], discountPercent: 10, rating: 4.8 },
+    { id: 8, name: 'Nasi Uduk', price: 15000, stock: 20, category: 'Makanan', img: '/nasi-uduk-asli.jpg', images: ['/nasi-uduk-asli.jpg'], discountPercent: 0, rating: 4.7 },
+    { id: 9, name: 'Soto Ayam', price: 15000, stock: 15, category: 'Makanan', img: '/soto-ayam-asli.jpg', images: ['/soto-ayam-asli.jpg'], discountPercent: 0, rating: 4.8 },
+    { id: 10, name: 'Bubur Ayam', price: 15000, stock: 20, category: 'Makanan', img: '/bubur-ayam-asli.jpg', images: ['/bubur-ayam-asli.jpg'], discountPercent: 0, rating: 4.8 },
+    { id: 11, name: 'Ketoprak', price: 15000, stock: 15, category: 'Makanan', img: '/ketoprak-asli.jpg', images: ['/ketoprak-asli.jpg'], discountPercent: 15, rating: 4.8 },
+    { id: 12, name: 'Nasi Ayam Pop', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-pop-asli.jpg', images: ['/nasi-ayam-pop-asli.jpg'], discountPercent: 0, rating: 4.8 },
+    { id: 13, name: 'Nasi Ayam Kecap', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-kecap-asli.jpg', images: ['/nasi-ayam-kecap-asli.jpg'], discountPercent: 0, rating: 4.8 },
+    { id: 14, name: 'Nasi Ayam Balado', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-balado-asli.jpg', images: ['/nasi-ayam-balado-asli.jpg'], discountPercent: 0, rating: 4.8 },
     { id: 15, name: 'Nasi Ayam Kremes', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-kremes-asli.jpg', images: ['/nasi-ayam-kremes-asli.jpg'], rating: 4.8 },
     { id: 16, name: 'Nasi Chicken Nugget', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-chicken-nugget-asli.jpg', images: ['/nasi-chicken-nugget-asli.jpg'], rating: 4.8 },
     { id: 17, name: 'Nasi Ayam Rica-Rica', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-rica-rica-asli.jpg', images: ['/nasi-ayam-rica-rica-asli.jpg'], rating: 4.8 },
@@ -256,7 +277,12 @@ function CustomerPortalContent() {
 
         const storedSettings = localStorage.getItem('santaraStoreSettings');
         if (storedSettings) {
-            setStoreSettings(JSON.parse(storedSettings));
+            try {
+                const parsed = JSON.parse(storedSettings);
+                setStoreSettings({ ...DEFAULT_SETTINGS, ...parsed });
+            } catch (e) {
+                console.error("Error parsing settings", e);
+            }
         }
 
         // Load language & theme
