@@ -83,9 +83,6 @@ export default function KasBankPage() {
         date: new Date().toISOString().split('T')[0]
     });
 
-        date: new Date().toISOString().split('T')[0]
-    });
-
     // --- State Standarisasi ---
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -256,27 +253,6 @@ export default function KasBankPage() {
     const totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
 
     return (
-        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden pb-20 lg:pb-0">
-            {/* Sidebar */}
-            <aside className="hidden lg:flex w-64 bg-emerald-900 text-white flex-col shadow-2xl z-40">
-                <div className="p-6 flex items-center gap-3 border-b border-emerald-800">
-                    <button onClick={() => router.push('/homepage')} className="bg-white p-1.5 rounded-lg flex items-center justify-center hover:scale-110 transition-transform cursor-pointer">
-                        <img src="/santara-logo.png" alt="Santara" className="w-6 h-6 object-contain" />
-                    </button>
-                    <span className="font-black tracking-tighter text-xl italic uppercase">SANTARA OPS</span>
-                </div>
-                
-                <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-                    {[
-                        { id: 'pos', label: 'POS Kasir', icon: <ShoppingBag size={20} />, action: () => router.push('/posin-adm') },
-                        { id: 'penjualan', label: 'Penjualan', icon: <Tag size={20} />, action: () => router.push('/penjualan') },
-                        { id: 'kas-bank', label: 'Kas \u0026 Bank', icon: <Landmark size={20} />, action: () => router.push('/kas-bank') },
-                        { id: 'buku-besar', label: 'Buku Besar', icon: <BookOpen size={20} />, action: () => router.push('/buku-besar') },
-                        { id: 'perusahaan', label: 'Perusahaan', icon: <Building2 size={20} />, action: () => router.push('/perusahaan') },
-                        { id: 'persediaan', label: 'Persediaan', icon: <Package size={20} />, action: () => router.push('/persediaan') },
-                        { id: 'pembelian', label: 'Pembelian', icon: <ShoppingBag size={20} />, action: () => router.push('/pembelian') },
-                        { id: 'laporan', label: 'Riwayat', icon: <History size={20} />, action: () => router.push('/history?role=admin') },
-                    ].map((item) => (
         <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden relative">
             {/* Standardized Sidebar Admin */}
             <AdminSidebar 

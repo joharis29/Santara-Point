@@ -84,8 +84,6 @@ export default function ManajemenStok() {
     const [products, setProducts] = useState(INITIAL_PRODUCTS);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-        img: ''
-    });
 
     // --- State Standarisasi ---
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);

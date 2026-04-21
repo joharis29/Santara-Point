@@ -12,7 +12,17 @@ import {
     Search,
     Tag,
     Landmark,
-    BookOpen
+    BookOpen,
+    User,
+    ChefHat,
+    CheckCircle2,
+    Info,
+    Utensils,
+    Hash,
+    Phone,
+    MapPin,
+    History,
+    LogOut
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import AdminHeader from '@/components/AdminHeader';
@@ -417,8 +427,8 @@ export default function WaitingListPage() {
                     </div>
 
                 </div>
-
-            {/* Standardized Settings Modal */}
+            </main>
+        </div>
             <SettingsModal 
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}

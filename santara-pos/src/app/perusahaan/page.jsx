@@ -361,7 +361,7 @@ export default function PerusahaanPage() {
                         <ArrowLeft size={20} />
                         <span className="text-[10px] font-bold uppercase tracking-tight">Back</span>
                     </button>
-                </div>
+                </nav>
             </main>
 
             {/* Standardized Settings Modal (Admin) */}

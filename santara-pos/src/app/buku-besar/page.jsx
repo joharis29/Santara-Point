@@ -288,7 +288,7 @@ export default function BukuBesarPage() {
                         <Tag size={20} />
                         <span className="text-[10px] font-bold uppercase tracking-tight">Jual</span>
                     </button>
-                </div>
+                </nav>
             </main>
 
             {/* Standardized Settings Modal (Admin) */}

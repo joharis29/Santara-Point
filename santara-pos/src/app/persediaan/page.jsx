@@ -187,18 +187,40 @@ export default function PersediaanPage() {
     const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
     return (
-                        <div className="relative flex-1 md:w-80">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                            <input
-                                type="text"
-                                placeholder="Cari barang atau jasa..."
-                                className="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden relative">
+            <AdminSidebar 
+                isOpen={isSidebarOpen} 
+                setIsOpen={setIsSidebarOpen} 
+                onOpenSettings={() => {
+                    setActiveSettingsTab('info-toko');
+                    setIsSettingsOpen(true);
+                }} 
+            />
+
+            <main className="flex-1 flex flex-col min-w-0 bg-white">
+                <AdminHeader 
+                    title="Manajemen Persediaan"
+                    subtitle="Kelola Stok Barang, Bahan Baku, & Penyesuaian"
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    onMenuClick={() => setIsSidebarOpen(true)}
+                    rightElement={(
+                        <div className="flex gap-2">
+                            <button 
+                                onClick={() => setIsProductModalOpen(true)}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200"
+                            >
+                                <Plus size={16} /> Item Baru
+                            </button>
+                            <button 
+                                onClick={() => setIsAdjustmentModalOpen(true)}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-100"
+                            >
+                                <ArrowUpDown size={16} /> Penyesuaian
+                            </button>
                         </div>
-                    </div>
-                </header>
+                    )}
+                />
 
                 {/* Tab Navigation */}
                 <div className="bg-white border-b border-slate-100 flex px-6 lg:px-10">
@@ -331,26 +353,8 @@ export default function PersediaanPage() {
                         <Home size={20} />
                         <span className="text-[10px] font-bold uppercase tracking-tight">Home</span>
                     </button>
-                </div>
+                </nav>
             </main>
-
-            {/* Standardized Settings Modal (Admin) */}
-            <SettingsModal 
-                isOpen={isSettingsOpen}
-                onClose={() => setIsSettingsOpen(false)}
-                isAdmin={true}
-                activeTab={activeSettingsTab}
-                setActiveTab={setActiveSettingsTab}
-                userProfile={userProfile}
-                setUserProfile={setUserProfile}
-                handleSaveProfile={handleSaveProfile}
-                storeSettings={storeSettings}
-                setStoreSettings={setStoreSettings}
-                newUserContact={newUserContact}
-                setNewUserContact={setNewUserContact}
-                newUserRole={newUserRole}
-                setNewUserRole={setNewUserRole}
-            />
 
             {/* Modal Tambah Item (Barang & Jasa) */}
             {isProductModalOpen && (
@@ -514,6 +518,30 @@ export default function PersediaanPage() {
                     </div>
                 </div>
             )}
+
+            {/* Standardized Settings Modal (Admin) */}
+            <SettingsModal 
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                isAdmin={true}
+                activeTab={activeSettingsTab}
+                setActiveTab={setActiveSettingsTab}
+                userProfile={userProfile}
+                setUserProfile={setUserProfile}
+                handleSaveProfile={handleSaveProfile}
+                storeSettings={storeSettings}
+                setStoreSettings={setStoreSettings}
+                newUserContact={newUserContact}
+                setNewUserContact={setNewUserContact}
+                newUserRole={newUserRole}
+                setNewUserRole={setNewUserRole}
+                setIsChangeEmailOpen={setIsChangeEmailOpen}
+                setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+                setIsChangePasswordOpen={setIsChangePasswordOpen}
+                addAddress={addAddress}
+                removeAddress={removeAddress}
+                updateAddress={updateAddress}
+            />
         </div>
     );
 }

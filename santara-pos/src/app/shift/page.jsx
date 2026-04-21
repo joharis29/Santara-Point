@@ -12,7 +12,6 @@ export default function ShiftPage() {
     const router = useRouter();
     const [activeShift, setActiveShift] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-    });
     
     // --- State Standarisasi ---
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);

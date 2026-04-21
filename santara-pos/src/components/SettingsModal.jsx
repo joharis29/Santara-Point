@@ -22,6 +22,19 @@ import {
     ChevronDown
 } from 'lucide-react';
 
+const SettingsModal = ({ 
+    isOpen, 
+    onClose, 
+    activeTab, 
+    setActiveTab, 
+    userProfile, 
+    setUserProfile, 
+    handleSaveProfile,
+    setIsChangeEmailOpen,
+    setIsChangeWhatsappOpen,
+    setIsChangePasswordOpen,
+    addAddress,
+    removeAddress,
     updateAddress,
     // Admin Props
     isAdmin = false,
