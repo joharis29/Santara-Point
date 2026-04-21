@@ -26,7 +26,8 @@ import {
     Eye,
     EyeOff,
     ArrowUpDown,
-    MapPin
+    MapPin,
+    ChevronRight
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import WaitingOverlay from './WaitingOverlay';
@@ -206,7 +207,7 @@ function CustomerPortalContent() {
                 const fName = meta.first_name || '';
                 const lName = meta.last_name || '';
                 const fullName = `${fName} ${lName}`.trim() || 'Sobat Santara';
-                
+
                 setCustomerName(fullName);
                 setIsLoggedIn(true);
 
@@ -215,7 +216,7 @@ function CustomerPortalContent() {
                 if (!storedAddresses || storedAddresses.length === 0) {
                     storedAddresses = JSON.parse(localStorage.getItem('santaraCustomerAddresses') || '[]');
                 }
-                
+
                 setUserProfile({
                     firstName: fName,
                     lastName: lName,
@@ -314,7 +315,7 @@ function CustomerPortalContent() {
             localStorage.setItem('registeredEmail', userProfile.email);
             localStorage.setItem('registeredWhatsapp', userProfile.whatsapp);
             localStorage.setItem('santaraCustomerAddresses', JSON.stringify(userProfile.addresses));
-            
+
             setCustomerName(fullName);
             alert('Profil berhasil diperbaharui!');
         } catch (err) {
@@ -636,8 +637,8 @@ function CustomerPortalContent() {
                     </div>
                     <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm shrink-0 mb-2">
                         <ArrowUpDown size={14} className="text-slate-400" />
-                        <select 
-                            value={sortBy} 
+                        <select
+                            value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                             className="text-[11px] font-black uppercase tracking-widest text-slate-600 outline-none bg-transparent cursor-pointer"
                         >
@@ -1233,7 +1234,7 @@ function CustomerPortalContent() {
                                         <div className="space-y-2">
                                             <div className="flex justify-between items-center ml-1">
                                                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Nomor WhatsApp</label>
-                                                <button 
+                                                <button
                                                     type="button"
                                                     onClick={() => {
                                                         setNewWhatsappInput(userProfile.whatsapp);
@@ -1255,7 +1256,7 @@ function CustomerPortalContent() {
                                         <div className="space-y-2">
                                             <div className="flex justify-between items-center ml-1">
                                                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Kata Sandi</label>
-                                                <button 
+                                                <button
                                                     type="button"
                                                     onClick={() => {
                                                         setNewPasswordInput('');
@@ -1415,9 +1416,9 @@ function CustomerPortalContent() {
                     </div>
                 </div>
             )}
-            <ChangeEmailModal 
-                isOpen={isChangeEmailOpen} 
-                onClose={() => setIsChangeEmailOpen(false)} 
+            <ChangeEmailModal
+                isOpen={isChangeEmailOpen}
+                onClose={() => setIsChangeEmailOpen(false)}
                 oldEmail={userProfile.email}
                 newEmail={newEmailInput}
                 setNewEmail={setNewEmailInput}
