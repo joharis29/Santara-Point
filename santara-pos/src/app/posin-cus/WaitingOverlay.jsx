@@ -23,7 +23,7 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
     // DB Polling
     useEffect(() => {
         if (!isOpen || !transactionId) return;
-        
+
         setStatus('KONFIRMASI'); // reset
 
         const poll = setInterval(async () => {
@@ -34,7 +34,7 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                     .select('status')
                     .eq('id', transactionId)
                     .single();
-                
+
                 if (error) throw error;
 
                 if (data && data.status) {
@@ -54,7 +54,7 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                     if (t.status === 'Ditolak') setStatus('DITOLAK');
                 }
             }
-        }, 2000); 
+        }, 2000);
 
         return () => clearInterval(poll);
     }, [isOpen, transactionId]);
@@ -133,7 +133,7 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                                         Pesanan Siap Disajikan
                                     </h3>
                                     <p className={`text-xs mt-1 leading-relaxed ${status === 'SELESAI' ? 'text-emerald-700/70' : 'text-slate-300'}`}>
-                                        Pesanan telah ditandai Selesai oleh staf! Silakan ambil di kasir.
+                                        Pesanan telah ditandai Selesai oleh staf! Mohon tunggu hidangan sampai ditujuan.
                                     </p>
                                 </div>
                             </div>
@@ -151,8 +151,8 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                             onClick={(status === 'SELESAI' || status === 'DITOLAK') ? onClose : undefined}
                             disabled={status !== 'SELESAI' && status !== 'DITOLAK'}
                             className={`w-full py-4 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 ${status === 'SELESAI' ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200 active:scale-95' :
-                                    status === 'DITOLAK' ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-200 active:scale-95' :
-                                        'bg-slate-200 text-slate-400 cursor-not-allowed'
+                                status === 'DITOLAK' ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-200 active:scale-95' :
+                                    'bg-slate-200 text-slate-400 cursor-not-allowed'
                                 }`}
                         >
                             {status === 'SELESAI' ? 'Tutup & Selesai' : status === 'DITOLAK' ? 'Pesanan Dibatalkan - Tutup' : 'Sedang Sinkronisasi dengan Dapur...'}

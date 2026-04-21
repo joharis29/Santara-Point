@@ -17,6 +17,7 @@ import {
     ShoppingBag as ShoppingBagIcon,
     Receipt
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function CustomerHistory() {
     const router = useRouter();
@@ -31,12 +32,56 @@ export default function CustomerHistory() {
             setIsLoggedIn(true);
         }
 
-        const rawHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
-        const userHistory = rawHistory.filter(trx => 
-            trx.customerName === storedName && 
-            (trx.status === 'Selesai' || trx.status === 'Ditolak')
-        );
-        setHistory(userHistory);
+        const loadHistory = async () => {
+            try {
+                // Priority 1: Fetch from Supabase
+                const { data, error } = await supabase
+                    .from('transactions')
+                    .select('*')
+                    .eq('customer_name', storedName)
+                    .in('status', ['Selesai', 'Ditolak'])
+                    .order('timestamp', { ascending: false });
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    // Map snake_case to camelCase for UI compatibility
+                    const mapped = data.map(trx => ({
+                        id: trx.id,
+                        timestamp: trx.timestamp,
+                        customerName: trx.customer_name,
+                        queueNumber: trx.queue_number,
+                        orderType: trx.order_type,
+                        keterangan: trx.keterangan,
+                        paymentMethod: trx.payment_method,
+                        source: trx.source,
+                        cashierName: trx.cashier_name,
+                        totalAmount: trx.total_amount,
+                        pajak: trx.pajak,
+                        status: trx.status,
+                        items: trx.items
+                    }));
+                    setHistory(mapped);
+                } else {
+                    // Priority 2: Fallback to LocalStorage
+                    const rawHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
+                    const userHistory = rawHistory.filter(trx => 
+                        trx.customerName === storedName && 
+                        (trx.status === 'Selesai' || trx.status === 'Ditolak')
+                    );
+                    setHistory(userHistory);
+                }
+            } catch (err) {
+                console.error("Error loading Supabase history:", err);
+                // Fallback
+                const rawHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
+                setHistory(rawHistory.filter(trx => trx.customerName === storedName && ['Selesai', 'Ditolak'].includes(trx.status)));
+            }
+        };
+
+        if (storedName) {
+            loadHistory();
+        }
     }, []);
 
     return (

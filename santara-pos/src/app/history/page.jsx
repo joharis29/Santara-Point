@@ -24,6 +24,7 @@ import {
     BookOpen,
     Building2
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function HistoryPage() {
     const router = useRouter();
@@ -39,20 +40,57 @@ export default function HistoryPage() {
             setIsAdmin(params.get('role') === 'admin');
         }
 
-        const history = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
-        
-        // Mengurutkan dari yang terbaru
-        history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-        setTransactions(history);
-        
-        // Setup initial default month to current month if transactions exist
-        if (history.length > 0) {
-            const months = Array.from(new Set(history.map(t => new Date(t.timestamp).toISOString().slice(0, 7))));
-            months.sort().reverse();
-            setSelectedMonth(months[0]);
-        } else {
-            setSelectedMonth(new Date().toISOString().slice(0, 7)); // Cth: "2026-04"
-        }
+        const loadTransactions = async () => {
+            try {
+                // Priority 1: Supabase
+                const { data, error } = await supabase
+                    .from('transactions')
+                    .select('*')
+                    .order('timestamp', { ascending: false });
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    const mapped = data.map(trx => ({
+                        id: trx.id,
+                        timestamp: trx.timestamp,
+                        customerName: trx.customer_name,
+                        queueNumber: trx.queue_number,
+                        orderType: trx.order_type,
+                        keterangan: trx.keterangan,
+                        paymentMethod: trx.payment_method,
+                        source: trx.source,
+                        cashierName: trx.cashier_name,
+                        totalAmount: trx.total_amount,
+                        pajak: trx.pajak,
+                        status: trx.status,
+                        items: trx.items
+                    }));
+                    setTransactions(mapped);
+                    
+                    // Setup initial month
+                    const months = Array.from(new Set(mapped.map(t => new Date(t.timestamp).toISOString().slice(0, 7))));
+                    months.sort().reverse();
+                    setSelectedMonth(months[0]);
+                } else {
+                    // Fallback to LocalStorage
+                    const history = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
+                    history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    setTransactions(history);
+                    if (history.length > 0) {
+                        const months = Array.from(new Set(history.map(t => new Date(t.timestamp).toISOString().slice(0, 7))));
+                        months.sort().reverse();
+                        setSelectedMonth(months[0]);
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading global history:", err);
+                const history = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
+                setTransactions(history);
+            }
+        };
+
+        loadTransactions();
 
         const payments = JSON.parse(localStorage.getItem('santaraPurchasePayments') || '[]');
         setPurchasePayments(payments);
