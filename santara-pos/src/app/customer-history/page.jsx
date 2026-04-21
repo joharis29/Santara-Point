@@ -17,6 +17,13 @@ import {
     ShoppingBag as ShoppingBagIcon,
     Receipt,
     ArrowLeft,
+    Settings
+} from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import CustomerHeader from '@/components/CustomerHeader';
+import CustomerBottomNav from '@/components/CustomerBottomNav';
+import SettingsModal from '@/components/SettingsModal';
+
 const DEFAULT_SETTINGS = {
     storeName: 'Santara Point',
     storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
