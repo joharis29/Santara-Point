@@ -18,7 +18,8 @@ import {
     X,
     Image as ImageIcon,
     Home,
-    History
+    History,
+    Package
 } from 'lucide-react';
 
 const INITIAL_PRODUCTS = [
@@ -165,6 +166,8 @@ export default function ManajemenStok() {
                         { icon: <ShoppingBag size={20} />, label: "POS Kasir", active: false, action: () => router.push('/posin-adm') },
                         { icon: <ChefHat size={20} />, label: "Daftar Antrean", active: false, action: () => router.push('/waiting-list') },
                         { icon: <ClipboardList size={20} />, label: "Manajemen Stok", active: true, action: () => router.push('/manajemen-stok') },
+                        { icon: <Package size={20} />, label: "Persediaan", active: false, action: () => router.push('/persediaan') },
+                        { icon: <ShoppingBag size={20} />, label: "Pembelian", active: false, action: () => router.push('/pembelian') },
                         { icon: <TrendingUp size={20} />, label: "Laporan Keuangan", active: false, action: () => router.push('/history?role=admin') },
                         { icon: <Settings size={20} />, label: "Pengaturan Toko", active: false },
                     ].map((item, i) => (
@@ -335,6 +338,10 @@ export default function ManajemenStok() {
                     <button onClick={() => router.push('/history?role=admin')} className="flex flex-col items-center gap-1 text-slate-400">
                         <History size={20} />
                         <span className="text-[10px] font-bold uppercase tracking-tight">Riwayat</span>
+                    </button>
+                    <button onClick={() => router.push('/pembelian')} className="flex flex-col items-center gap-1 text-slate-400">
+                        <ShoppingBag size={20} />
+                        <span className="text-[10px] font-bold uppercase tracking-tight">Beli</span>
                     </button>
                     <button className="flex flex-col items-center gap-1 text-emerald-600">
                         <ClipboardList size={20} />

@@ -26,9 +26,7 @@ const DEFAULT_SETTINGS = {
     whatsapp: '6285846802177',
     email: 'santarapoint@gmail.com',
     address: 'Jl. Raya Santara No. 123, Bandung',
-    zakatPercent: 2.5,
-    footerText: '© 2024 Santara Point. Berkah setiap saat.',
-    zakatEnabledDefault: true
+    footerText: '© 2024 Santara Point. Berkah setiap saat.'
 };
 
 export default function App() {
@@ -118,7 +116,7 @@ export default function App() {
               <MessageCircle size={24} className="text-emerald-500" /> Kontak Kami
             </button>
             <button onClick={() => handleAction('dokumentasi')} className="text-2xl font-black text-white flex items-center gap-4">
-              <ShieldCheck size={24} className="text-emerald-500" /> Dokumentasi Zakat
+              <ShieldCheck size={24} className="text-emerald-500" /> Dokumentasi Layanan
             </button>
             <div className="mt-auto border-t border-white/10 pt-8">
               <p className="text-emerald-500 font-bold mb-2">Santara Point POS</p>
@@ -162,18 +160,18 @@ export default function App() {
           {[
             {
               icon: <MessageCircle className="text-emerald-400" size={24} />,
-              title: "Belanja Sambil Beramal",
-              desc: "Setiap pesanan termasuk dana kepedulian 2,5%. Nikmati hidangan lezat sekaligus tebarkan manfaat bagi yang membutuhkan."
+              title: "Kualitas Premium",
+              desc: "Kami menyajikan hidangan dengan bahan baku pilihan yang selalu segar setiap harinya untuk menjaga cita rasa terbaik."
             },
             {
               icon: <ShieldCheck className="text-emerald-400" size={24} />,
-              title: "Penyaluran Transparan",
-              desc: "Sistem otomatis memisahkan 2,5% pesanan untuk disalurkan rutin kepada mustahiq. Nota digital merinci secara transparan."
+              title: "Jaminan Halal & Higienis",
+              desc: "Seluruh proses pengolahan makanan kami dilakukan dengan standar kebersihan tinggi dan jaminan kehalalan 100%."
             },
             {
               icon: <ShoppingBag className="text-emerald-400" size={24} />,
-              title: "Akad Syariah Jelas",
-              desc: "Transaksi diproses dengan prinsip muamalah yang benar. Kami memastikan harga dan tujuan dana amal terkelola amanah."
+              title: "Pesanan Cepat & Mudah",
+              desc: "Nikmati kemudahan memesan menu favorit Anda melalui sistem online kami yang terintegrasi untuk layanan yang lebih efisien."
             }
           ].map((feature, index) => (
             <div

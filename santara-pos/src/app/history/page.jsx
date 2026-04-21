@@ -16,7 +16,12 @@ import {
     Filter,
     Home,
     ChefHat,
-    ShoppingBag
+    ShoppingBag,
+    Package,
+    Tag,
+    Landmark,
+    BookOpen,
+    Building2
 } from 'lucide-react';
 
 export default function HistoryPage() {
@@ -25,6 +30,7 @@ export default function HistoryPage() {
     const [selectedMonth, setSelectedMonth] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [isAdmin, setIsAdmin] = useState(false);
+    const [purchasePayments, setPurchasePayments] = useState([]);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -46,6 +52,9 @@ export default function HistoryPage() {
         } else {
             setSelectedMonth(new Date().toISOString().slice(0, 7)); // Cth: "2026-04"
         }
+
+        const payments = JSON.parse(localStorage.getItem('santaraPurchasePayments') || '[]');
+        setPurchasePayments(payments);
     }, []);
 
     // Get unique months from transactions for the 'folder' dropdown
@@ -68,7 +77,11 @@ export default function HistoryPage() {
     });
 
     const totalIncome = filteredTransactions.reduce((sum, t) => sum + (t.status === 'Ditolak' ? 0 : (t.totalAmount || 0)), 0);
-    const totalZakat = filteredTransactions.reduce((sum, t) => sum + (t.status === 'Ditolak' ? 0 : (t.zakat || 0)), 0);
+
+    // Filter purchase payments by month
+    const filteredPurchasePayments = purchasePayments.filter(p => p.date.startsWith(selectedMonth));
+    const totalExpenses = filteredPurchasePayments.reduce((sum, p) => sum + p.amount, 0);
+    const netProfit = totalIncome - totalExpenses;
 
     return (
         <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden pb-20 lg:pb-0">
@@ -89,6 +102,48 @@ export default function HistoryPage() {
                     </button>
                     <button className="p-4 bg-emerald-500/20 text-emerald-400 rounded-2xl transition-all shadow-sm border border-emerald-500/30" title="Riwayat">
                         <FolderOpen size={24} />
+                    </button>
+                    <button 
+                        onClick={() => router.push('/penjualan')}
+                        className="p-4 text-emerald-400 hover:text-white hover:bg-slate-800 rounded-2xl transition-all shadow-sm"
+                        title="Penjualan"
+                    >
+                        <Tag size={24} />
+                    </button>
+                    <button 
+                        onClick={() => router.push('/kas-bank')}
+                        className="p-4 text-emerald-400 hover:text-white hover:bg-slate-800 rounded-2xl transition-all shadow-sm"
+                        title="Kas \u0026 Bank"
+                    >
+                        <Landmark size={24} />
+                    </button>
+                    <button 
+                        onClick={() => router.push('/buku-besar')}
+                        className="p-4 text-emerald-400 hover:text-white hover:bg-slate-800 rounded-2xl transition-all shadow-sm"
+                        title="Buku Besar"
+                    >
+                        <BookOpen size={24} />
+                    </button>
+                    <button 
+                        onClick={() => router.push('/perusahaan')}
+                        className="p-4 text-emerald-400 hover:text-white hover:bg-slate-800 rounded-2xl transition-all shadow-sm"
+                        title="Perusahaan"
+                    >
+                        <Building2 size={24} />
+                    </button>
+                    <button 
+                        onClick={() => router.push('/persediaan')}
+                        className="p-4 text-emerald-400 hover:text-white hover:bg-slate-800 rounded-2xl transition-all shadow-sm"
+                        title="Persediaan"
+                    >
+                        <Package size={24} />
+                    </button>
+                    <button 
+                        onClick={() => router.push('/pembelian')}
+                        className="p-4 text-emerald-400 hover:text-white hover:bg-slate-800 rounded-2xl transition-all shadow-sm"
+                        title="Pembelian"
+                    >
+                        <ShoppingBag size={24} />
                     </button>
                 </nav>
             </aside>
@@ -141,29 +196,43 @@ export default function HistoryPage() {
                     
                     {/* Statistik Bulan Ini - Hanya untuk Owner/Admin */}
                     {isAdmin && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 mb-8 lg:mb-10">
+                        <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-8 lg:mb-10">
                             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4 lg:gap-6">
                                 <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                                     <TrendingUp size={24} className="lg:hidden" />
                                     <TrendingUp size={32} className="hidden lg:block" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Pendapatan</p>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Omset</p>
                                     <h3 className="text-xl lg:text-3xl font-black text-slate-800 tracking-tight">Rp {totalIncome.toLocaleString()}</h3>
                                 </div>
                             </div>
 
                             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4 lg:gap-6">
-                                <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500">
+                                <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-2xl bg-red-50 flex items-center justify-center text-red-500">
+                                    <ShoppingBag size={24} className="lg:hidden" />
+                                    <ShoppingBag size={32} className="hidden lg:block" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Belanja (Expense)</p>
+                                    <h3 className="text-xl lg:text-3xl font-black text-red-600 tracking-tight">Rp {totalExpenses.toLocaleString()}</h3>
+                                </div>
+                            </div>
+
+                            <div className="bg-emerald-600 p-6 rounded-3xl shadow-xl shadow-emerald-900/10 flex items-center gap-4 lg:gap-6 text-white md:col-span-2 lg:col-span-1">
+                                <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-2xl bg-white/20 flex items-center justify-center text-white">
                                     <Calculator size={24} className="lg:hidden" />
                                     <Calculator size={32} className="hidden lg:block" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Alokasi Zakat 2.5%</p>
-                                    <h3 className="text-xl lg:text-3xl font-black text-slate-800 tracking-tight">Rp {totalZakat.toLocaleString()}</h3>
+                                    <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-wider mb-1">Laba Bersih (Estimasi)</p>
+                                    <h3 className="text-xl lg:text-3xl font-black tracking-tight">Rp {netProfit.toLocaleString()}</h3>
                                 </div>
                             </div>
                         </div>
+
+                        </>
                     )}
 
                     {/* Tabel / Daftar Riwayat */}
@@ -212,13 +281,10 @@ export default function HistoryPage() {
                                                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Antrian {trx.queueNumber}</p>
                                                     </div>
                                                 </div>
-                                                <div className="text-right">
                                                     <p className="text-sm font-black text-emerald-700 leading-none mb-1">Rp {trx.totalAmount?.toLocaleString()}</p>
-                                                    <p className="text-[9px] text-emerald-600/50 font-bold uppercase">Zakat Rp {trx.zakat?.toLocaleString()}</p>
                                                 </div>
-                                            </div>
 
-                                            <div className="bg-slate-50 p-3 rounded-xl space-y-1.5">
+                                                <div className="bg-slate-50 p-3 rounded-xl space-y-1.5">
                                                 {trx.items && trx.items.map((item, i) => (
                                                     <div key={i} className="text-[10px] text-slate-600 font-bold flex justify-between">
                                                         <span>{item.quantity}x {item.name}</span>
@@ -310,7 +376,6 @@ export default function HistoryPage() {
                                                 </td>
                                                 <td className="p-5 align-top text-right">
                                                     <div className="font-black text-sm text-emerald-700">Rp {trx.totalAmount?.toLocaleString()}</div>
-                                                    <div className="text-[10px] font-bold text-emerald-600/50 mt-1 uppercase tracking-wider">Inc. Zakat Rp {trx.zakat?.toLocaleString()}</div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -335,6 +400,10 @@ export default function HistoryPage() {
                     <button className="flex flex-col items-center gap-1 text-emerald-600">
                         <FolderOpen size={20} />
                         <span className="text-[10px] font-bold uppercase">Riwayat</span>
+                    </button>
+                    <button onClick={() => router.push('/pembelian')} className="flex flex-col items-center gap-1 text-slate-400">
+                        <ShoppingBag size={20} />
+                        <span className="text-[10px] font-bold uppercase">Beli</span>
                     </button>
                     <button onClick={() => router.push('/waiting-list')} className="flex flex-col items-center gap-1 text-slate-400">
                         <ChefHat size={20} />

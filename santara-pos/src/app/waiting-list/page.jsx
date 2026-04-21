@@ -14,7 +14,12 @@ import {
     Utensils,
     Home,
     ShoppingBag,
-    History
+    History,
+    MapPin,
+    Phone,
+    Info,
+    Hash,
+    Truck
 } from 'lucide-react';
 
 const DEFAULT_SETTINGS = {
@@ -23,9 +28,7 @@ const DEFAULT_SETTINGS = {
     whatsapp: '6285846802177',
     email: 'santarapoint@gmail.com',
     address: 'Jl. Raya Santara No. 123, Bandung',
-    zakatPercent: 2.5,
-    footerText: '© 2024 Santara Point. Berkah setiap saat.',
-    zakatEnabledDefault: true
+    footerText: '© 2024 Santara Point. Berkah setiap saat.'
 };
 
 export default function WaitingListPage() {
@@ -96,6 +99,54 @@ export default function WaitingListPage() {
 
             <div className="flex items-center gap-2 text-sm font-bold text-slate-700 bg-slate-50 p-2 rounded-lg">
                 <User size={14} className="text-slate-400" /> {trx.customerName}
+            </div>
+
+            <div className="space-y-2.5">
+                {(trx.source === 'Owner' || trx.source === 'Kasir') ? (
+                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 space-y-2">
+                        <div className="flex items-center gap-2 border-b border-slate-100 pb-1.5">
+                            <Info size={11} className="text-slate-400" />
+                            <h4 className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Keterangan Pesanan</h4>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="flex items-center gap-1.5">
+                                <Utensils size={12} className="text-emerald-500" />
+                                <span className="text-[10px] font-bold text-slate-600">{trx.orderType || 'Dine-In'}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <Hash size={12} className="text-amber-500" />
+                                <span className="text-[10px] font-bold text-slate-600">No. {trx.queueNumber}</span>
+                            </div>
+                        </div>
+                        {trx.keterangan && (
+                            <p className="text-[10px] text-slate-500 italic bg-amber-50/50 p-2 rounded border border-amber-100/50 border-dashed">
+                                "{trx.keterangan}"
+                            </p>
+                        )}
+                    </div>
+                ) : (
+                    <div className="bg-emerald-50/30 p-2.5 rounded-xl border border-emerald-100/50 space-y-2">
+                        <div className="flex items-center gap-2 border-b border-emerald-100/30 pb-1.5">
+                            <Truck size={11} className="text-emerald-600" />
+                            <h4 className="text-[9px] font-black uppercase text-emerald-600 tracking-widest">Data Diri Pemesan</h4>
+                        </div>
+                        <div className="space-y-1.5">
+                            <div className="flex items-center gap-1.5">
+                                <Phone size={11} className="text-emerald-600" />
+                                <span className="text-[10px] font-bold text-slate-600">{trx.customerPhone || 'N/A'}</span>
+                            </div>
+                            <div className="flex items-start gap-1.5">
+                                <MapPin size={11} className="text-red-500 mt-0.5 shrink-0" />
+                                <p className="text-[10px] font-bold text-slate-600 leading-tight line-clamp-2">{trx.deliveryAddress || 'Ambil di Toko'}</p>
+                            </div>
+                        </div>
+                        {trx.keterangan && (
+                            <p className="text-[10px] text-emerald-700 italic bg-white/80 p-2 rounded border border-emerald-100/50 border-dashed">
+                                "{trx.keterangan}"
+                            </p>
+                        )}
+                    </div>
+                )}
             </div>
 
             <div className="flex-1">
@@ -244,6 +295,10 @@ export default function WaitingListPage() {
                     <button onClick={() => router.push('/history?role=admin')} className="flex flex-col items-center gap-1 text-slate-400">
                         <History size={20} />
                         <span className="text-[10px] font-bold uppercase tracking-tight">Riwayat</span>
+                    </button>
+                    <button onClick={() => router.push('/pembelian')} className="flex flex-col items-center gap-1 text-slate-400">
+                        <ShoppingBag size={20} />
+                        <span className="text-[10px] font-bold uppercase tracking-tight">Beli</span>
                     </button>
                     <button className="flex flex-col items-center gap-1 text-emerald-600">
                         <ChefHat size={20} />

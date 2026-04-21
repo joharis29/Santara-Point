@@ -10,6 +10,7 @@ import {
     Minus,
     Trash2,
     Info,
+    Calculator,
     ChevronRight,
     MessageCircle,
     Mail,
@@ -20,7 +21,15 @@ import {
     Heart,
     Star,
     CheckCircle2,
-    X
+    X,
+    Settings,
+    User,
+    Languages,
+    Palette,
+    Eye,
+    EyeOff,
+    ArrowUpDown,
+    MapPin
 } from 'lucide-react';
 import WaitingOverlay from './WaitingOverlay';
 
@@ -30,9 +39,7 @@ const DEFAULT_SETTINGS = {
     whatsapp: '6285846802177',
     email: 'santarapoint@gmail.com',
     address: 'Jl. Raya Santara No. 123, Bandung',
-    zakatPercent: 2.5,
-    footerText: '© 2024 Santara Point. Berkah setiap saat.',
-    zakatEnabledDefault: true
+    footerText: '© 2024 Santara Point. Berkah setiap saat.'
 };
 
 const PRODUCTS = [
@@ -129,7 +136,12 @@ const ProductImageSlider = ({ product }) => {
                 </>
             )}
 
-            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black text-slate-800 shadow-sm flex items-center gap-1 z-10">
+            {product.discountPercent > 0 && (
+                <div className="absolute top-4 left-4 bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-md z-30">
+                    -{product.discountPercent}%
+                </div>
+            )}
+            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black text-slate-800 shadow-sm flex items-center gap-1 z-10">
                 <Star size={12} className="text-amber-500 fill-amber-500" /> {product.rating || '4.5'}
             </div>
             {product.stock <= 0 && (
@@ -138,7 +150,7 @@ const ProductImageSlider = ({ product }) => {
                 </div>
             )}
             {product.isNew && (
-                <div className="absolute top-4 right-4 bg-red-500 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-md z-30">
+                <div className="absolute top-4 right-4 translate-y-8 bg-red-500 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-md z-30">
                     NEW
                 </div>
             )}
@@ -156,6 +168,21 @@ export default function App() {
     const [products, setProducts] = useState(PRODUCTS);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
 
+    // --- State Pengaturan ---
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [activeSettingsTab, setActiveSettingsTab] = useState('profil');
+    const [showPassword, setShowPassword] = useState(false);
+    const [language, setLanguage] = useState('ID');
+    const [theme, setTheme] = useState('Light');
+    const [userProfile, setUserProfile] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        whatsapp: '',
+        password: '••••••••',
+        addresses: []
+    });
+
     React.useEffect(() => {
         const storedName = localStorage.getItem('customerName');
         if (storedName) {
@@ -164,7 +191,7 @@ export default function App() {
         }
         const storedFavs = JSON.parse(localStorage.getItem('santaraFavorites') || '[]');
         setFavorites(storedFavs);
-        
+
         const storedProducts = localStorage.getItem('santaraProducts');
         if (storedProducts) {
             setProducts(JSON.parse(storedProducts));
@@ -176,7 +203,72 @@ export default function App() {
         if (storedSettings) {
             setStoreSettings(JSON.parse(storedSettings));
         }
+
+        // Load user profile from registration data if exists
+        const regEmail = localStorage.getItem('registeredEmail') || '';
+        const regWhatsapp = localStorage.getItem('registeredWhatsapp') || '';
+        const regPassword = localStorage.getItem('registeredPassword') || '••••••••';
+
+        const storedFirstName = localStorage.getItem('customerFirstName') || '';
+        const storedLastName = localStorage.getItem('customerLastName') || '';
+
+        const storedAddresses = JSON.parse(localStorage.getItem('santaraCustomerAddresses') || '[]');
+
+        setUserProfile({
+            firstName: storedFirstName || (storedName ? storedName.split(' ')[0] : 'Sobat'),
+            lastName: storedLastName || (storedName ? storedName.split(' ').slice(1).join(' ') : 'Santara'),
+            email: regEmail,
+            whatsapp: regWhatsapp,
+            password: regPassword,
+            addresses: storedAddresses
+        });
+
+        // Load language & theme
+        const storedLang = localStorage.getItem('santaraLanguage');
+        if (storedLang) setLanguage(storedLang);
+        const storedTheme = localStorage.getItem('santaraTheme');
+        if (storedTheme) setTheme(storedTheme);
     }, []);
+
+    const addAddress = () => {
+        const newAddress = { id: Date.now(), label: '', details: '' };
+        setUserProfile({ ...userProfile, addresses: [...userProfile.addresses, newAddress] });
+    };
+
+    const removeAddress = (id) => {
+        setUserProfile({ ...userProfile, addresses: userProfile.addresses.filter(a => a.id !== id) });
+    };
+
+    const updateAddress = (id, field, value) => {
+        setUserProfile({
+            ...userProfile,
+            addresses: userProfile.addresses.map(a => a.id === id ? { ...a, [field]: value } : a)
+        });
+    };
+
+    const handleSaveProfile = (e) => {
+        e.preventDefault();
+        const fullName = `${userProfile.firstName} ${userProfile.lastName}`.trim();
+        localStorage.setItem('customerFirstName', userProfile.firstName);
+        localStorage.setItem('customerLastName', userProfile.lastName);
+        localStorage.setItem('customerName', fullName);
+        localStorage.setItem('registeredEmail', userProfile.email);
+        localStorage.setItem('registeredWhatsapp', userProfile.whatsapp);
+        localStorage.setItem('registeredPassword', userProfile.password);
+        localStorage.setItem('santaraCustomerAddresses', JSON.stringify(userProfile.addresses));
+        setCustomerName(fullName);
+        alert('Profil berhasil diperbaharui!');
+    };
+
+    const handleSaveLanguage = (lang) => {
+        setLanguage(lang);
+        localStorage.setItem('santaraLanguage', lang);
+    };
+
+    const handleSaveTheme = (tm) => {
+        setTheme(tm);
+        localStorage.setItem('santaraTheme', tm);
+    };
 
     const toggleFavorite = (e, id) => {
         e.stopPropagation();
@@ -195,8 +287,11 @@ export default function App() {
     const [activeCategory, setActiveCategory] = useState('Semua');
     const [customerEmail, setCustomerEmail] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
+    const [customerAddress, setCustomerAddress] = useState('');
+    const [orderNote, setOrderNote] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [sortBy, setSortBy] = useState('default');
     const [isWaitingOpen, setIsWaitingOpen] = useState(false);
     const [currentTxId, setCurrentTxId] = useState(null);
     const [toppingModalProduct, setToppingModalProduct] = useState(null);
@@ -204,19 +299,26 @@ export default function App() {
     const [isCodOpen, setIsCodOpen] = useState(false);
     const [isTransferOpen, setIsTransferOpen] = useState(false);
     const [isCartModalOpen, setIsCartModalOpen] = useState(false);
+    // Pajak Daerah is strictly mandatory
 
     const categories = ['Semua', 'Makanan', 'Minuman', 'Snack', 'Frozen Food'];
 
-    // --- Perhitungan Total (102.5%) ---
+    // --- Perhitungan Total (Inclusive Pajak 10%) ---
     const menuTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const subtotal = Math.round(menuTotal / 1.025); // Harga original tanpa zakat dibulatkan
-    const zakatValue = Math.round(menuTotal - subtotal); // Otomatis terhitung untuk transparansi
-    const totalAmount = Math.round(menuTotal); // Total yang dibayar tetap
+    const subtotal = storeSettings.isPajakActive ? menuTotal / 1.10 : menuTotal;
+    const pajakValue = storeSettings.isPajakActive ? Math.round(menuTotal - subtotal) : 0;
+    const totalAmount = Math.round(menuTotal);
 
     const filteredProducts = products.filter(p =>
         (activeCategory === 'Semua' || p.category === activeCategory) &&
         p.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    ).sort((a, b) => {
+        if (sortBy === 'price-low') return a.price - b.price;
+        if (sortBy === 'price-high') return b.price - a.price;
+        if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+        if (sortBy === 'discount') return (b.discountPercent || 0) - (a.discountPercent || 0);
+        return 0;
+    });
 
     // --- Logic Keranjang ---
     const addToCart = (product) => {
@@ -262,7 +364,10 @@ export default function App() {
             source: 'Customer',
             cashierName: 'Online',
             totalAmount,
-            zakat: zakatValue,
+            pajak: pajakValue,
+            deliveryAddress: customerAddress,
+            customerPhone,
+            keterangan: orderNote,
             status: 'Menunggu',
             items: cart.map(({ name, quantity, price }) => ({ name, quantity, price }))
         };
@@ -279,8 +384,8 @@ export default function App() {
         }
 
         if (cart.length === 0) return alert('Keranjang masih kosong!');
-        if (!customerName || !customerEmail || !customerPhone || !paymentMethod) {
-            return alert('Mohon lengkapi Data Diri Pemesan dan Metode Pembayaran!');
+        if (!customerName || !customerAddress || !customerPhone || !paymentMethod) {
+            return alert('Mohon lengkapi Data Diri Pemesan (Termasuk Alamat) dan Metode Pembayaran!');
         }
 
         setIsProcessing(true);
@@ -328,6 +433,9 @@ export default function App() {
                     <button onClick={() => router.push('/favorites')} className="p-3 text-slate-300 hover:text-red-500 transition-colors" title="Menu Favorit">
                         <Heart size={24} />
                     </button>
+                    <button onClick={() => setIsSettingsOpen(true)} className="p-3 text-slate-300 hover:text-emerald-600 transition-colors" title="Pengaturan">
+                        <Settings size={24} />
+                    </button>
                 </nav>
                 <button
                     onClick={() => {
@@ -352,7 +460,7 @@ export default function App() {
                             <span className="bg-emerald-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-emerald-100">
                                 <ShieldCheck size={12} /> Syariah Verified
                             </span>
-                            <span className="text-slate-400 text-xs font-bold">Halo, {customerName}!</span>
+                            <span className="text-slate-400 text-xs font-bold">Halo, {customerName.trim().split(' ')[0]}!</span>
                         </div>
                     </div>
                     <div className="relative w-full md:w-80">
@@ -367,8 +475,8 @@ export default function App() {
                     </div>
                 </header>
 
-                <div className="px-6 md:px-10 mb-8 overflow-x-auto">
-                    <div className="flex gap-3">
+                <div className="px-6 md:px-10 mb-8 flex items-center justify-between gap-4 overflow-x-auto">
+                    <div className="flex gap-3 pb-2">
                         {categories.map(cat => (
                             <button
                                 key={cat}
@@ -378,6 +486,20 @@ export default function App() {
                                 {cat}
                             </button>
                         ))}
+                    </div>
+                    <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm shrink-0 mb-2">
+                        <ArrowUpDown size={14} className="text-slate-400" />
+                        <select 
+                            value={sortBy} 
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="text-[11px] font-black uppercase tracking-widest text-slate-600 outline-none bg-transparent cursor-pointer"
+                        >
+                            <option value="default">Urutkan</option>
+                            <option value="price-low">Termurah</option>
+                            <option value="price-high">Termahal</option>
+                            <option value="rating">Rating</option>
+                            <option value="discount">Diskon</option>
+                        </select>
                     </div>
                 </div>
 
@@ -390,9 +512,9 @@ export default function App() {
                                 className={`bg-white p-3 rounded-[2rem] shadow-sm hover:shadow-xl transition-all border border-transparent hover:border-emerald-500 cursor-pointer group flex flex-col ${product.stock <= 0 ? 'opacity-60 grayscale' : ''}`}
                             >
                                 <div className="relative">
-                                    <button 
+                                    <button
                                         onClick={(e) => toggleFavorite(e, product.id)}
-                                        className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur rounded-full shadow-sm z-30 hover:scale-110 active:scale-95 transition-transform"
+                                        className="absolute bottom-4 left-4 p-1.5 bg-white/90 backdrop-blur rounded-full shadow-sm z-30 hover:scale-110 active:scale-95 transition-transform"
                                         title="Tambahkan ke Favorit"
                                     >
                                         <Heart size={16} fill={favorites.includes(product.id) ? "#ef4444" : "transparent"} color={favorites.includes(product.id) ? "#ef4444" : "#94a3b8"} />
@@ -404,7 +526,12 @@ export default function App() {
                                         <div className="flex justify-between items-start mb-1">
                                             <h4 className="font-bold text-slate-800 text-sm line-clamp-2">{product.name}</h4>
                                         </div>
-                                        <p className="text-emerald-600 font-black text-base italic">Rp {product.price.toLocaleString('en-US')}</p>
+                                        <div className="flex flex-col">
+                                            {product.discountPercent > 0 && (
+                                                <span className="text-[10px] font-bold line-through text-slate-400">Rp {product.originalPrice?.toLocaleString()}</span>
+                                            )}
+                                            <p className="text-emerald-600 font-black text-base italic">Rp {product.price.toLocaleString('en-US')}</p>
+                                        </div>
                                     </div>
                                     <div className="mt-3 flex items-center justify-between text-[10px] font-bold text-slate-400">
                                         <span>{product.category}</span>
@@ -440,53 +567,92 @@ export default function App() {
                         ) : (
                             <div className="space-y-4">
                                 {cart.map(item => (
-                                    <div key={item.id} className="flex items-center gap-4 bg-white p-3 rounded-xl shadow-sm border border-slate-100">
-                                        <img src={item.img} className="w-16 h-16 rounded-xl object-cover" />
+                                    <div key={item.id} className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:border-emerald-200 transition-all">
                                         <div className="flex-1">
-                                            <h4 className="font-bold text-sm text-slate-800 line-clamp-1">{item.name}</h4>
-                                            <p className="text-xs text-emerald-600 font-bold mt-1">Rp {item.price.toLocaleString('en-US')}</p>
-                                            <div className="flex items-center gap-2 mt-2">
-                                                <button onClick={() => updateQty(item.id, -1)} className="w-6 h-6 flex items-center justify-center bg-slate-100 rounded text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
+                                            <h4 className="font-bold text-[13px] text-slate-800 leading-tight">{item.name}</h4>
+                                            <p className="text-[11px] text-emerald-600 font-bold mt-1">Rp {item.price.toLocaleString('en-US')}</p>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-2.5 bg-slate-50 p-1 rounded-lg border border-slate-100">
+                                                <button onClick={() => updateQty(item.id, -1)} className="w-6 h-6 flex items-center justify-center bg-white rounded shadow-sm text-slate-500 hover:text-emerald-600 transition-colors">
                                                     <Minus size={12} />
                                                 </button>
-                                                <span className="text-xs font-bold text-slate-800 w-4 text-center">{item.quantity}</span>
-                                                <button onClick={() => addToCart(item)} className="w-6 h-6 flex items-center justify-center bg-slate-100 rounded text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
+                                                <span className="text-[12px] font-black text-slate-800 w-4 text-center">{item.quantity}</span>
+                                                <button onClick={() => addToCart(item)} className="w-6 h-6 flex items-center justify-center bg-white rounded shadow-sm text-slate-500 hover:text-emerald-600 transition-colors">
                                                     <Plus size={12} />
                                                 </button>
                                             </div>
+                                            <button onClick={() => updateQty(item.id, -item.quantity)} className="text-slate-200 hover:text-red-400 transition-colors p-1">
+                                                <Trash2 size={16} />
+                                            </button>
                                         </div>
-                                        <button onClick={() => updateQty(item.id, -item.quantity)} className="text-slate-300 hover:text-red-500 transition-colors self-start p-1">
-                                            <Trash2 size={16} />
-                                        </button>
                                     </div>
                                 ))}
                             </div>
                         )}
 
                         {/* Customer Details Form */}
-                        <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-100 shadow-sm mt-auto">
-                            <h3 className="text-xs font-bold text-slate-800 uppercase mb-2">Data Pemesan</h3>
-                            <input type="text" placeholder="Nama Lengkap" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
-                            <input type="email" placeholder="Alamat Email (Wajib)" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} className="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
-                            <input type="tel" placeholder="Nomor WhatsApp" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
+                        <div className="space-y-4 bg-white p-5 rounded-[24px] border border-slate-100 shadow-sm mt-auto">
+                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Data Diri Pemesan</h3>
+                            <div className="grid grid-cols-1 gap-3">
+                                <input type="text" placeholder="Nama Lengkap" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium" />
+                                <div className="space-y-2">
+                                    <div className="flex gap-2">
+                                        <select
+                                            value={customerAddress}
+                                            onChange={(e) => setCustomerAddress(e.target.value)}
+                                            className="flex-1 text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium appearance-none"
+                                        >
+                                            <option value="" disabled>Pilih Alamat Pengiriman</option>
+                                            {userProfile.addresses.map(addr => (
+                                                <option key={addr.id} value={addr.details}>{addr.label}: {addr.details}</option>
+                                            ))}
+                                        </select>
+                                        <button
+                                            onClick={() => {
+                                                setIsSettingsOpen(true);
+                                                setActiveSettingsTab('profil');
+                                            }}
+                                            className="px-4 py-3 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl hover:bg-emerald-100 transition-all flex items-center justify-center shrink-0"
+                                            title="Tambah Alamat"
+                                        >
+                                            <Plus size={18} />
+                                        </button>
+                                    </div>
+                                    {userProfile.addresses.length === 0 && (
+                                        <p className="text-[10px] text-amber-600 font-bold ml-1">* Belum ada alamat. Silakan tambah alamat baru.</p>
+                                    )}
+                                </div>
+                                <textarea
+                                    placeholder="Keterangan / Catatan Pesanan (Optional)..."
+                                    value={orderNote}
+                                    onChange={(e) => setOrderNote(e.target.value)}
+                                    className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium min-h-[100px] resize-none"
+                                ></textarea>
+                                <input type="tel" placeholder="Nomor WhatsApp" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium" />
+                            </div>
                         </div>
                     </div>
 
                     <div className="p-4 lg:p-6 bg-white border-t border-slate-100">
                         <div className="mb-4 space-y-2">
                             <div className="flex justify-between text-slate-500 text-xs font-medium">
-                                <span>Total Pesanan</span>
+                                <span>Subtotal</span>
                                 <span>Rp {subtotal.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
                             </div>
 
-                            <div className="flex justify-between items-center py-2 px-3 rounded-lg border border-emerald-100 bg-emerald-50/50 flex-wrap gap-2">
-                                <div className="flex items-center gap-2">
-                                    <div className="text-emerald-500 flex items-center justify-center w-4 h-4 rounded-full bg-white shadow-sm shrink-0">
-                                        <Info size={10} />
+                            {/* Toggles & Breakdown Pajak */}
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center py-2 px-3 rounded-lg border border-emerald-100 bg-emerald-50/50 flex-wrap gap-2 transition-all">
+                                    <div className="flex items-center gap-2">
+                                        <div className="text-emerald-500 flex items-center justify-center w-4 h-4 rounded-full bg-white shadow-sm shrink-0">
+                                            <Info size={10} />
+                                        </div>
+                                        <span className="text-xs font-medium text-emerald-600">Pajak Daerah (10%)</span>
                                     </div>
-                                    <span className="text-xs font-medium text-emerald-600">Termasuk Zakat (2.5%)</span>
+                                    <span className="text-xs font-bold text-emerald-600">Rp {pajakValue.toLocaleString('en-US')}</span>
                                 </div>
-                                <span className="text-xs font-bold text-emerald-600">Rp {zakatValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+
                             </div>
                         </div>
 
@@ -595,7 +761,7 @@ export default function App() {
                         </button>
                         <h3 className="text-xl font-black text-slate-800 mb-2 mt-4">Transfer Bank</h3>
                         <p className="text-sm text-slate-500 mb-6">Silakan transfer sebesar <strong className="text-emerald-600 text-base">Rp {totalAmount.toLocaleString('en-US')}</strong> ke salah satu rekening berikut:</p>
-                        
+
                         <div className="w-full flex flex-col gap-4 mb-6">
                             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left">
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Bank BSI</p>
@@ -661,9 +827,9 @@ export default function App() {
 
             {/* Bottom Navigation (Mobile Only) */}
             <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-3 flex justify-between items-center z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
-                <button 
-                  onClick={() => router.push('/homepage')} 
-                  className="flex flex-col items-center gap-1 text-slate-400"
+                <button
+                    onClick={() => router.push('/homepage')}
+                    className="flex flex-col items-center gap-1 text-slate-400"
                 >
                     <Home size={20} />
                     <span className="text-[10px] font-bold uppercase tracking-tight">Beranda</span>
@@ -672,19 +838,26 @@ export default function App() {
                     <ShoppingBag size={20} />
                     <span className="text-[10px] font-bold uppercase tracking-tight">Menu</span>
                 </button>
-                <button 
-                  onClick={() => router.push('/favorites')} 
-                  className="flex flex-col items-center gap-1 text-slate-400"
+                <button
+                    onClick={() => router.push('/favorites')}
+                    className="flex flex-col items-center gap-1 text-slate-400"
                 >
                     <Heart size={20} />
                     <span className="text-[10px] font-bold uppercase tracking-tight">Favorit</span>
                 </button>
-                <button 
-                  onClick={() => router.push('/customer-history')} 
-                  className="flex flex-col items-center gap-1 text-slate-400"
+                <button
+                    onClick={() => router.push('/customer-history')}
+                    className="flex flex-col items-center gap-1 text-slate-400"
                 >
                     <Clock size={20} />
                     <span className="text-[10px] font-bold uppercase tracking-tight">Riwayat</span>
+                </button>
+                <button
+                    onClick={() => setIsSettingsOpen(true)}
+                    className="flex flex-col items-center gap-1 text-slate-400"
+                >
+                    <Settings size={20} />
+                    <span className="text-[10px] font-bold uppercase tracking-tight">Pengaturan</span>
                 </button>
             </nav>
 
@@ -710,24 +883,25 @@ export default function App() {
                             ) : (
                                 <div className="space-y-4">
                                     {cart.map(item => (
-                                        <div key={item.id} className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                            <img src={item.img} className="w-16 h-16 rounded-xl object-cover" />
+                                        <div key={item.id} className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-100">
                                             <div className="flex-1">
-                                                <h4 className="font-bold text-sm text-slate-800 line-clamp-1">{item.name}</h4>
-                                                <p className="text-xs text-emerald-600 font-bold mt-1 tracking-wider uppercase">Rp {item.price.toLocaleString('en-US')}</p>
-                                                <div className="flex items-center gap-3 mt-3">
-                                                    <button onClick={() => updateQty(item.id, -1)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-emerald-600 shadow-sm">
+                                                <h4 className="font-bold text-sm text-slate-800">{item.name}</h4>
+                                                <p className="text-xs text-emerald-600 font-black mt-0.5">Rp {item.price.toLocaleString('en-US')}</p>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex items-center gap-2.5 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+                                                    <button onClick={() => updateQty(item.id, -1)} className="w-8 h-8 flex items-center justify-center bg-slate-50 rounded-lg text-slate-600">
                                                         <Minus size={14} />
                                                     </button>
-                                                    <span className="text-sm font-black w-6 text-center">{item.quantity}</span>
-                                                    <button onClick={() => addToCart(item)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-emerald-600 shadow-sm">
+                                                    <span className="text-sm font-black w-5 text-center">{item.quantity}</span>
+                                                    <button onClick={() => addToCart(item)} className="w-8 h-8 flex items-center justify-center bg-slate-50 rounded-lg text-slate-600">
                                                         <Plus size={14} />
                                                     </button>
                                                 </div>
+                                                <button onClick={() => updateQty(item.id, -item.quantity)} className="text-slate-300 hover:text-red-500 p-1">
+                                                    <Trash2 size={18} />
+                                                </button>
                                             </div>
-                                            <button onClick={() => updateQty(item.id, -item.quantity)} className="text-slate-300 hover:text-red-500 transition-colors self-start p-1">
-                                                <Trash2 size={18} />
-                                            </button>
                                         </div>
                                     ))}
 
@@ -735,19 +909,51 @@ export default function App() {
                                         <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Data Pemesan</h3>
                                             <input type="text" placeholder="Nama Lengkap" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
-                                            <input type="email" placeholder="Email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
+                                            <div className="space-y-2">
+                                                <div className="flex gap-2">
+                                                    <select
+                                                        value={customerAddress}
+                                                        onChange={(e) => setCustomerAddress(e.target.value)}
+                                                        className="flex-1 text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold appearance-none"
+                                                    >
+                                                        <option value="" disabled>Pilih Alamat Pengiriman</option>
+                                                        {userProfile.addresses.map(addr => (
+                                                            <option key={addr.id} value={addr.details}>{addr.label}: {addr.details}</option>
+                                                        ))}
+                                                    </select>
+                                                    <button
+                                                        onClick={() => {
+                                                            setIsCartModalOpen(false);
+                                                            setIsSettingsOpen(true);
+                                                            setActiveSettingsTab('profil');
+                                                        }}
+                                                        className="px-4 py-3 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl flex items-center justify-center"
+                                                    >
+                                                        <Plus size={18} />
+                                                    </button>
+                                                </div>
+                                                {userProfile.addresses.length === 0 && (
+                                                    <p className="text-[10px] text-amber-600 font-bold">* Silakan tambah alamat lebih dulu.</p>
+                                                )}
+                                            </div>
+                                            <textarea
+                                                placeholder="Keterangan / Catatan (Optional)..."
+                                                value={orderNote}
+                                                onChange={(e) => setOrderNote(e.target.value)}
+                                                className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold min-h-[100px] resize-none"
+                                            ></textarea>
                                             <input type="tel" placeholder="Nomor WhatsApp" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
                                         </div>
 
                                         <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl">
-                                            <div className="flex justify-between items-center mb-6">
-                                                <div className="flex flex-col">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic mb-1">Total Pembayaran</span>
-                                                    <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</span>
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic mb-1">Total Pembayaran</span>
+                                                <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</span>
+                                            </div>
+                                            <div className="flex flex-col items-end gap-1">
+                                                <div className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm">
+                                                    Pajak (10%)
                                                 </div>
-                                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider bg-white/5 px-2 py-1 rounded">
-                                                    Inc. Zakat Rp {zakatValue.toLocaleString('en-US')}
-                                                </span>
                                             </div>
                                             <div className="space-y-3 pb-4">
                                                 <select
@@ -774,6 +980,255 @@ export default function App() {
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Pengaturan */}
+            {isSettingsOpen && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row h-[80vh] md:h-auto max-h-[90vh]">
+                        {/* Sidebar Modal */}
+                        <div className="w-full md:w-64 bg-slate-50 p-6 flex flex-col gap-2">
+                            <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2 px-2">
+                                <Settings className="text-emerald-600" />
+                                Pengaturan
+                            </h3>
+                            <button
+                                onClick={() => setActiveSettingsTab('profil')}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${activeSettingsTab === 'profil' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
+                            >
+                                <User size={20} />
+                                Profil Saya
+                            </button>
+                            <button
+                                onClick={() => setActiveSettingsTab('bahasa')}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${activeSettingsTab === 'bahasa' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
+                            >
+                                <Languages size={20} />
+                                Bahasa
+                            </button>
+                            <button
+                                onClick={() => setActiveSettingsTab('tema')}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${activeSettingsTab === 'tema' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
+                            >
+                                <Palette size={20} />
+                                Tema
+                            </button>
+                            <button
+                                onClick={() => setIsSettingsOpen(false)}
+                                className="mt-auto flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-slate-400 hover:text-red-500 transition-all border border-transparent hover:border-red-100 mb-2"
+                            >
+                                <X size={20} />
+                                Tutup
+                            </button>
+                        </div>
+
+                        {/* Content Modal */}
+                        <div className="flex-1 p-8 md:p-10 bg-white overflow-y-auto">
+                            {activeSettingsTab === 'profil' && (
+                                <div className="space-y-6">
+                                    <div>
+                                        <h4 className="text-2xl font-black text-slate-800 tracking-tight">Profil Saya</h4>
+                                        <p className="text-slate-400 text-sm font-medium mt-1">Kelola informasi data diri Anda.</p>
+                                    </div>
+                                    <form onSubmit={handleSaveProfile} className="space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Depan</label>
+                                                <input
+                                                    type="text"
+                                                    value={userProfile.firstName}
+                                                    onChange={(e) => setUserProfile({ ...userProfile, firstName: e.target.value })}
+                                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 transition-all"
+                                                    placeholder="Nama Depan"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Belakang</label>
+                                                <input
+                                                    type="text"
+                                                    value={userProfile.lastName}
+                                                    onChange={(e) => setUserProfile({ ...userProfile, lastName: e.target.value })}
+                                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 transition-all"
+                                                    placeholder="Nama Belakang"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Alamat Email</label>
+                                            <input
+                                                type="email"
+                                                value={userProfile.email}
+                                                onChange={(e) => setUserProfile({ ...userProfile, email: e.target.value })}
+                                                className="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 transition-all"
+                                                placeholder="email@contoh.com"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Nomor WhatsApp</label>
+                                            <input
+                                                type="tel"
+                                                value={userProfile.whatsapp}
+                                                onChange={(e) => setUserProfile({ ...userProfile, whatsapp: e.target.value })}
+                                                className="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 transition-all"
+                                                placeholder="08xxxxxxxxxx"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Kata Sandi</label>
+                                            <div className="relative">
+                                                <input
+                                                    type={showPassword ? "text" : "password"}
+                                                    value={userProfile.password}
+                                                    onChange={(e) => setUserProfile({ ...userProfile, password: e.target.value })}
+                                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 transition-all pr-14"
+                                                    placeholder="••••••••"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors"
+                                                >
+                                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Address Section */}
+                                        <div className="pt-6 border-t border-slate-100 space-y-4">
+                                            <div className="flex items-center justify-between px-1">
+                                                <div className="flex items-center gap-2">
+                                                    <MapPin size={18} className="text-emerald-600" />
+                                                    <h5 className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Alamat Pengiriman</h5>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={addAddress}
+                                                    className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:bg-emerald-50 px-3 py-1.5 rounded-lg transition-all border border-emerald-100"
+                                                >
+                                                    + Tambah Alamat
+                                                </button>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                {userProfile.addresses.length === 0 ? (
+                                                    <div className="p-8 bg-slate-50 border border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center text-center gap-2">
+                                                        <MapPin size={24} className="text-slate-300" />
+                                                        <p className="text-xs font-bold text-slate-400">Belum ada alamat tersimpan.</p>
+                                                    </div>
+                                                ) : (
+                                                    userProfile.addresses.map((addr, idx) => (
+                                                        <div key={addr.id} className="p-5 bg-slate-50 rounded-[2rem] border border-slate-100 space-y-3 relative group/address">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeAddress(addr.id)}
+                                                                className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors"
+                                                                title="Hapus Alamat"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                            <div className="space-y-2">
+                                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Label Alamat (ex: Rumah, Kantor)</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={addr.label}
+                                                                    onChange={(e) => updateAddress(addr.id, 'label', e.target.value)}
+                                                                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 text-sm"
+                                                                    placeholder="Contoh: Rumah"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Detail Alamat Lengkap</label>
+                                                                <textarea
+                                                                    value={addr.details}
+                                                                    onChange={(e) => updateAddress(addr.id, 'details', e.target.value)}
+                                                                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-600 text-sm min-h-[80px] leading-relaxed resize-none"
+                                                                    placeholder="Jl. Merdeka No. 123, Kel. Kebon Jeruk..."
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all mt-4 active:scale-95"
+                                        >
+                                            Simpan Perubahan
+                                        </button>
+                                    </form>
+                                </div>
+                            )}
+
+                            {activeSettingsTab === 'bahasa' && (
+                                <div className="space-y-6">
+                                    <div>
+                                        <h4 className="text-2xl font-black text-slate-800 tracking-tight">Pilih Bahasa</h4>
+                                        <p className="text-slate-400 text-sm font-medium mt-1">Sesuaikan bahasa tampilan aplikasi.</p>
+                                    </div>
+                                    <div className="grid gap-3">
+                                        {[
+                                            { id: 'ID', name: 'Bahasa Indonesia', flag: '🇮🇩' },
+                                            { id: 'EN', name: 'English (US)', flag: '🇺🇸' }
+                                        ].map(lang => (
+                                            <button
+                                                key={lang.id}
+                                                onClick={() => handleSaveLanguage(lang.id)}
+                                                className={`flex items-center justify-between p-5 rounded-3xl border-2 transition-all ${language === lang.id ? 'border-emerald-500 bg-emerald-50/30' : 'border-slate-50 hover:border-emerald-200 bg-white'}`}
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <span className="text-2xl">{lang.flag}</span>
+                                                    <span className={`font-black tracking-tight ${language === lang.id ? 'text-emerald-700' : 'text-slate-700'}`}>{lang.name}</span>
+                                                </div>
+                                                {language === lang.id && (
+                                                    <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white">
+                                                        <CheckCircle2 size={14} strokeWidth={3} />
+                                                    </div>
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeSettingsTab === 'tema' && (
+                                <div className="space-y-6">
+                                    <div>
+                                        <h4 className="text-2xl font-black text-slate-800 tracking-tight">Tema Aplikasi</h4>
+                                        <p className="text-slate-400 text-sm font-medium mt-1">Pilih tampilan yang paling nyaman untuk Anda.</p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {[
+                                            { id: 'Light', name: 'Terang', color: 'bg-white', border: 'border-slate-200' },
+                                            { id: 'Dark', name: 'Gelap', color: 'bg-slate-900', border: 'border-slate-800' }
+                                        ].map(tm => (
+                                            <button
+                                                key={tm.id}
+                                                onClick={() => handleSaveTheme(tm.id)}
+                                                className={`p-1 rounded-[2rem] border-4 transition-all ${theme === tm.id ? 'border-emerald-500' : 'border-transparent shadow-sm hover:scale-105'}`}
+                                            >
+                                                <div className={`${tm.color} ${tm.border} border rounded-[1.8rem] h-32 flex flex-col items-center justify-center gap-3 overflow-hidden relative`}>
+                                                    <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                                                        <Palette size={24} className={tm.id === 'Light' ? 'text-emerald-600' : 'text-emerald-400'} />
+                                                    </div>
+                                                    <span className={`text-xs font-black uppercase tracking-widest ${tm.id === 'Light' ? 'text-slate-600' : 'text-slate-300'}`}>{tm.name}</span>
+                                                    {theme === tm.id && (
+                                                        <div className="absolute top-3 right-3 bg-emerald-500 text-white rounded-full p-1 shadow-lg">
+                                                            <CheckCircle2 size={14} strokeWidth={3} />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className="p-4 bg-amber-50 rounded-2xl text-[11px] font-bold text-amber-700 italic border border-amber-100/50 leading-relaxed capitalize">
+                                        * Fitur Tema Gelap akan segera hadir secara menyeluruh di seluruh halaman aplikasi.
+                                    </p>
                                 </div>
                             )}
                         </div>

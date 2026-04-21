@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Lock, ShieldCheck, AlertCircle, ArrowRight, Phone, ArrowLeft, MapPin } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient'; // Sesuaikan jalur/path ini dengan letak file Supabase Anda
 
 const DEFAULT_SETTINGS = {
     storeName: 'Santara Point',
@@ -9,9 +10,7 @@ const DEFAULT_SETTINGS = {
     whatsapp: '6285846802177',
     email: 'santarapoint@gmail.com',
     address: 'Jl. Raya Santara No. 123, Bandung',
-    zakatPercent: 2.5,
-    footerText: '© 2024 Santara Point. Berkah setiap saat.',
-    zakatEnabledDefault: true
+    footerText: '© 2024 Santara Point. Berkah setiap saat.'
 };
 
 export default function Register() {
@@ -26,7 +25,8 @@ export default function Register() {
     }, []);
 
     const [formData, setFormData] = useState({
-        name: '',
+        firstName: '',
+        lastName: '',
         email: '',
         whatsapp: '',
         address: '',
@@ -34,7 +34,8 @@ export default function Register() {
         confirmPassword: ''
     });
     const [touched, setTouched] = useState({
-        name: false,
+        firstName: false,
+        lastName: false,
         email: false,
         whatsapp: false,
         address: false,
@@ -50,10 +51,11 @@ export default function Register() {
         setTouched({ ...touched, [e.target.name]: true });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => { // Pastikan ada kata 'async' di sini
         e.preventDefault();
 
-        if (!formData.name || !formData.email || !formData.whatsapp || !formData.address || !formData.password || !formData.confirmPassword) {
+        // 1. Validasi dasar
+        if (!formData.firstName || !formData.lastName || !formData.email || !formData.whatsapp || !formData.address || !formData.password || !formData.confirmPassword) {
             alert('Tolong lengkapi data yang masih kosong!');
             return;
         }
@@ -63,13 +65,40 @@ export default function Register() {
             return;
         }
 
-        // Simpan data nama untuk simulasi saat login nanti
-        localStorage.setItem('registeredName', formData.name);
+        try {
+            // 2. MENGIRIM DATA KE SUPABASE
+            const { data, error } = await supabase.auth.signUp({
+                email: formData.email,
+                password: formData.password,
+                options: {
+                    data: {
+                        first_name: formData.firstName,
+                        last_name: formData.lastName,
+                        whatsapp: formData.whatsapp,
+                        address: formData.address
+                    }
+                }
+            });
 
-        alert(`Alhamdulillah! Anda telah berhasil mendaftar akun pelanggan ${storeSettings.storeName}.\n\nInformasi pendaftaran Anda telah dikirimkan melalui Email dan nomor WhatsApp yang terdaftar.\n\nTerima kasih telah bergabung bersama kami. Mari mulai memesan sajian penuh keberkahan!`);
+            // 3. Jika Supabase menolak (misal: email sudah terdaftar)
+            if (error) {
+                alert(`Gagal Mendaftar: ${error.message}`);
+                return;
+            }
 
-        // Setelah daftar sukses, arahkan ke login
-        router.push('/login');
+            // 4. Jika Berhasil
+            const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+            localStorage.setItem('registeredName', fullName);
+
+            alert(`Alhamdulillah! Anda telah berhasil mendaftar akun pelanggan ${storeSettings.storeName}.\n\nSilakan cek kotak masuk Email Anda (${formData.email}) untuk melakukan verifikasi akun.`);
+
+            // Setelah daftar sukses, arahkan ke login
+            router.push('/login');
+
+        } catch (err) {
+            console.error("Gagal terhubung ke server:", err);
+            alert("Terjadi kesalahan sistem, mohon coba lagi nanti.");
+        }
     };
 
     return (
@@ -102,24 +131,45 @@ export default function Register() {
                     </div>
 
                     <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                            <div className="mt-1 relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                                    placeholder="Budi Santoso"
-                                    required
-                                />
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Nama Depan</label>
+                                <div className="mt-1 relative">
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                    <input
+                                        type="text"
+                                        name="firstName"
+                                        value={formData.firstName}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                                        placeholder="Budi"
+                                        required
+                                    />
+                                </div>
+                                {touched.firstName && !formData.firstName && (
+                                    <p className="text-red-500 text-xs mt-1 font-medium">Wajib diisi!</p>
+                                )}
                             </div>
-                            {touched.name && !formData.name && (
-                                <p className="text-red-500 text-xs mt-1 font-medium">Wajib diisi!</p>
-                            )}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Nama Belakang</label>
+                                <div className="mt-1 relative">
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                    <input
+                                        type="text"
+                                        name="lastName"
+                                        value={formData.lastName}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                                        placeholder="Santoso"
+                                        required
+                                    />
+                                </div>
+                                {touched.lastName && !formData.lastName && (
+                                    <p className="text-red-500 text-xs mt-1 font-medium">Wajib diisi!</p>
+                                )}
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Email</label>

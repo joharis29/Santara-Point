@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
+    LayoutDashboard,
     Home,
     ShoppingBag,
     ShieldCheck,
@@ -18,32 +19,50 @@ import {
     MessageCircle,
     Mail,
     LogOut,
-    LayoutDashboard,
     ClipboardList,
     Settings,
+    ArrowUpDown,
     Store,
     ChefHat,
     CreditCard,
     UserCircle,
     X,
     MapPin,
-    Phone
+    Phone,
+    PlusCircle,
+    ArrowLeft,
+    Image as ImageIcon,
+    History,
+    Package as PackageIcon,
+    Calendar,
+    ChevronDown,
+    Tag,
+    Landmark,
+    BookOpen,
+    Building2,
+    Briefcase,
+    Globe,
+    FileText,
+    Coins,
+    Clock,
+    Users,
+    UserPlus
 } from 'lucide-react';
 
 /**
  * SANTARA POINT - POS INPUT (OWNER ROLE)
- * Fokus: Manajemen Stok Presisi, Kalkulator Zakat, & Kontrol Operasional.
+ * Fokus: Manajemen Stok Presisi, Kontrol Operasional, & Transaksi Cepat.
  */
 
 const INITIAL_PRODUCTS = [
-    { id: 7, name: 'Nasi Kuning', price: 15000, stock: 15, category: 'Makanan', img: '/nasi-kuning-baru.jpg' },
-    { id: 8, name: 'Nasi Uduk', price: 15000, stock: 20, category: 'Makanan', img: '/nasi-uduk-asli.jpg' },
-    { id: 9, name: 'Soto Ayam', price: 15000, stock: 15, category: 'Makanan', img: '/soto-ayam-asli.jpg' },
-    { id: 10, name: 'Bubur Ayam', price: 15000, stock: 20, category: 'Makanan', img: '/bubur-ayam-asli.jpg' },
-    { id: 11, name: 'Ketoprak', price: 15000, stock: 15, category: 'Makanan', img: '/ketoprak-asli.jpg' },
-    { id: 12, name: 'Nasi Ayam Pop', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-pop-asli.jpg' },
-    { id: 13, name: 'Nasi Ayam Kecap', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-kecap-asli.jpg' },
-    { id: 14, name: 'Nasi Ayam Balado', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-balado-asli.jpg' },
+    { id: 7, name: 'Nasi Kuning', price: 15000, stock: 15, category: 'Makanan', img: '/nasi-kuning-baru.jpg', discountPercent: 10, rating: 4.8 },
+    { id: 8, name: 'Nasi Uduk', price: 15000, stock: 20, category: 'Makanan', img: '/nasi-uduk-asli.jpg', discountPercent: 0, rating: 4.5 },
+    { id: 9, name: 'Soto Ayam', price: 15000, stock: 15, category: 'Makanan', img: '/soto-ayam-asli.jpg', discountPercent: 0, rating: 4.7 },
+    { id: 10, name: 'Bubur Ayam', price: 15000, stock: 20, category: 'Makanan', img: '/bubur-ayam-asli.jpg', discountPercent: 0, rating: 4.6 },
+    { id: 11, name: 'Ketoprak', price: 15000, stock: 15, category: 'Makanan', img: '/ketoprak-asli.jpg', discountPercent: 15, rating: 4.9 },
+    { id: 12, name: 'Nasi Ayam Pop', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-pop-asli.jpg', discountPercent: 0, rating: 4.4 },
+    { id: 13, name: 'Nasi Ayam Kecap', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-kecap-asli.jpg', discountPercent: 0, rating: 4.3 },
+    { id: 14, name: 'Nasi Ayam Balado', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-balado-asli.jpg', discountPercent: 0, rating: 4.2 },
     { id: 15, name: 'Nasi Ayam Kremes', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-kremes-asli.jpg' },
     { id: 16, name: 'Nasi Chicken Nugget', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-chicken-nugget-asli.jpg' },
     { id: 17, name: 'Nasi Ayam Rica-Rica', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-rica-rica-asli.jpg' },
@@ -94,9 +113,28 @@ const DEFAULT_SETTINGS = {
     whatsapp: '6285846802177',
     email: 'santarapoint@gmail.com',
     address: 'Jl. Raya Santara No. 123, Bandung',
-    zakatPercent: 2.5,
     footerText: '© 2024 Santara Point. Berkah setiap saat.',
-    zakatEnabledDefault: true
+    // Info Perusahaan
+    companyCategory: 'Retailer',
+    companyField: 'Restoran',
+    startDate: '',
+    accountingPeriod: 'Januari - Desember',
+    currency: 'IDR',
+    // Pajak
+    taxCompanyName: '',
+    pkpDate: '',
+    pkpNumber: '',
+    companyType: 'PT',
+    companyNpwp: '',
+    klu: '',
+    nitku: '',
+    taxAddress: '',
+    // Pengguna
+    authorizedUsers: [
+        { contact: 'santarapoint@gmail.com', role: 'Administrator' }
+    ],
+    // Pengaturan Pajak
+    isPajakActive: true
 };
 
 export default function App() {
@@ -104,18 +142,31 @@ export default function App() {
     const [products, setProducts] = useState(INITIAL_PRODUCTS);
     const [cart, setCart] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [zakatEnabled, setZakatEnabled] = useState(true);
+    // Pajak Daerah strictly mandatory
     const [activeCategory, setActiveCategory] = useState('Semua');
     const [customerName, setCustomerName] = useState('');
     const [queueNumber, setQueueNumber] = useState('');
+    const [sortBy, setSortBy] = useState('default');
+    const [orderNote, setOrderNote] = useState('');
     const [usedQueueNumbers, setUsedQueueNumbers] = useState([]);
     const [paymentMethod, setPaymentMethod] = useState('');
+    const [orderType, setOrderType] = useState('Dine-In');
     const [toppingModalProduct, setToppingModalProduct] = useState(null);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+    const [settingsTab, setSettingsTab] = useState('info'); // 'info', 'tax', or 'users'
+    const [newUserContact, setNewUserContact] = useState('');
+    const [newUserRole, setNewUserRole] = useState('Operator');
     const [isCartModalOpen, setIsCartModalOpen] = useState(false);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
 
     React.useEffect(() => {
+        // Security Check
+        const userRole = localStorage.getItem('currentUserRole');
+        if (userRole !== 'Administrator') {
+            router.push('/Login');
+            return;
+        }
+
         const stored = localStorage.getItem('santaraUsedQueue');
         if (stored) {
             try { setUsedQueueNumbers(JSON.parse(stored)); } catch(e) {}
@@ -132,27 +183,31 @@ export default function App() {
         if (storedSettings) {
             try {
                 const parsed = JSON.parse(storedSettings);
-                setStoreSettings(parsed);
-                setZakatEnabled(parsed.zakatEnabledDefault);
+                setStoreSettings({ ...DEFAULT_SETTINGS, ...parsed });
             } catch (e) {
                 console.error("Error parsing settings", e);
             }
         } else {
             localStorage.setItem('santaraStoreSettings', JSON.stringify(DEFAULT_SETTINGS));
-            setZakatEnabled(DEFAULT_SETTINGS.zakatEnabledDefault);
         }
     }, []);
 
-    // --- Logika Perhitungan ---
+    // --- Logika Perhitungan (Inclusive Pajak 10%) ---
     const menuTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const subtotal = zakatEnabled ? menuTotal / 1.025 : menuTotal;
-    const zakatValue = zakatEnabled ? menuTotal - (menuTotal / 1.025) : 0;
+    const subtotal = storeSettings.isPajakActive ? menuTotal / 1.10 : menuTotal;
+    const pajakValue = storeSettings.isPajakActive ? Math.round(menuTotal - subtotal) : 0;
     const totalAmount = menuTotal;
 
     const filteredProducts = products.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = activeCategory === 'Semua' || p.category === activeCategory;
         return matchesSearch && matchesCategory;
+    }).sort((a, b) => {
+        if (sortBy === 'price-low') return a.price - b.price;
+        if (sortBy === 'price-high') return b.price - a.price;
+        if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+        if (sortBy === 'discount') return (b.discountPercent || 0) - (a.discountPercent || 0);
+        return 0;
     });
 
     // --- Handler Keranjang ---
@@ -206,11 +261,13 @@ export default function App() {
             timestamp: new Date().toISOString(),
             customerName,
             queueNumber,
+            orderType,
+            keterangan: orderNote,
             paymentMethod,
             source: 'Owner',
             cashierName: 'Admin',
             totalAmount,
-            zakat: zakatValue,
+            pajak: pajakValue,
             status: 'Menunggu',
             items: cart.map(({ name, quantity, price }) => ({ name, quantity, price }))
         };
@@ -222,6 +279,8 @@ export default function App() {
         setCart([]);
         setCustomerName('');
         setQueueNumber('');
+        setOrderNote('');
+        setOrderType('Dine-In');
         setPaymentMethod('');
     };
 
@@ -240,8 +299,14 @@ export default function App() {
                     {[
                         { icon: <LayoutDashboard size={20} />, label: "Dashboard", active: false, action: () => alert('Dashboard akan segera hadir!') },
                         { icon: <ShoppingBag size={20} />, label: "POS Kasir", active: true, action: () => {} },
+                        { icon: <Tag size={20} />, label: "Penjualan", active: false, action: () => router.push('/penjualan') },
+                        { icon: <Landmark size={20} />, label: "Kas \u0026 Bank", active: false, action: () => router.push('/kas-bank') },
+                        { icon: <BookOpen size={20} />, label: "Buku Besar", active: false, action: () => router.push('/buku-besar') },
+                        { icon: <Building2 size={20} />, label: "Perusahaan", active: false, action: () => router.push('/perusahaan') },
                         { icon: <ChefHat size={20} />, label: "Daftar Antrean", active: false, action: () => router.push('/waiting-list') },
+                        { icon: <Package size={20} />, label: "Persediaan", active: false, action: () => router.push('/persediaan') },
                         { icon: <ClipboardList size={20} />, label: "Manajemen Stok", active: false, action: () => router.push('/manajemen-stok') },
+                        { icon: <ShoppingBag size={20} />, label: "Pembelian", active: false, action: () => router.push('/pembelian') },
                         { icon: <TrendingUp size={20} />, label: "Laporan Keuangan", active: false, action: () => router.push('/history?role=admin') },
                         { icon: <Settings size={20} />, label: "Pengaturan Toko", active: false, action: () => setIsSettingsModalOpen(true) },
                     ].map((item, i) => (
@@ -291,9 +356,8 @@ export default function App() {
                     </div>
                 </header>
 
-                {/* Kategori Makanan - Filter */}
-                <div className="px-6 lg:px-10 mt-6 overflow-x-auto">
-                    <div className="flex gap-3">
+                <div className="px-6 lg:px-10 mt-6 flex items-center justify-between overflow-x-auto gap-4">
+                    <div className="flex gap-3 pb-2">
                         {categories.map(cat => (
                             <button
                                 key={cat}
@@ -303,6 +367,20 @@ export default function App() {
                                 {cat}
                             </button>
                         ))}
+                    </div>
+                    <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm shrink-0 mb-2">
+                        <ArrowUpDown size={14} className="text-slate-400" />
+                        <select 
+                            value={sortBy} 
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="text-[11px] font-black uppercase tracking-widest text-slate-600 outline-none bg-transparent cursor-pointer"
+                        >
+                            <option value="default">Urutkan</option>
+                            <option value="price-low">Termurah</option>
+                            <option value="price-high">Termahal</option>
+                            <option value="rating">Rating</option>
+                            <option value="discount">Diskon</option>
+                        </select>
                     </div>
                 </div>
 
@@ -318,6 +396,11 @@ export default function App() {
                                 <div className="h-36 rounded-[1.5rem] overflow-hidden mb-4 relative">
                                     <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
                                     <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition"></div>
+                                    {product.discountPercent > 0 && (
+                                        <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest shadow-md z-10">
+                                            -{product.discountPercent}%
+                                        </div>
+                                    )}
                                     {product.isNew && (
                                         <div className="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-md">
                                             NEW
@@ -329,7 +412,12 @@ export default function App() {
                                         <div className="flex justify-between items-start mb-1">
                                             <h4 className="font-bold text-slate-800 text-sm line-clamp-2">{product.name}</h4>
                                         </div>
-                                        <p className="text-emerald-600 font-black text-base italic">Rp {product.price.toLocaleString('en-US')}</p>
+                                        <div className="flex flex-col">
+                                            {product.discountPercent > 0 && (
+                                                <span className="text-[10px] font-bold line-through text-slate-400">Rp {product.originalPrice?.toLocaleString()}</span>
+                                            )}
+                                            <p className="text-emerald-600 font-black text-base italic">Rp {product.price.toLocaleString('en-US')}</p>
+                                        </div>
                                     </div>
                                     <div className="mt-3 flex items-center justify-between text-[10px] font-bold text-slate-400">
                                         <span>{product.category}</span>
@@ -363,18 +451,24 @@ export default function App() {
                     ) : (
                         <div className="space-y-3">
                             {cart.map(item => (
-                                <div key={item.id} className="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100 group">
-                                    <img src={item.img} className="w-12 h-12 rounded-xl object-cover shadow-sm" />
+                                <div key={item.id} className="flex items-center justify-between bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:border-emerald-500/50 transition-all">
                                     <div className="flex-1">
-                                        <h5 className="font-black text-xs text-slate-800 line-clamp-1">{item.name}</h5>
-                                        <p className="text-[10px] text-emerald-600 font-bold mt-0.5">Rp {item.price.toLocaleString('en-US')}</p>
+                                        <h5 className="font-bold text-[13px] text-slate-100 leading-tight">{item.name}</h5>
+                                        <p className="text-[10px] text-emerald-400 font-black mt-0.5">Rp {(item.price * item.quantity).toLocaleString('en-US')}</p>
                                     </div>
-                                    <div className="flex flex-col items-end gap-1.5">
-                                        <div className="flex items-center gap-1.5 bg-white p-1 rounded-lg border border-slate-200">
-                                            <button onClick={() => updateQty(item.id, -1)} className="p-0.5 hover:bg-emerald-50 rounded-md text-emerald-600"><Minus size={12} /></button>
-                                            <span className="text-xs font-black w-3 text-center">{item.quantity}</span>
-                                            <button onClick={() => addToCart(item)} className="p-0.5 hover:bg-emerald-50 rounded-md text-emerald-600"><Plus size={12} /></button>
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2.5 bg-slate-900/50 p-1 rounded-lg border border-slate-700 shadow-sm">
+                                            <button onClick={() => updateQty(item.id, -1)} className="w-6 h-6 flex items-center justify-center bg-slate-800 rounded shadow-sm text-slate-400 hover:text-emerald-500 transition-colors">
+                                                <Minus size={10} />
+                                            </button>
+                                            <span className="text-[12px] font-black w-4 text-center text-slate-100">{item.quantity}</span>
+                                            <button onClick={() => addToCart(item)} className="w-6 h-6 flex items-center justify-center bg-slate-800 rounded shadow-sm text-slate-400 hover:text-emerald-500 transition-colors">
+                                                <Plus size={10} />
+                                            </button>
                                         </div>
+                                        <button onClick={() => updateQty(item.id, -item.quantity)} className="text-slate-500 hover:text-red-400 transition-colors p-1">
+                                            <Trash2 size={16} />
+                                        </button>
                                     </div>
                                 </div>
                             ))}
@@ -382,28 +476,44 @@ export default function App() {
                     )}
 
                     {/* Customer Details Form */}
-                    <div className="mt-5 space-y-2 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <h3 className="text-[10px] font-black text-slate-800 uppercase mb-1">Data Pemesan</h3>
-                        <input type="text" placeholder="Nama Pemesan" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-700" />
-                        <select
-                            value={queueNumber}
-                            onChange={(e) => setQueueNumber(e.target.value)}
-                            className="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-700 cursor-pointer"
-                        >
-                            <option value="" disabled>Pilih Nomor Antrian</option>
-                            {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
-                                const isUsed = usedQueueNumbers.includes(num.toString());
-                                return (
-                                    <option key={num} value={num} disabled={isUsed}>
-                                        Antrian {num} {isUsed ? '(Terpakai)' : ''}
-                                    </option>
-                                );
-                            })}
-                        </select>
+                    <div className="mt-6 p-5 bg-slate-800 border border-slate-700 rounded-[24px] space-y-4 shadow-sm">
+                        <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Keterangan Pesanan</h3>
+                        <div className="space-y-3">
+                            <input type="text" placeholder="Nama Pemesan" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-[13px] px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-200" />
+                            <select
+                                value={queueNumber}
+                                onChange={(e) => setQueueNumber(e.target.value)}
+                                className="w-full text-[13px] px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-200 cursor-pointer"
+                            >
+                                <option value="" disabled>Pilih Nomor Antrian</option>
+                                {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
+                                    const isUsed = usedQueueNumbers.includes(num.toString());
+                                    return (
+                                        <option key={num} value={num} disabled={isUsed}>
+                                            Antrian {num} {isUsed ? '(Terpakai)' : ''}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                            <select
+                                value={orderType}
+                                onChange={(e) => setOrderType(e.target.value)}
+                                className="w-full text-[13px] px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-200 cursor-pointer"
+                            >
+                                <option value="Dine-In">Dine-In</option>
+                                <option value="Takeaway">Takeaway</option>
+                            </select>
+                            <textarea 
+                                placeholder="Keterangan (Optional)..." 
+                                value={orderNote} 
+                                onChange={(e) => setOrderNote(e.target.value)} 
+                                className="w-full text-[13px] px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-200 min-h-[80px] resize-none"
+                            ></textarea>
+                        </div>
                     </div>
                 </div>
 
-                {/* Bagian Pembayaran & Zakat */}
+                {/* Bagian Pembayaran & Ringkasan */}
                 <div className="p-5 lg:p-6 bg-slate-900 border-t border-slate-800 text-white shadow-[0_-10px_40px_rgba(0,0,0,0.15)] relative z-20">
                     <div className="space-y-3 mb-5">
                         <div className="flex justify-between text-slate-400 font-bold text-xs tracking-widest uppercase mb-2">
@@ -411,25 +521,21 @@ export default function App() {
                             <span>Rp {subtotal.toLocaleString('en-US')}</span>
                         </div>
 
-                        {/* KALKULATOR ZAKAT OTOMATIS */}
-                        <div className={`flex items-center justify-between p-3 rounded-xl transition-all border ${zakatEnabled ? 'bg-emerald-600/20 border-emerald-500' : 'bg-slate-800 border-slate-700'}`}>
-                            <div className="flex items-center gap-3">
-                                <div className={`p-1.5 rounded-lg ${zakatEnabled ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-400'}`}>
-                                    <Calculator size={14} />
+                        {/* KALKULATOR PAJAK DAERAH */}
+                        <div className="space-y-2">
+                            <div className={`flex items-center justify-between p-3 rounded-xl transition-all border ${storeSettings.isPajakActive ? 'bg-emerald-600/20 border-emerald-500' : 'bg-slate-800 border-slate-700 opacity-50'}`}>
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-1.5 rounded-lg ${storeSettings.isPajakActive ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-500'}`}>
+                                        <Calculator size={14} />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-wider leading-none mb-0.5">Pajak Daerah (10%)</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-[10px] font-black uppercase tracking-wider leading-none mb-0.5">Zakat (2.5%)</p>
-                                    <button
-                                        onClick={() => setZakatEnabled(!zakatEnabled)}
-                                        className="text-[9px] font-bold text-emerald-400 underline decoration-dotted"
-                                    >
-                                        {zakatEnabled ? 'Nonaktifkan' : 'Aktifkan'}
-                                    </button>
-                                </div>
+                                <span className={`text-xs font-black ${storeSettings.isPajakActive ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                    {storeSettings.isPajakActive ? `Rp ${pajakValue.toLocaleString('en-US')}` : 'Nonaktif'}
+                                </span>
                             </div>
-                            <span className={`text-xs font-black ${zakatEnabled ? 'text-emerald-400' : 'text-slate-500'}`}>
-                                Rp {zakatValue.toLocaleString('en-US')}
-                            </span>
                         </div>
                     </div>
 
@@ -484,6 +590,7 @@ export default function App() {
             {isSettingsModalOpen && (
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
                     <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                        {/* Header Modal */}
                         <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                             <div>
                                 <h3 className="text-2xl font-black text-slate-800 tracking-tight">Pengaturan Toko</h3>
@@ -493,83 +600,388 @@ export default function App() {
                                 <X size={24} />
                             </button>
                         </div>
+
+                        {/* TABS Navigation */}
+                        <div className="flex bg-slate-100 p-2 mx-8 mt-6 rounded-2xl">
+                            <button 
+                                onClick={() => setSettingsTab('info')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${settingsTab === 'info' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            >
+                                <Building2 size={16} />
+                                Info Perusahaan
+                            </button>
+                            <button 
+                                onClick={() => setSettingsTab('tax')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${settingsTab === 'tax' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            >
+                                <Calculator size={16} />
+                                Pajak
+                            </button>
+                            <button 
+                                onClick={() => setSettingsTab('users')}
+                                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${settingsTab === 'users' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            >
+                                <Users size={16} />
+                                Pengguna
+                            </button>
+                        </div>
                         
                         <div className="p-8 overflow-y-auto space-y-6 flex-1">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Nama Toko</label>
-                                    <div className="relative">
-                                        <Store className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                            {settingsTab === 'info' ? (
+                                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Nama Usaha</label>
+                                            <div className="relative">
+                                                <Store className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                                <input 
+                                                    type="text" 
+                                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                                    value={storeSettings.storeName}
+                                                    onChange={(e) => setStoreSettings({...storeSettings, storeName: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Kategori Usaha</label>
+                                            <div className="relative">
+                                                <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                                <select 
+                                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none cursor-pointer"
+                                                    value={storeSettings.companyCategory}
+                                                    onChange={(e) => setStoreSettings({...storeSettings, companyCategory: e.target.value})}
+                                                >
+                                                    <option value="Manufaktur">Manufaktur</option>
+                                                    <option value="Distributor">Distributor</option>
+                                                    <option value="Grosir/Wholesaler">Grosir/Wholesaler</option>
+                                                    <option value="Retailer">Retailer</option>
+                                                    <option value="Jasa/Service">Jasa/Service</option>
+                                                </select>
+                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Bidang Usaha</label>
+                                            <div className="relative">
+                                                <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                                <select 
+                                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none cursor-pointer"
+                                                    value={storeSettings.companyField}
+                                                    onChange={(e) => setStoreSettings({...storeSettings, companyField: e.target.value})}
+                                                >
+                                                    <option value="Restoran">Restoran</option>
+                                                    <option value="Cafe">Cafe</option>
+                                                    <option value="Toko Kelontong">Toko Kelontong</option>
+                                                    <option value="Fashion">Fashion</option>
+                                                    <option value="Teknologi">Teknologi</option>
+                                                    <option value="Pendidikan">Pendidikan</option>
+                                                    <option value="Kesehatan">Kesehatan</option>
+                                                    <option value="Lainnya">Lainnya</option>
+                                                </select>
+                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Telepon</label>
+                                            <div className="relative">
+                                                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                                <input 
+                                                    type="text" 
+                                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                                    value={storeSettings.whatsapp}
+                                                    onChange={(e) => setStoreSettings({...storeSettings, whatsapp: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email</label>
+                                            <div className="relative">
+                                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                                <input 
+                                                    type="email" 
+                                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                                    value={storeSettings.email}
+                                                    onChange={(e) => setStoreSettings({...storeSettings, email: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Tanggal Mulai Data</label>
+                                            <div className="relative">
+                                                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                                <input 
+                                                    type="date" 
+                                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                                    value={storeSettings.startDate}
+                                                    onChange={(e) => setStoreSettings({...storeSettings, startDate: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Periode Akuntansi</label>
+                                            <div className="relative">
+                                                <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                                <input 
+                                                    type="text" 
+                                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                                    placeholder="Januari - Desember"
+                                                    value={storeSettings.accountingPeriod}
+                                                    onChange={(e) => setStoreSettings({...storeSettings, accountingPeriod: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Mata Uang</label>
+                                            <div className="relative">
+                                                <Coins className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                                <select 
+                                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none cursor-pointer"
+                                                    value={storeSettings.currency}
+                                                    onChange={(e) => setStoreSettings({...storeSettings, currency: e.target.value})}
+                                                >
+                                                    <option value="IDR">IDR - Rupiah Indonesia</option>
+                                                    <option value="USD">USD - US Dollar</option>
+                                                    <option value="MYR">MYR - Ringgit Malaysia</option>
+                                                    <option value="SGD">SGD - Singapore Dollar</option>
+                                                </select>
+                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Alamat Toko</label>
+                                        <div className="relative">
+                                            <MapPin className="absolute left-4 top-4 text-emerald-500" size={18} />
+                                            <textarea 
+                                                className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 min-h-[80px]"
+                                                value={storeSettings.address}
+                                                onChange={(e) => setStoreSettings({...storeSettings, address: e.target.value})}
+                                            ></textarea>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Teks Footer (Nota/Web)</label>
                                         <input 
                                             type="text" 
-                                            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                            value={storeSettings.storeName}
-                                            onChange={(e) => setStoreSettings({...storeSettings, storeName: e.target.value})}
+                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                            value={storeSettings.footerText}
+                                            onChange={(e) => setStoreSettings({...storeSettings, footerText: e.target.value})}
                                         />
                                     </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">WhatsApp Toko</label>
-                                    <div className="relative">
-                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                        <input 
-                                            type="text" 
-                                            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                            value={storeSettings.whatsapp}
-                                            onChange={(e) => setStoreSettings({...storeSettings, whatsapp: e.target.value})}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email Toko</label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                        <input 
-                                            type="email" 
-                                            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                            value={storeSettings.email}
-                                            onChange={(e) => setStoreSettings({...storeSettings, email: e.target.value})}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Default Zakat (2.5%)</label>
-                                    <div className="flex items-center gap-3 h-[50px] bg-slate-50 px-4 border border-slate-200 rounded-2xl">
-                                        <Calculator className="text-emerald-500" size={18} />
-                                        <span className="text-sm font-bold text-slate-600 flex-1">Aktifkan saat checkout</span>
+                            ) : settingsTab === 'tax' ? (
+                                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                    <div className="bg-emerald-50 p-6 rounded-[2rem] border border-emerald-100 mb-6 flex items-center justify-between group">
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-3 bg-white rounded-2xl shadow-sm text-emerald-600">
+                                                <Calculator size={24} />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-slate-800 text-sm">Aktifkan Pajak Daerah (10%)</h4>
+                                                <p className="text-[10px] text-slate-400 font-medium tracking-tight">Hitung breakdown pajak 10% (Inclusive) pada setiap transaksi</p>
+                                            </div>
+                                        </div>
                                         <button 
-                                            onClick={() => setStoreSettings({...storeSettings, zakatEnabledDefault: !storeSettings.zakatEnabledDefault})}
-                                            className={`w-12 h-6 rounded-full transition-all relative ${storeSettings.zakatEnabledDefault ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                                            onClick={() => setStoreSettings({...storeSettings, isPajakActive: !storeSettings.isPajakActive})}
+                                            className={`w-14 h-8 rounded-full transition-all relative ${storeSettings.isPajakActive ? 'bg-emerald-600' : 'bg-slate-300'}`}
                                         >
-                                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${storeSettings.zakatEnabledDefault ? 'right-1' : 'left-1'}`}></div>
+                                            <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all shadow-sm ${storeSettings.isPajakActive ? 'right-1' : 'left-1'}`} />
                                         </button>
                                     </div>
-                                </div>
-                            </div>
-                            
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Alamat Toko</label>
-                                <div className="relative">
-                                    <MapPin className="absolute left-4 top-4 text-emerald-500" size={18} />
-                                    <textarea 
-                                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 min-h-[100px]"
-                                        value={storeSettings.address}
-                                        onChange={(e) => setStoreSettings({...storeSettings, address: e.target.value})}
-                                    ></textarea>
-                                </div>
-                            </div>
 
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Teks Footer (Nota/Web)</label>
-                                <input 
-                                    type="text" 
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                    value={storeSettings.footerText}
-                                    onChange={(e) => setStoreSettings({...storeSettings, footerText: e.target.value})}
-                                />
-                            </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Nama Perusahaan</label>
+                                            <div className="relative">
+                                                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                                <input 
+                                                    type="text" 
+                                                    className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 shadow-sm"
+                                                    value={storeSettings.taxCompanyName || ''}
+                                                    onChange={(e) => setStoreSettings({...storeSettings, taxCompanyName: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Tanggal Pengukuhan PKP</label>
+                                            <div className="relative">
+                                                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                                <input 
+                                                    type="date" 
+                                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                                    value={storeSettings.pkpDate}
+                                                    onChange={(e) => setStoreSettings({...storeSettings, pkpDate: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">No. Pengukuhan PKP</label>
+                                            <div className="relative">
+                                                <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                                <input 
+                                                    type="text" 
+                                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                                    value={storeSettings.pkpNumber}
+                                                    onChange={(e) => setStoreSettings({...storeSettings, pkpNumber: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Tipe Usaha</label>
+                                            <div className="relative">
+                                                <LayoutDashboard className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                                <select 
+                                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none cursor-pointer"
+                                                    value={storeSettings.companyType}
+                                                    onChange={(e) => setStoreSettings({...storeSettings, companyType: e.target.value})}
+                                                >
+                                                    <option value="PT">PT (Perseroan Terbatas)</option>
+                                                    <option value="CV">CV (Commanditaire Vennootschap)</option>
+                                                    <option value="Perorangan">Perorangan</option>
+                                                    <option value="Yayasan">Yayasan</option>
+                                                    <option value="Lainnya">Lainnya</option>
+                                                </select>
+                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">NPWP Perusahaan</label>
+                                            <div className="relative">
+                                                <Calculator className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="00.000.000.0-000.000"
+                                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                                    value={storeSettings.companyNpwp}
+                                                    onChange={(e) => setStoreSettings({...storeSettings, companyNpwp: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">KLU (Klasifikasi Lapangan Usaha)</label>
+                                            <div className="relative">
+                                                <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                                <input 
+                                                    type="text" 
+                                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                                    value={storeSettings.klu}
+                                                    onChange={(e) => setStoreSettings({...storeSettings, klu: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-span-1 md:col-span-2 space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">NITKU</label>
+                                            <div className="relative">
+                                                <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                                <input 
+                                                    type="text" 
+                                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                                    value={storeSettings.nitku}
+                                                    onChange={(e) => setStoreSettings({...storeSettings, nitku: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Alamat (Pajak)</label>
+                                        <div className="relative">
+                                            <MapPin className="absolute left-4 top-4 text-emerald-500" size={18} />
+                                            <textarea 
+                                                className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 min-h-[100px]"
+                                                value={storeSettings.taxAddress}
+                                                onChange={(e) => setStoreSettings({...storeSettings, taxAddress: e.target.value})}
+                                            ></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                    <div className="bg-emerald-50 p-6 rounded-[2rem] border border-emerald-100">
+                                        <h4 className="text-sm font-black text-emerald-800 mb-4 flex items-center gap-2">
+                                            <UserPlus size={18} />
+                                            Tambah Pengguna Baru
+                                        </h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-emerald-600/50 ml-1">Email / No. HP</label>
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="contoh@gmail.com"
+                                                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                                    value={newUserContact}
+                                                    onChange={(e) => setNewUserContact(e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-emerald-600/50 ml-1">Peran (Role)</label>
+                                                <div className="flex gap-2">
+                                                    <select 
+                                                        className="flex-1 px-4 py-3 bg-white border border-emerald-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 cursor-pointer"
+                                                        value={newUserRole}
+                                                        onChange={(e) => setNewUserRole(e.target.value)}
+                                                    >
+                                                        <option value="Operator">Operator</option>
+                                                        <option value="Administrator">Administrator</option>
+                                                    </select>
+                                                    <button 
+                                                        onClick={() => {
+                                                            if (!newUserContact) return alert('Masukkan Email atau Nomor HP!');
+                                                            
+                                                            // Validasi Email atau Nomor HP
+                                                            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                                                            const phoneRegex = /^\d{7,15}$/;
+                                                            
+                                                            if (!emailRegex.test(newUserContact) && !phoneRegex.test(newUserContact)) {
+                                                                return alert('Format Email atau Nomor HP tidak valid!');
+                                                            }
+
+                                                            const updatedUsers = [...storeSettings.authorizedUsers, { contact: newUserContact, role: newUserRole }];
+                                                            setStoreSettings({...storeSettings, authorizedUsers: updatedUsers});
+                                                            setNewUserContact('');
+                                                        }}
+                                                        className="px-6 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase hover:bg-emerald-500 transition-all active:scale-95 shadow-lg shadow-emerald-900/10"
+                                                    >
+                                                        Tambah
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Daftar Pengguna Terdaftar</h4>
+                                        <div className="space-y-2">
+                                            {storeSettings.authorizedUsers && storeSettings.authorizedUsers.map((user, idx) => (
+                                                <div key={idx} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl hover:border-emerald-200 transition-all group">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className={`p-3 rounded-xl ${user.role === 'Administrator' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-200 text-slate-500'}`}>
+                                                            <UserCircle size={20} />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-bold text-slate-800 text-sm">{user.contact}</p>
+                                                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">{user.role}</p>
+                                                        </div>
+                                                    </div>
+                                                    {user.contact !== 'santarapoint@gmail.com' && (
+                                                        <button 
+                                                            onClick={() => {
+                                                                const updatedUsers = storeSettings.authorizedUsers.filter((_, i) => i !== idx);
+                                                                setStoreSettings({...storeSettings, authorizedUsers: updatedUsers});
+                                                            }}
+                                                            className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
+                        {/* Footer Modal */}
                         <div className="p-8 border-t border-slate-100 bg-slate-50 flex gap-4">
                             <button 
                                 onClick={() => setIsSettingsModalOpen(false)}
@@ -580,7 +992,6 @@ export default function App() {
                             <button 
                                 onClick={() => {
                                     localStorage.setItem('santaraStoreSettings', JSON.stringify(storeSettings));
-                                    setZakatEnabled(storeSettings.zakatEnabledDefault);
                                     setIsSettingsModalOpen(false);
                                     alert('Pengaturan Berhasil Disimpan!');
                                 }}
@@ -635,6 +1046,13 @@ export default function App() {
                     <span className="text-[9px] font-bold uppercase">Stok</span>
                 </button>
                 <button 
+                  onClick={() => router.push('/pembelian')} 
+                  className="flex flex-col items-center gap-1"
+                >
+                    <ShoppingBag size={18} />
+                    <span className="text-[9px] font-bold uppercase">Beli</span>
+                </button>
+                <button 
                   onClick={() => setIsSettingsModalOpen(true)} 
                   className="flex flex-col items-center gap-1"
                 >
@@ -665,20 +1083,24 @@ export default function App() {
                             ) : (
                                 <div className="space-y-4">
                                     {cart.map(item => (
-                                        <div key={item.id} className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm">
-                                            <img src={item.img} className="w-16 h-16 rounded-xl object-cover" />
+                                        <div key={item.id} className="flex items-center justify-between bg-slate-800 p-4 rounded-2xl border border-slate-700">
                                             <div className="flex-1">
-                                                <h4 className="font-bold text-sm text-slate-800">{item.name}</h4>
-                                                <p className="text-xs text-emerald-600 font-bold mt-1">Rp {item.price.toLocaleString('en-US')}</p>
-                                                <div className="flex items-center gap-3 mt-3">
-                                                    <button onClick={() => updateQty(item.id, -1)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-600">
+                                                <h4 className="font-bold text-sm text-slate-100">{item.name}</h4>
+                                                <p className="text-xs text-emerald-400 font-black mt-0.5">Rp {(item.price * item.quantity).toLocaleString('en-US')}</p>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex items-center gap-2.5 bg-slate-900 p-1 rounded-xl border border-slate-700">
+                                                    <button onClick={() => updateQty(item.id, -1)} className="w-8 h-8 flex items-center justify-center bg-slate-800 border border-slate-700 rounded-lg text-slate-400">
                                                         <Minus size={14} />
                                                     </button>
-                                                    <span className="text-sm font-black w-6 text-center">{item.quantity}</span>
-                                                    <button onClick={() => updateQty(item.id, 1)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-600">
+                                                    <span className="text-sm font-black w-5 text-center text-slate-100">{item.quantity}</span>
+                                                    <button onClick={() => addToCart(item)} className="w-8 h-8 flex items-center justify-center bg-slate-800 border border-slate-700 rounded-lg text-slate-400">
                                                         <Plus size={14} />
                                                     </button>
                                                 </div>
+                                                <button onClick={() => updateQty(item.id, -item.quantity)} className="text-slate-400 hover:text-red-500 transition-colors p-1">
+                                                    <Trash2 size={18} />
+                                                </button>
                                             </div>
                                         </div>
                                     ))}
@@ -710,9 +1132,6 @@ export default function App() {
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic mb-1">Total Transaksi</span>
                                                     <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</span>
                                                 </div>
-                                                <button onClick={() => setZakatEnabled(!zakatEnabled)} className="text-[9px] font-bold text-white/50 underline px-2 py-1 bg-white/5 rounded">
-                                                    Zakat: {zakatEnabled ? 'Aktif' : 'Off'}
-                                                </button>
                                             </div>
                                             <div className="space-y-3 pb-4">
                                                 <select

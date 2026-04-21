@@ -11,9 +11,7 @@ const DEFAULT_SETTINGS = {
     whatsapp: '6285846802177',
     email: 'santarapoint@gmail.com',
     address: 'Jl. Raya Santara No. 123, Bandung',
-    zakatPercent: 2.5,
-    footerText: '© 2024 Santara Point. Berkah setiap saat.',
-    zakatEnabledDefault: true
+    footerText: '© 2024 Santara Point. Berkah setiap saat.'
 };
 
 export default function ContactPage() {

@@ -26,9 +26,7 @@ const DEFAULT_SETTINGS = {
     whatsapp: '6285846802177',
     email: 'santarapoint@gmail.com',
     address: 'Jl. Raya Santara No. 123, Bandung',
-    zakatPercent: 2.5,
-    footerText: '© 2024 Santara Point. Berkah setiap saat.',
-    zakatEnabledDefault: true
+    footerText: '© 2024 Santara Point. Berkah setiap saat.'
 };
 
 // --- Mock Data Produk F&B ---
@@ -63,24 +61,45 @@ const Login = () => {
       return;
     }
 
-    // Simulate login for different roles
+    // 1. Ambil data Authorized Users dari pengaturan toko
+    const storedSettings = localStorage.getItem('santaraStoreSettings');
+    let authorizedUser = null;
+    
+    // Fallback Super Admin
     if (email === 'santarapoint@gmail.com') {
-      router.push('/posin-adm');
+      authorizedUser = { contact: 'santarapoint@gmail.com', role: 'Administrator' };
+    } else if (storedSettings) {
+      const settings = JSON.parse(storedSettings);
+      if (settings.authorizedUsers) {
+        authorizedUser = settings.authorizedUsers.find(u => u.contact === email);
+      }
+    }
+
+    if (authorizedUser) {
+      localStorage.setItem('currentUserRole', authorizedUser.role);
+      localStorage.setItem('currentUserContact', authorizedUser.contact);
+      
+      if (authorizedUser.role === 'Administrator') {
+        router.push('/posin-adm');
+      } else if (authorizedUser.role === 'Operator') {
+        router.push('/posin-cas');
+      } else {
+        router.push('/posin-cus');
+      }
     } else {
-      // Coba ambil dari data registrasi jika ada
+      // 2. Jika bukan authorized user, anggap sebagai Pelanggan
       const registeredName = localStorage.getItem('registeredName');
       let finalName = 'Sobat Santara';
       
       if (registeredName) {
-        // Ambil hanya nama pertama (kata pertama)
-        finalName = registeredName.split(' ')[0];
+        finalName = registeredName;
       } else {
-        // Jika belum registrasi, kita fallback dari prefix email
         const nameFallback = email.split('@')[0];
         finalName = nameFallback.charAt(0).toUpperCase() + nameFallback.slice(1);
       }
       
       localStorage.setItem('customerName', finalName);
+      localStorage.setItem('currentUserRole', 'Customer');
       router.push('/posin-cus');
     }
   };

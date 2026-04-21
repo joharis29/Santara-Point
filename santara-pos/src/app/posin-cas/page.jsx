@@ -21,7 +21,8 @@ import {
     ChefHat,
     CreditCard,
     UserCircle,
-    ShoppingCart, // Ditambahkan untuk memperbaiki ReferenceError
+    ShoppingCart,
+    ArrowUpDown,
     X
 } from 'lucide-react';
 
@@ -36,20 +37,18 @@ const DEFAULT_SETTINGS = {
     whatsapp: '6285846802177',
     email: 'santarapoint@gmail.com',
     address: 'Jl. Raya Santara No. 123, Bandung',
-    zakatPercent: 2.5,
-    footerText: '© 2024 Santara Point. Berkah setiap saat.',
-    zakatEnabledDefault: true
+    footerText: '© 2024 Santara Point. Berkah setiap saat.'
 };
 
 const PRODUCTS = [
-    { id: 7, name: 'Nasi Kuning', price: 15000, stock: 15, category: 'Makanan', img: '/nasi-kuning-baru.jpg' },
-    { id: 8, name: 'Nasi Uduk', price: 15000, stock: 20, category: 'Makanan', img: '/nasi-uduk-asli.jpg' },
-    { id: 9, name: 'Soto Ayam', price: 15000, stock: 15, category: 'Makanan', img: '/soto-ayam-asli.jpg' },
-    { id: 10, name: 'Bubur Ayam', price: 15000, stock: 20, category: 'Makanan', img: '/bubur-ayam-asli.jpg' },
-    { id: 11, name: 'Ketoprak', price: 15000, stock: 15, category: 'Makanan', img: '/ketoprak-asli.jpg' },
-    { id: 12, name: 'Nasi Ayam Pop', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-pop-asli.jpg' },
-    { id: 13, name: 'Nasi Ayam Kecap', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-kecap-asli.jpg' },
-    { id: 14, name: 'Nasi Ayam Balado', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-balado-asli.jpg' },
+    { id: 7, name: 'Nasi Kuning', price: 15000, stock: 15, category: 'Makanan', img: '/nasi-kuning-baru.jpg', discountPercent: 10, rating: 4.8 },
+    { id: 8, name: 'Nasi Uduk', price: 15000, stock: 20, category: 'Makanan', img: '/nasi-uduk-asli.jpg', discountPercent: 0, rating: 4.5 },
+    { id: 9, name: 'Soto Ayam', price: 15000, stock: 15, category: 'Makanan', img: '/soto-ayam-asli.jpg', discountPercent: 0, rating: 4.7 },
+    { id: 10, name: 'Bubur Ayam', price: 15000, stock: 20, category: 'Makanan', img: '/bubur-ayam-asli.jpg', discountPercent: 0, rating: 4.6 },
+    { id: 11, name: 'Ketoprak', price: 15000, stock: 15, category: 'Makanan', img: '/ketoprak-asli.jpg', discountPercent: 15, rating: 4.9 },
+    { id: 12, name: 'Nasi Ayam Pop', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-pop-asli.jpg', discountPercent: 0, rating: 4.4 },
+    { id: 13, name: 'Nasi Ayam Kecap', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-kecap-asli.jpg', discountPercent: 0, rating: 4.3 },
+    { id: 14, name: 'Nasi Ayam Balado', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-balado-asli.jpg', discountPercent: 0, rating: 4.2 },
     { id: 15, name: 'Nasi Ayam Kremes', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-kremes-asli.jpg' },
     { id: 16, name: 'Nasi Chicken Nugget', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-chicken-nugget-asli.jpg' },
     { id: 17, name: 'Nasi Ayam Rica-Rica', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-rica-rica-asli.jpg' },
@@ -98,20 +97,30 @@ export default function App() {
     const router = useRouter();
     const [cart, setCart] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [zakatEnabled, setZakatEnabled] = useState(false);
+    // Pajak Daerah strictly mandatory
     const [activeCategory, setActiveCategory] = useState('Semua');
     const [customerName, setCustomerName] = useState('');
     const [queueNumber, setQueueNumber] = useState('');
+    const [orderNote, setOrderNote] = useState('');
     const [usedQueueNumbers, setUsedQueueNumbers] = useState([]);
+    const [sortBy, setSortBy] = useState('default');
     const [activeShift, setActiveShift] = useState('Pagi (Zaid)');
     const [toppingModalProduct, setToppingModalProduct] = useState(null);
     const [isCartModalOpen, setIsCartModalOpen] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('CASH');
+    const [orderType, setOrderType] = useState('Dine-In');
 
     const [products, setProducts] = useState(PRODUCTS);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
 
     React.useEffect(() => {
+        // Security Check
+        const userRole = localStorage.getItem('currentUserRole');
+        if (userRole !== 'Operator' && userRole !== 'Administrator') {
+            router.push('/Login');
+            return;
+        }
+
         const storedShift = localStorage.getItem('activeCashierShift');
         if (storedShift) setActiveShift(storedShift);
 
@@ -131,22 +140,25 @@ export default function App() {
         if (storedSettings) {
             const parsed = JSON.parse(storedSettings);
             setStoreSettings(parsed);
-            setZakatEnabled(parsed.zakatEnabledDefault);
-        } else {
-            setZakatEnabled(DEFAULT_SETTINGS.zakatEnabledDefault);
         }
-    }, []);
+    }, [router]);
 
-    // --- Perhitungan Total ---
+    // --- Perhitungan Total (Inclusive Pajak 10%) ---
     const menuTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const subtotal = zakatEnabled ? menuTotal / 1.025 : menuTotal;
-    const zakatValue = zakatEnabled ? menuTotal - (menuTotal / 1.025) : 0;
+    const subtotal = storeSettings.isPajakActive ? menuTotal / 1.10 : menuTotal;
+    const pajakValue = storeSettings.isPajakActive ? Math.round(menuTotal - subtotal) : 0;
     const totalAmount = menuTotal;
 
     const filteredProducts = products.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = activeCategory === 'Semua' || p.category === activeCategory;
         return matchesSearch && matchesCategory;
+    }).sort((a, b) => {
+        if (sortBy === 'price-low') return a.price - b.price;
+        if (sortBy === 'price-high') return b.price - a.price;
+        if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+        if (sortBy === 'discount') return (b.discountPercent || 0) - (a.discountPercent || 0);
+        return 0;
     });
 
     // --- Logic Keranjang ---
@@ -196,11 +208,13 @@ export default function App() {
             timestamp: new Date().toISOString(),
             customerName,
             queueNumber,
+            orderType,
+            keterangan: orderNote,
             paymentMethod,
             source: 'Kasir',
             cashierName: activeShift,
             totalAmount,
-            zakat: zakatValue,
+            pajak: pajakValue,
             status: 'Menunggu',
             items: cart.map(({ name, quantity, price }) => ({ name, quantity, price }))
         };
@@ -211,6 +225,8 @@ export default function App() {
         setCart([]);
         setCustomerName('');
         setQueueNumber('');
+        setOrderNote('');
+        setOrderType('Dine-In');
         setPaymentMethod('');
     };
 
@@ -275,9 +291,8 @@ export default function App() {
                     </div>
                 </header>
 
-                {/* Kategori Makanan - Filter */}
-                <div className="px-6 mt-6 overflow-x-auto">
-                    <div className="flex gap-3">
+                <div className="px-6 mt-6 flex items-center justify-between gap-4 overflow-x-auto">
+                    <div className="flex gap-3 pb-2">
                         {categories.map(cat => (
                             <button
                                 key={cat}
@@ -287,6 +302,20 @@ export default function App() {
                                 {cat}
                             </button>
                         ))}
+                    </div>
+                    <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl border border-slate-200 shadow-sm shrink-0 mb-2">
+                        <ArrowUpDown size={14} className="text-slate-400" />
+                        <select 
+                            value={sortBy} 
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="text-[11px] font-black uppercase tracking-widest text-slate-600 outline-none bg-transparent cursor-pointer"
+                        >
+                            <option value="default">Urutkan</option>
+                            <option value="price-low">Termurah</option>
+                            <option value="price-high">Termahal</option>
+                            <option value="rating">Rating</option>
+                            <option value="discount">Diskon</option>
+                        </select>
                     </div>
                 </div>
 
@@ -302,6 +331,11 @@ export default function App() {
                                 <div className="h-36 rounded-[1.5rem] overflow-hidden mb-4 relative">
                                     <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
                                     <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition"></div>
+                                    {product.discountPercent > 0 && (
+                                        <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest shadow-md z-10">
+                                            -{product.discountPercent}%
+                                        </div>
+                                    )}
                                     {product.isNew && (
                                         <div className="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-md">
                                             NEW
@@ -311,7 +345,12 @@ export default function App() {
                                 <div className="px-2 flex-1 flex flex-col justify-between">
                                     <div>
                                         <h4 className="font-bold text-slate-800 text-sm mb-1 line-clamp-2">{product.name}</h4>
-                                        <p className="text-emerald-600 font-black text-base italic">Rp {product.price.toLocaleString('en-US')}</p>
+                                        <div className="flex flex-col">
+                                            {product.discountPercent > 0 && (
+                                                <span className="text-[10px] font-bold line-through text-slate-400">Rp {product.originalPrice?.toLocaleString()}</span>
+                                            )}
+                                            <p className="text-emerald-600 font-black text-base italic">Rp {product.price.toLocaleString('en-US')}</p>
+                                        </div>
                                     </div>
                                     <div className="mt-3 flex items-center justify-between text-[10px] font-bold text-slate-400">
                                         <span>{product.category}</span>
@@ -348,21 +387,23 @@ export default function App() {
                     ) : (
                         <div className="space-y-3">
                             {cart.map(item => (
-                                <div key={item.id} className="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                                    <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm">
-                                        <img src={item.img} className="w-full h-full object-cover" />
-                                    </div>
+                                <div key={item.id} className="flex items-center justify-between bg-slate-50 p-3.5 rounded-2xl border border-slate-100 hover:border-emerald-200 transition-all">
                                     <div className="flex-1">
-                                        <h5 className="font-bold text-xs text-slate-800 line-clamp-1">{item.name}</h5>
-                                        <p className="text-[10px] text-emerald-600 font-black">Rp {(item.price * item.quantity).toLocaleString('en-US')}</p>
+                                        <h5 className="font-bold text-[13px] text-slate-800 leading-tight">{item.name}</h5>
+                                        <p className="text-[10px] text-emerald-600 font-black mt-0.5">Rp {(item.price * item.quantity).toLocaleString('en-US')}</p>
                                     </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <button onClick={() => updateQty(item.id, -1)} className="w-5 h-5 flex items-center justify-center bg-white rounded-md border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-600 transition-colors">
-                                            <Minus size={10} />
-                                        </button>
-                                        <span className="text-xs font-black w-3 text-center">{item.quantity}</span>
-                                        <button onClick={() => addToCart(item)} className="w-5 h-5 flex items-center justify-center bg-white rounded-md border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-600 transition-colors">
-                                            <Plus size={10} />
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2.5 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
+                                            <button onClick={() => updateQty(item.id, -1)} className="w-6 h-6 flex items-center justify-center bg-slate-50 rounded shadow-sm text-slate-400 hover:text-emerald-600 transition-colors">
+                                                <Minus size={10} />
+                                            </button>
+                                            <span className="text-[12px] font-black w-4 text-center">{item.quantity}</span>
+                                            <button onClick={() => addToCart(item)} className="w-6 h-6 flex items-center justify-center bg-slate-50 rounded shadow-sm text-slate-400 hover:text-emerald-600 transition-colors">
+                                                <Plus size={10} />
+                                            </button>
+                                        </div>
+                                        <button onClick={() => updateQty(item.id, -item.quantity)} className="text-slate-200 hover:text-red-400 transition-colors p-1">
+                                            <Trash2 size={16} />
                                         </button>
                                     </div>
                                 </div>
@@ -371,24 +412,40 @@ export default function App() {
                     )}
 
                     {/* Customer Details Form */}
-                    <div className="mt-5 space-y-2 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <h3 className="text-[10px] font-black text-slate-800 uppercase mb-1">Data Pemesan</h3>
-                        <input type="text" placeholder="Nama Pemesan" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-700" />
-                        <select
-                            value={queueNumber}
-                            onChange={(e) => setQueueNumber(e.target.value)}
-                            className="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-700 cursor-pointer"
-                        >
-                            <option value="" disabled>Pilih Nomor Antrian</option>
-                            {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
-                                const isUsed = usedQueueNumbers.includes(num.toString());
-                                return (
-                                    <option key={num} value={num} disabled={isUsed}>
-                                        Antrian {num} {isUsed ? '(Terpakai)' : ''}
-                                    </option>
-                                );
-                            })}
-                        </select>
+                    <div className="mt-6 p-5 bg-slate-50 border border-slate-200 rounded-[24px] space-y-4 shadow-sm">
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Keterangan Pesanan</h3>
+                        <div className="space-y-3">
+                            <input type="text" placeholder="Nama Pemesan" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-[13px] px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700" />
+                            <select
+                                value={queueNumber}
+                                onChange={(e) => setQueueNumber(e.target.value)}
+                                className="w-full text-[13px] px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 cursor-pointer"
+                            >
+                                <option value="" disabled>Pilih Nomor Antrian</option>
+                                {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
+                                    const isUsed = usedQueueNumbers.includes(num.toString());
+                                    return (
+                                        <option key={num} value={num} disabled={isUsed}>
+                                            Antrian {num} {isUsed ? '(Terpakai)' : ''}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                            <select
+                                value={orderType}
+                                onChange={(e) => setOrderType(e.target.value)}
+                                className="w-full text-[13px] px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 cursor-pointer"
+                            >
+                                <option value="Dine-In">Dine-In</option>
+                                <option value="Takeaway">Takeaway</option>
+                            </select>
+                            <textarea 
+                                placeholder="Keterangan (Optional)..." 
+                                value={orderNote} 
+                                onChange={(e) => setOrderNote(e.target.value)} 
+                                className="w-full text-[13px] px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 min-h-[80px] resize-none"
+                            ></textarea>
+                        </div>
                     </div>
                 </div>
 
@@ -400,21 +457,18 @@ export default function App() {
                             <span className="text-slate-800">Rp {subtotal.toLocaleString('en-US')}</span>
                         </div>
 
-                        {/* Kalkulator Zakat Mal */}
-                        <div className={`flex items-center justify-between p-3 rounded-xl border transition-all ${zakatEnabled ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-white border-slate-200 text-slate-500'}`}>
-                            <div className="flex items-center gap-3">
-                                <Calculator size={14} />
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] font-black uppercase leading-none">Zakat (2.5%)</span>
-                                    <button
-                                        onClick={() => setZakatEnabled(!zakatEnabled)}
-                                        className={`text-[9px] font-bold underline text-left ${zakatEnabled ? 'text-emerald-100' : 'text-emerald-600'}`}
-                                    >
-                                        {zakatEnabled ? 'Batalkan' : 'Aktifkan'}
-                                    </button>
+                        {/* Kalkulator Pajak Daerah */}
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between p-3 rounded-xl border bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-900/10">
+                                <div className="flex items-center gap-3">
+                                    <Calculator size={14} />
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-black uppercase leading-none">Pajak Daerah (10%)</span>
+                                    </div>
                                 </div>
+                                <span className="text-xs font-black">Rp {pajakValue.toLocaleString('en-US')}</span>
                             </div>
-                            <span className="text-xs font-black">Rp {zakatValue.toLocaleString('en-US')}</span>
+
                         </div>
                     </div>
 
@@ -514,24 +568,25 @@ export default function App() {
                             ) : (
                                 <div className="space-y-4">
                                     {cart.map(item => (
-                                        <div key={item.id} className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                            <img src={item.img} className="w-16 h-16 rounded-xl object-cover" />
+                                        <div key={item.id} className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
                                             <div className="flex-1">
                                                 <h4 className="font-bold text-sm text-slate-800">{item.name}</h4>
-                                                <p className="text-xs text-emerald-600 font-bold mt-1 uppercase">Rp {item.price.toLocaleString('en-US')}</p>
-                                                <div className="flex items-center gap-3 mt-3">
+                                                <p className="text-xs text-emerald-600 font-black mt-0.5">Rp {(item.price * item.quantity).toLocaleString('en-US')}</p>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex items-center gap-2.5 bg-slate-50 p-1 rounded-xl border border-slate-200 shadow-sm">
                                                     <button onClick={() => updateQty(item.id, -1)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-600 shadow-sm">
                                                         <Minus size={14} />
                                                     </button>
-                                                    <span className="text-sm font-black w-6 text-center">{item.quantity}</span>
+                                                    <span className="text-sm font-black w-5 text-center">{item.quantity}</span>
                                                     <button onClick={() => addToCart(item)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-600 shadow-sm">
                                                         <Plus size={14} />
                                                     </button>
                                                 </div>
+                                                <button onClick={() => updateQty(item.id, -item.quantity)} className="text-slate-300 hover:text-red-500 p-1">
+                                                    <Trash2 size={18} />
+                                                </button>
                                             </div>
-                                            <button onClick={() => updateQty(item.id, -item.quantity)} className="text-slate-300 hover:text-red-500 transition-colors self-start p-1">
-                                                <Trash2 size={18} />
-                                            </button>
                                         </div>
                                     ))}
 
@@ -562,9 +617,11 @@ export default function App() {
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic mb-1">Total Tunai</span>
                                                     <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</span>
                                                 </div>
-                                                <button onClick={() => setZakatEnabled(!zakatEnabled)} className="text-[9px] font-bold text-white/50 underline px-2 py-1 bg-white/5 rounded">
-                                                    Zakat: {zakatEnabled ? 'Aktif' : 'Off'}
-                                                </button>
+                                                <div className="flex flex-row items-center gap-2">
+                                                    <div className="text-[8px] font-black uppercase tracking-wider px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                                        Pajak (10%)
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div className="space-y-3 pb-4">
                                                 <select

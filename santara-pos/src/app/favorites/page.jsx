@@ -31,9 +31,7 @@ const DEFAULT_SETTINGS = {
     whatsapp: '6285846802177',
     email: 'santarapoint@gmail.com',
     address: 'Jl. Raya Santara No. 123, Bandung',
-    zakatPercent: 2.5,
-    footerText: '© 2024 Santara Point. Berkah setiap saat.',
-    zakatEnabledDefault: true
+    footerText: '© 2024 Santara Point. Berkah setiap saat.'
 };
 
 const PRODUCTS = [
@@ -208,11 +206,11 @@ export default function App() {
 
     const categories = ['Semua', 'Makanan', 'Minuman', 'Snack', 'Frozen Food'];
 
-    // --- Perhitungan Total (102.5%) ---
+    // --- Perhitungan Total (Inclusive Pajak 10%) ---
     const menuTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const subtotal = Math.round(menuTotal / 1.025); // Harga original tanpa zakat dibulatkan
-    const zakatValue = Math.round(menuTotal - subtotal); // Otomatis terhitung untuk transparansi
-    const totalAmount = Math.round(menuTotal); // Total yang dibayar tetap
+    const subtotal = menuTotal / 1.10;
+    const pajakValue = Math.round(menuTotal - subtotal);
+    const totalAmount = Math.round(menuTotal);
 
     const filteredProducts = products.filter(p =>
         favorites.includes(p.id) &&
@@ -264,7 +262,7 @@ export default function App() {
             source: 'Customer',
             cashierName: 'Online',
             totalAmount,
-            zakat: zakatValue,
+            pajak: pajakValue,
             status: 'Menunggu',
             items: cart.map(({ name, quantity, price }) => ({ name, quantity, price }))
         };
@@ -522,14 +520,14 @@ export default function App() {
                                 <span>Rp {subtotal.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
                             </div>
 
-                            <div className="flex justify-between items-center py-2 px-3 rounded-lg border border-emerald-100 bg-emerald-50/50 flex-wrap gap-2">
+                            <div className="flex justify-between items-center py-2 px-3 rounded-lg border border-emerald-100 bg-emerald-50/50 flex-wrap gap-2 transition-all">
                                 <div className="flex items-center gap-2">
                                     <div className="text-emerald-500 flex items-center justify-center w-4 h-4 rounded-full bg-white shadow-sm shrink-0">
                                         <Info size={10} />
                                     </div>
-                                    <span className="text-xs font-medium text-emerald-600">Termasuk Zakat (2.5%)</span>
+                                    <span className="text-xs font-medium text-emerald-600">Pajak Daerah (10%)</span>
                                 </div>
-                                <span className="text-xs font-bold text-emerald-600">Rp {zakatValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+                                <span className="text-xs font-bold text-emerald-600">Rp {pajakValue.toLocaleString('en-US')}</span>
                             </div>
                         </div>
 
@@ -755,16 +753,12 @@ export default function App() {
                         </div>
 
                         <div className="p-8 bg-slate-50 border-t border-slate-100 p-safe-bottom">
-                            <div className="flex justify-between items-center mb-6">
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Pembayaran</p>
-                                    <p className="text-3xl font-black text-emerald-600 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</p>
+                                <div className="flex justify-between items-center mb-6">
+                                    <div>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Pembayaran</p>
+                                        <p className="text-2xl font-black text-emerald-600 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</p>
+                                    </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-[10px] font-black text-emerald-600/50 uppercase tracking-widest mb-1">Sudah Termasuk Zakat</p>
-                                    <p className="font-bold text-emerald-600/70">Rp {zakatValue.toLocaleString('en-US')}</p>
-                                </div>
-                            </div>
                             <button 
                                 onClick={handleCheckout}
                                 disabled={isProcessing || cart.length === 0}

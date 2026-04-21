@@ -26,7 +26,7 @@ export default function DokumentasiPage() {
         </h1>
         
         <p className="text-gray-400 mb-12 text-lg">
-          Halaman dokumentasi penyaluran dana zakat saat ini sedang dipersiapkan dan akan segera hadir.
+          Halaman dokumentasi operasional dan layanan kami saat ini sedang dipersiapkan dan akan segera hadir.
         </p>
 
         <button 
