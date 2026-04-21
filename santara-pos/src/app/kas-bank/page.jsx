@@ -104,6 +104,11 @@ export default function KasBankPage() {
     const [newUserContact, setNewUserContact] = useState('');
     const [newUserRole, setNewUserRole] = useState('Operator');
 
+    // --- State Perubahan Modals ---
+    const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
+    const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+
     useEffect(() => {
         const storedAccounts = localStorage.getItem('santaraAccounts');
         if (storedAccounts) {
@@ -437,6 +442,9 @@ export default function KasBankPage() {
                 setNewUserContact={setNewUserContact}
                 newUserRole={newUserRole}
                 setNewUserRole={setNewUserRole}
+                setIsChangeEmailOpen={setIsChangeEmailOpen}
+                setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+                setIsChangePasswordOpen={setIsChangePasswordOpen}
             />
 
             {/* Modal Penerimaan */}

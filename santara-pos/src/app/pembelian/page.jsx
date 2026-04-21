@@ -96,6 +96,11 @@ export default function PembelianPage() {
     const [newUserContact, setNewUserContact] = useState('');
     const [newUserRole, setNewUserRole] = useState('Operator');
 
+    // --- State Perubahan Modals ---
+    const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
+    const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+
     useEffect(() => {
         // Load data from LocalStorage
         const storedProducts = localStorage.getItem('santaraProducts');
@@ -606,6 +611,9 @@ export default function PembelianPage() {
                 setNewUserContact={setNewUserContact}
                 newUserRole={newUserRole}
                 setNewUserRole={setNewUserRole}
+                setIsChangeEmailOpen={setIsChangeEmailOpen}
+                setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+                setIsChangePasswordOpen={setIsChangePasswordOpen}
             />
 
             {/* Modal Tambah Pemasok */}

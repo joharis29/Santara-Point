@@ -183,6 +183,11 @@ function FavoritesContent() {
         password: '••••••••',
         addresses: []
     });
+
+    // --- State Perubahan Modals ---
+    const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
+    const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
     const [isCartModalOpen, setIsCartModalOpen] = useState(false);
 
     useEffect(() => {
@@ -784,6 +789,22 @@ function FavoritesContent() {
                     </div>
                 </div>
             )}
+
+            {/* Standardized Settings Modal (Customer) */}
+            <SettingsModal 
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                isAdmin={false}
+                activeTab={activeSettingsTab}
+                setActiveTab={setActiveSettingsTab}
+                userProfile={userProfile}
+                setUserProfile={setUserProfile}
+                handleSaveProfile={handleSaveProfile}
+                storeSettings={storeSettings}
+                setIsChangeEmailOpen={setIsChangeEmailOpen}
+                setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+                setIsChangePasswordOpen={setIsChangePasswordOpen}
+            />
         </div>
     );
 }

@@ -87,6 +87,11 @@ export default function PerusahaanPage() {
     const [newUserContact, setNewUserContact] = useState('');
     const [newUserRole, setNewUserRole] = useState('Operator');
     
+    // --- State Perubahan Modals ---
+    const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
+    const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+    
     // Calendar state
     const [currentDate, setCurrentDate] = useState(new Date());
     const daysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
@@ -382,6 +387,9 @@ export default function PerusahaanPage() {
                 setNewUserContact={setNewUserContact}
                 newUserRole={newUserRole}
                 setNewUserRole={setNewUserRole}
+                setIsChangeEmailOpen={setIsChangeEmailOpen}
+                setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+                setIsChangePasswordOpen={setIsChangePasswordOpen}
             />
         </div>
     );

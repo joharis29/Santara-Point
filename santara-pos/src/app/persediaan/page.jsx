@@ -76,6 +76,11 @@ export default function PersediaanPage() {
     const [newUserContact, setNewUserContact] = useState('');
     const [newUserRole, setNewUserRole] = useState('Operator');
 
+    // --- State Perubahan Modals ---
+    const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
+    const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+
     useEffect(() => {
         const storedProducts = localStorage.getItem('santaraRawMaterials');
         if (storedProducts) setProducts(JSON.parse(storedProducts));

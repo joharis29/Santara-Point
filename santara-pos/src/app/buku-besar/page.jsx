@@ -84,6 +84,11 @@ export default function BukuBesarPage() {
     const [newUserContact, setNewUserContact] = useState('');
     const [newUserRole, setNewUserRole] = useState('Operator');
 
+    // --- State Perubahan Modals ---
+    const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
+    const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+
     useEffect(() => {
         const storedCoa = localStorage.getItem('santaraCoA');
         if (storedCoa) {
@@ -307,6 +312,9 @@ export default function BukuBesarPage() {
                 setNewUserContact={setNewUserContact}
                 newUserRole={newUserRole}
                 setNewUserRole={setNewUserRole}
+                setIsChangeEmailOpen={setIsChangeEmailOpen}
+                setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+                setIsChangePasswordOpen={setIsChangePasswordOpen}
             />
 
             {/* Modal Tambah Akun */}
