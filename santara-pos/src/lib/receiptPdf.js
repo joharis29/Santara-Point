@@ -5,13 +5,16 @@ import 'jspdf-autotable';
  * SANTARA POINT - PDF Receipt Generator
  * Generates a professional, branded PDF receipt.
  */
-export const generateReceiptPDF = (transaction, storeSettings) => {
+    if (!transaction || !transaction.items || transaction.items.length === 0) {
+        console.error('Invalid transaction data for PDF generation');
+        return;
+    }
+
     // Create new PDF (Portrait, mm, 80mm width for POS feel)
-    // We use a custom size [80, 200] to simulate a roll of paper
     const doc = new jsPDF({
         orientation: 'p',
         unit: 'mm',
-        format: [80, 250] // Custom height, will auto-page if needed
+        format: [80, 250] // Custom height
     });
 
     const pageWidth = doc.internal.pageSize.getWidth();

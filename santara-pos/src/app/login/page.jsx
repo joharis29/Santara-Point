@@ -100,7 +100,7 @@ const LoginContent = () => {
 
       // Check for Authorized Users from local settings (Admin/Operator)
       const storedSettings = localStorage.getItem('santaraStoreSettings');
-      if (email === 'santarapoint@gmail.com') {
+      if (email.toLowerCase() === 'santarapoint@gmail.com') {
         role = 'Administrator';
       } else if (storedSettings) {
         const settings = JSON.parse(storedSettings);
