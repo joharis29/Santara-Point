@@ -27,7 +27,7 @@ const AdminSidebar = ({ isOpen, setIsOpen, onOpenSettings }) => {
         { icon: <LayoutDashboard size={20} />, label: "Dashboard", href: "/posin-adm", id: 'dashboard' },
         { icon: <ShoppingBag size={20} />, label: "POS Kasir", href: "/posin-adm", id: 'pos' },
         { icon: <Tag size={20} />, label: "Penjualan", href: "/penjualan", id: 'penjualan' },
-        { icon: <Landmark size={20} />, label: "Kas \u0026 Bank", href: "/kas-bank", id: 'kas-bank' },
+        { icon: <Landmark size={20} />, label: "Kas & Bank", href: "/kas-bank", id: 'kas-bank' },
         { icon: <BookOpen size={20} />, label: "Buku Besar", href: "/buku-besar", id: 'buku-besar' },
         { icon: <Building2 size={20} />, label: "Perusahaan", href: "/perusahaan", id: 'perusahaan' },
         { icon: <ChefHat size={20} />, label: "Daftar Antrean", href: "/waiting-list", id: 'waiting-list' },

@@ -38,9 +38,9 @@ import AdminSidebar from '@/components/AdminSidebar';
 import SettingsModal from '@/components/SettingsModal';
 
 const INITIAL_COA = [
-    { code: '1-1001', name: 'Kas Utama (Toko)', type: 'Aktiva', subType: 'Kas \u0026 Bank', balance: 0 },
-    { code: '1-1002', name: 'Bank BCA', type: 'Aktiva', subType: 'Kas \u0026 Bank', balance: 0 },
-    { code: '1-1003', name: 'Bank Mandiri', type: 'Aktiva', subType: 'Kas \u0026 Bank', balance: 0 },
+    { code: '1-1001', name: 'Kas Utama (Toko)', type: 'Aktiva', subType: 'Kas & Bank', balance: 0 },
+    { code: '1-1002', name: 'Bank BCA', type: 'Aktiva', subType: 'Kas & Bank', balance: 0 },
+    { code: '1-1003', name: 'Bank Mandiri', type: 'Aktiva', subType: 'Kas & Bank', balance: 0 },
     { code: '1-1101', name: 'Piutang Usaha', type: 'Aktiva', subType: 'Piutang', balance: 0 },
     { code: '1-1201', name: 'Persediaan Barang Jadi', type: 'Aktiva', subType: 'Persediaan', balance: 0 },
     { code: '1-1202', name: 'Persediaan Bahan Baku', type: 'Aktiva', subType: 'Persediaan', balance: 0 },
@@ -49,7 +49,7 @@ const INITIAL_COA = [
     { code: '4-1001', name: 'Pendapatan Penjualan', type: 'Pendapatan', subType: 'Operasional', balance: 0 },
     { code: '5-1001', name: 'Beban Gaji Karyawan', type: 'Beban', subType: 'Operasional', balance: 0 },
     { code: '5-1002', name: 'Beban Sewa Tempat', type: 'Beban', subType: 'Operasional', balance: 0 },
-    { code: '5-1003', name: 'Beban Listrik \u0026 Air', type: 'Beban', subType: 'Operasional', balance: 0 },
+    { code: '5-1003', name: 'Beban Listrik & Air', type: 'Beban', subType: 'Operasional', balance: 0 },
     { code: '5-1004', name: 'Beban Bahan Baku', type: 'Beban', subType: 'HPP', balance: 0 }
 ];
 

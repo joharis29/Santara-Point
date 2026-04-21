@@ -221,7 +221,7 @@ export default function PerusahaanPage() {
                 <div className="bg-white border-b border-slate-100 flex overflow-x-auto scrollbar-hide z-10 p-2">
                     {[
                         { id: 'karyawan', label: 'Data Karyawan', icon: <Users size={16} /> },
-                        { id: 'pajak', label: 'Pajak \u0026 Retribusi', icon: <Percent size={16} /> },
+                        { id: 'pajak', label: 'Pajak & Retribusi', icon: <Percent size={16} /> },
                         { id: 'log', label: 'Log Aktivitas', icon: <ClipboardList size={16} /> },
                         { id: 'kalender', label: 'Kalender Kerja', icon: <CalendarDays size={16} /> },
                     ].map(tab => (

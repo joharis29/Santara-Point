@@ -235,7 +235,7 @@ const SettingsModal = ({
                                                         />
                                                     </div>
                                                     <div className="space-y-2">
-                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Detail Jalan \u0026 No Rumah</label>
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Detail Jalan & No Rumah</label>
                                                         <textarea
                                                             value={addr.details}
                                                             onChange={(e) => updateAddress(addr.id, 'details', e.target.value)}
@@ -269,7 +269,7 @@ const SettingsModal = ({
                                 {['Bahasa Indonesia', 'English (UK)', 'Arabic (\u0627\u0644\u0639\u0631\u0628\u064a\u0629)'].map(lang => (
                                     <button key={lang} className="p-4 w-full text-left font-bold text-slate-700 bg-slate-50 hover:bg-emerald-50 hover:text-emerald-700 rounded-2xl transition-all border border-slate-100 flex items-center justify-between">
                                         {lang}
-                                        {lang === 'Bahasa Indonesia' \u0026\u0026 <div className="w-2 h-2 rounded-full bg-emerald-500" />}
+                                        {lang === 'Bahasa Indonesia' && <div className="w-2 h-2 rounded-full bg-emerald-500" />}
                                     </button>
                                 ))}
                             </div>

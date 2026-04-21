@@ -46,10 +46,10 @@ const INITIAL_ACCOUNTS = [
 ];
 
 const PAYMENT_CATEGORIES = [
-    'Biaya Listrik \u0026 Air',
+    'Biaya Listrik & Air',
     'Biaya Sewa Tempat',
     'Gaji Karyawan',
-    'Biaya Internet \u0026 Telp',
+    'Biaya Internet & Telp',
     'Biaya Kebersihan',
     'Biaya Marketing',
     'Biaya Lain-lain'
@@ -352,7 +352,7 @@ export default function KasBankPage() {
                              <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
                                 <div className="px-6 py-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
                                     <h3 className="font-black text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
-                                        <History size={16} className="text-emerald-500" /> Buku Besar Kas \u0026 Bank
+                                        <History size={16} className="text-emerald-500" /> Buku Besar Kas & Bank
                                     </h3>
                                     <div className="flex gap-2">
                                         <div className="relative">
@@ -453,7 +453,7 @@ export default function KasBankPage() {
                         
                         <form onSubmit={handleAddReceipt} className="p-10 space-y-6">
                             <div className="space-y-1">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Metode Akun Kas \u0026 Bank</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Metode Akun Kas & Bank</label>
                                 <select required className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 font-bold" value={newTransaction.accountId} onChange={e => setNewTransaction({...newTransaction, accountId: e.target.value})}>
                                     <option value="">Pilih Akun...</option>
                                     {accounts.map(a => <option key={a.id} value={a.id}>{a.name} (Saldo: Rp {a.balance.toLocaleString()})</option>)}
@@ -503,7 +503,7 @@ export default function KasBankPage() {
                         
                         <form onSubmit={handleAddPayment} className="p-10 space-y-6">
                             <div className="space-y-1">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Sumber Akun Kas \u0026 Bank</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Sumber Akun Kas & Bank</label>
                                 <select required className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-red-500/10 focus:border-red-500 font-bold" value={newTransaction.accountId} onChange={e => setNewTransaction({...newTransaction, accountId: e.target.value})}>
                                     <option value="">Pilih Akun...</option>
                                     {accounts.map(a => <option key={a.id} value={a.id}>{a.name} (Saldo: Rp {a.balance.toLocaleString()})</option>)}
@@ -533,7 +533,8 @@ export default function KasBankPage() {
                                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Deksripsi / Peruntukan Biaya</label>
                                 <textarea placeholder="Contoh: Bayar tagihan PLN bulan April" className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-red-500/10 focus:border-red-500 font-bold resize-none h-24" value={newTransaction.note} onChange={e => setNewTransaction({...newTransaction, note: e.target.value})}></textarea>
                             </div>
-                            <button type="submit" className="w-full py-5 bg-red-600 hover:bg-red-500 text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-red-200 active:scale-95 transition-all">Konfirmasi \u0026 Catat Pembayaran</button>
+                                                         <button type="submit" className="w-full py-5 bg-red-600 hover:bg-red-500 text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-red-200 active:scale-95 transition-all">Konfirmasi & Catat Pembayaran</button>
+
                         </form>
                     </div>
                 </div>
