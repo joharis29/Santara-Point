@@ -394,31 +394,31 @@ export default function HistoryPage() {
 
                 {/* Mobile Navigation Spacer */}
                 <div className="h-20 lg:hidden"></div>
+
+                {/* Standardized Settings Modal (Admin) */}
+                <SettingsModal 
+                    isOpen={isSettingsOpen}
+                    onClose={() => setIsSettingsOpen(false)}
+                    isAdmin={true}
+                    activeTab={activeSettingsTab}
+                    setActiveTab={setActiveSettingsTab}
+                    userProfile={userProfile}
+                    setUserProfile={setUserProfile}
+                    handleSaveProfile={handleSaveProfile}
+                    storeSettings={storeSettings}
+                    setStoreSettings={setStoreSettings}
+                    newUserContact={newUserContact}
+                    setNewUserContact={setNewUserContact}
+                    newUserRole={newUserRole}
+                    setNewUserRole={setNewUserRole}
+                    setIsChangeEmailOpen={setIsChangeEmailOpen}
+                    setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+                    setIsChangePasswordOpen={setIsChangePasswordOpen}
+                    addAddress={addAddress}
+                    removeAddress={removeAddress}
+                    updateAddress={updateAddress}
+                />
             </main>
         </div>
-
-        {/* Standardized Settings Modal (Admin) */}
-        <SettingsModal 
-            isOpen={isSettingsOpen}
-            onClose={() => setIsSettingsOpen(false)}
-            isAdmin={true}
-            activeTab={activeSettingsTab}
-            setActiveTab={setActiveSettingsTab}
-            userProfile={userProfile}
-            setUserProfile={setUserProfile}
-            handleSaveProfile={handleSaveProfile}
-            storeSettings={storeSettings}
-            setStoreSettings={setStoreSettings}
-            newUserContact={newUserContact}
-            setNewUserContact={setNewUserContact}
-            newUserRole={newUserRole}
-            setNewUserRole={setNewUserRole}
-            setIsChangeEmailOpen={setIsChangeEmailOpen}
-            setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
-            setIsChangePasswordOpen={setIsChangePasswordOpen}
-            addAddress={addAddress}
-            removeAddress={removeAddress}
-            updateAddress={updateAddress}
-        />
     );
 }

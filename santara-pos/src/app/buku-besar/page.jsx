@@ -310,31 +310,30 @@ export default function BukuBesarPage() {
                         <span className="text-[10px] font-bold uppercase tracking-tight">Jual</span>
                     </button>
                 </nav>
+                {/* Standardized Settings Modal (Admin) */}
+                <SettingsModal 
+                    isOpen={isSettingsOpen}
+                    onClose={() => setIsSettingsOpen(false)}
+                    isAdmin={true}
+                    activeTab={activeSettingsTab}
+                    setActiveTab={setActiveSettingsTab}
+                    userProfile={userProfile}
+                    setUserProfile={setUserProfile}
+                    handleSaveProfile={handleSaveProfile}
+                    storeSettings={storeSettings}
+                    setStoreSettings={setStoreSettings}
+                    newUserContact={newUserContact}
+                    setNewUserContact={setNewUserContact}
+                    newUserRole={newUserRole}
+                    setNewUserRole={setNewUserRole}
+                    setIsChangeEmailOpen={setIsChangeEmailOpen}
+                    setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+                    setIsChangePasswordOpen={setIsChangePasswordOpen}
+                    addAddress={addAddress}
+                    removeAddress={removeAddress}
+                    updateAddress={updateAddress}
+                />
             </main>
-
-            {/* Standardized Settings Modal (Admin) */}
-            <SettingsModal 
-                isOpen={isSettingsOpen}
-                onClose={() => setIsSettingsOpen(false)}
-                isAdmin={true}
-                activeTab={activeSettingsTab}
-                setActiveTab={setActiveSettingsTab}
-                userProfile={userProfile}
-                setUserProfile={setUserProfile}
-                handleSaveProfile={handleSaveProfile}
-                storeSettings={storeSettings}
-                setStoreSettings={setStoreSettings}
-                newUserContact={newUserContact}
-                setNewUserContact={setNewUserContact}
-                newUserRole={newUserRole}
-                setNewUserRole={setNewUserRole}
-                setIsChangeEmailOpen={setIsChangeEmailOpen}
-                setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
-                setIsChangePasswordOpen={setIsChangePasswordOpen}
-                addAddress={addAddress}
-                removeAddress={removeAddress}
-                updateAddress={updateAddress}
-            />
 
             {/* Modal Tambah Akun */}
             {isAddModalOpen && (
