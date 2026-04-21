@@ -189,6 +189,10 @@ export default function CustomerHistory() {
         setUserProfile({ ...userProfile, addresses: [...userProfile.addresses, newAddr] });
     };
 
+    const removeAddress = (id) => {
+        setUserProfile({ ...userProfile, addresses: userProfile.addresses.filter(a => a.id !== id) });
+    };
+
     const updateAddress = (id, field, value) => {
         setUserProfile({
             ...userProfile,
