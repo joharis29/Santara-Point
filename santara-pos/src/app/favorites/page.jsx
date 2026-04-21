@@ -175,6 +175,13 @@ export default function App() {
         if (storedSettings) {
             setStoreSettings(JSON.parse(storedSettings));
         }
+
+        // Restore active transaction overlay if any
+        const activeTxId = localStorage.getItem('santaraActiveTxId');
+        if (activeTxId) {
+            setCurrentTxId(activeTxId);
+            setIsWaitingOpen(true);
+        }
     }, []);
 
     const toggleFavorite = (e, id) => {
@@ -268,6 +275,10 @@ export default function App() {
         };
         const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
         localStorage.setItem('santaraTransactionHistory', JSON.stringify([newTransaction, ...existingHistory]));
+        
+        // Persist active ID
+        localStorage.setItem('santaraActiveTxId', tId);
+        
         setCurrentTxId(tId);
         setIsWaitingOpen(true);
     };
@@ -307,12 +318,10 @@ export default function App() {
 
     const handleCloseWaiting = () => {
         setIsWaitingOpen(false);
+        setCurrentTxId(null);
+        localStorage.removeItem('santaraActiveTxId');
         setCart([]);
         setPaymentMethod('');
-        // Optional: Reset data diri
-        // setCustomerName('');
-        // setCustomerEmail('');
-        // setCustomerPhone('');
     };
 
     return (

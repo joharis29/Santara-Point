@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { generateReceiptPDF } from '@/lib/receiptPdf';
+import WaitingOverlay from '../posin-cus/WaitingOverlay';
 import {
     LayoutDashboard,
     Home,
@@ -161,9 +162,10 @@ export default function App() {
     const [settingsTab, setSettingsTab] = useState('info'); // 'info', 'tax', or 'users'
     const [newUserContact, setNewUserContact] = useState('');
     const [newUserRole, setNewUserRole] = useState('Operator');
-    const [isCartModalOpen, setIsCartModalOpen] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
+    const [isWaitingOpen, setIsWaitingOpen] = useState(false);
+    const [currentTxId, setCurrentTxId] = useState(null);
 
     React.useEffect(() => {
         // Security Check
@@ -197,7 +199,14 @@ export default function App() {
         } else {
             localStorage.setItem('santaraStoreSettings', JSON.stringify(DEFAULT_SETTINGS));
         }
-    }, []);
+
+        // Restore active transaction overlay if any
+        const activeTxId = localStorage.getItem('santaraActiveTxId');
+        if (activeTxId) {
+            setCurrentTxId(activeTxId);
+            setIsWaitingOpen(true);
+        }
+    }, [router]);
 
     // --- Logika Perhitungan (Inclusive Pajak 10%) ---
     const menuTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -299,6 +308,11 @@ export default function App() {
                 };
                 const { error } = await supabase.from('transactions').insert([dbTrx]);
                 if (error) throw error;
+
+                // Persist active ID
+                localStorage.setItem('santaraActiveTxId', trx.id);
+                setCurrentTxId(trx.id);
+                setIsWaitingOpen(true);
                 console.log("Admin transaction synced to Supabase");
             } catch (err) {
                 console.error("Supabase sync failed (Admin):", err);
@@ -314,13 +328,6 @@ export default function App() {
         generateReceiptPDF(newTransaction, storeSettings);
 
         alert(`Transaksi ${paymentMethod} Berhasil!\nNama: ${customerName}\nAntrian: ${queueNumber}\nTotal: Rp ${totalAmount.toLocaleString('en-US')}\nNota/Struk telah berhasil dibuat.`);
-        // Reset state setelah simulasi
-        setCart([]);
-        setCustomerName('');
-        setQueueNumber('');
-        setOrderNote('');
-        setOrderType('Dine-In');
-        setPaymentMethod('');
     };
 
     return (
@@ -1211,6 +1218,14 @@ export default function App() {
                     </div>
                 </div>
             )}
+            {/* Tracking Overlay */}
+            <WaitingOverlay 
+                isOpen={isWaitingOpen}
+                onClose={handleCloseWaiting}
+                customerName={customerName}
+                totalAmount={totalAmount}
+                transactionId={currentTxId}
+            />
         </div>
     );
 }

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { generateReceiptPDF } from '@/lib/receiptPdf';
+import WaitingOverlay from '../posin-cus/WaitingOverlay';
 import {
     Home,
     ShoppingBag,
@@ -135,6 +136,8 @@ export default function App() {
 
     const [products, setProducts] = useState(PRODUCTS);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
+    const [isWaitingOpen, setIsWaitingOpen] = useState(false);
+    const [currentTxId, setCurrentTxId] = useState(null);
 
     React.useEffect(() => {
         // Security Check
@@ -168,6 +171,13 @@ export default function App() {
             } catch (e) {
                 console.error("Error parsing settings", e);
             }
+        }
+
+        // Restore active transaction overlay if any
+        const activeTxId = localStorage.getItem('santaraActiveTxId');
+        if (activeTxId) {
+            setCurrentTxId(activeTxId);
+            setIsWaitingOpen(true);
         }
     }, [router]);
 
@@ -267,6 +277,12 @@ export default function App() {
                 };
                 const { error } = await supabase.from('transactions').insert([dbTrx]);
                 if (error) throw error;
+
+                // Persist active ID
+                localStorage.setItem('santaraActiveTxId', trx.id);
+                setCurrentTxId(trx.id);
+                setIsWaitingOpen(true);
+
                 console.log("Cashier transaction synced to Supabase");
             } catch (err) {
                 console.error("Supabase sync failed (Cashier):", err);
@@ -282,10 +298,20 @@ export default function App() {
         generateReceiptPDF(newTransaction, storeSettings);
 
         alert(`Pembayaran ${paymentMethod} Berhasil!\nNama: ${customerName}\nAntrian: ${queueNumber}\nNota Digital/Struk telah berhasil dibuat.\nJazakallahu Khairan.`);
+    };
+
+    const clearCart = () => {
         setCart([]);
         setCustomerName('');
         setQueueNumber('');
         setOrderNote('');
+    };
+
+    const handleCloseWaiting = () => {
+        setIsWaitingOpen(false);
+        setCurrentTxId(null);
+        localStorage.removeItem('santaraActiveTxId');
+        clearCart();
         setOrderType('Dine-In');
         setPaymentMethod('');
     };
@@ -736,6 +762,14 @@ export default function App() {
                     </div>
                 </div>
             )}
+            {/* Tracking Overlay */}
+            <WaitingOverlay 
+                isOpen={isWaitingOpen}
+                onClose={handleCloseWaiting}
+                customerName={customerName}
+                totalAmount={totalAmount}
+                transactionId={currentTxId}
+            />
         </div>
     );
 }

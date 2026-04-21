@@ -298,6 +298,13 @@ function CustomerPortalContent() {
             }
         }
 
+        // Restore active transaction overlay if any
+        const activeTxId = localStorage.getItem('santaraActiveTxId');
+        if (activeTxId) {
+            setCurrentTxId(activeTxId);
+            setIsWaitingOpen(true);
+        }
+
         // Load language & theme
         const storedLang = localStorage.getItem('santaraLanguage');
         if (storedLang) setLanguage(storedLang);
@@ -309,7 +316,7 @@ function CustomerPortalContent() {
             setIsSettingsOpen(true);
             setActiveSettingsTab('profil');
         }
-    }, [searchParams]);
+    }, [router]);
 
     const addAddress = () => {
         const newAddress = { id: Date.now(), label: '', details: '' };
@@ -501,7 +508,7 @@ function CustomerPortalContent() {
         p.name.toLowerCase().includes(searchTerm.toLowerCase())
     ).sort((a, b) => {
         if (sortBy === 'price-low') return a.price - b.price;
-        if (sortBy === 'price-high') return b.price - a.price;
+        if (sortBy === 'price-high') return a.price - b.price;
         if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
         if (sortBy === 'discount') return (b.discountPercent || 0) - (a.discountPercent || 0);
         return 0;
@@ -591,6 +598,9 @@ function CustomerPortalContent() {
             const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
             localStorage.setItem('santaraTransactionHistory', JSON.stringify([localTransaction, ...existingHistory]));
             
+            // Persist active ID for tracking overlay
+            localStorage.setItem('santaraActiveTxId', tId);
+            
             setCurrentTxId(tId);
             setIsWaitingOpen(true);
             setCart([]);
@@ -635,6 +645,8 @@ function CustomerPortalContent() {
 
     const handleCloseWaiting = () => {
         setIsWaitingOpen(false);
+        setCurrentTxId(null);
+        localStorage.removeItem('santaraActiveTxId');
         setCart([]);
         setPaymentMethod('');
         // Optional: Reset data diri
