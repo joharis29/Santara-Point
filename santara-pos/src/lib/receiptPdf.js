@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 /**
  * SANTARA POINT - PDF Receipt Generator
@@ -75,7 +75,7 @@ export const generateReceiptPDF = (transaction, storeSettings) => {
         `Rp ${(item.price * item.quantity).toLocaleString('id-ID')}`
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
         startY: currentY,
         head: tableHead,
         body: tableData,
