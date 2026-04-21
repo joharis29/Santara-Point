@@ -12,19 +12,17 @@ import {
     Calculator,
     Clock,
     User,
+    Building2,
     Store,
-    FolderOpen,
-    Filter,
-    Home,
-    ChefHat,
-    ShoppingBag,
-    Package,
-    Tag,
-    Landmark,
-    BookOpen,
-    Building2
+    Menu,
+    X
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
+import AdminHeader from '@/components/AdminHeader';
+import AdminSidebar from '@/components/AdminSidebar';
+import CashierHeader from '@/components/CashierHeader';
+import CashierSidebar from '@/components/CashierSidebar';
+import SettingsModal from '@/components/SettingsModal';
 
 export default function HistoryPage() {
     const router = useRouter();
@@ -33,6 +31,27 @@ export default function HistoryPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [isAdmin, setIsAdmin] = useState(false);
     const [purchasePayments, setPurchasePayments] = useState([]);
+
+    // --- State Standarisasi ---
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [activeSettingsTab, setActiveSettingsTab] = useState('profil');
+    const [storeSettings, setStoreSettings] = useState({
+        storeName: 'Santara Point',
+        storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
+        isPajakActive: true,
+        authorizedUsers: []
+    });
+    const [userProfile, setUserProfile] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        whatsapp: '',
+        password: '••••••••',
+        addresses: []
+    });
+    const [newUserContact, setNewUserContact] = useState('');
+    const [newUserRole, setNewUserRole] = useState('Operator');
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -94,7 +113,42 @@ export default function HistoryPage() {
 
         const payments = JSON.parse(localStorage.getItem('santaraPurchasePayments') || '[]');
         setPurchasePayments(payments);
+
+        const storedSettings = localStorage.getItem('santaraStoreSettings');
+        if (storedSettings) setStoreSettings(JSON.parse(storedSettings));
+
+        const fetchUserProfile = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const meta = user.user_metadata || {};
+                setUserProfile({
+                    firstName: meta.first_name || '',
+                    lastName: meta.last_name || '',
+                    email: user.email || '',
+                    whatsapp: meta.whatsapp || '',
+                    password: '••••••••',
+                    addresses: meta.addresses || []
+                });
+            }
+        };
+        fetchUserProfile();
     }, []);
+
+    const handleSaveProfile = async (e) => {
+        e.preventDefault();
+        try {
+            const { error } = await supabase.auth.updateUser({
+                data: {
+                    first_name: userProfile.firstName,
+                    last_name: userProfile.lastName
+                }
+            });
+            if (error) throw error;
+            alert('Profil berhasil diperbarui!');
+        } catch (err) {
+            alert(err.message);
+        }
+    };
 
     // Get unique months from transactions for the 'folder' dropdown
     const availableMonths = Array.from(new Set([
@@ -123,124 +177,60 @@ export default function HistoryPage() {
     const netProfit = totalIncome - totalExpenses;
 
     return (
-        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden pb-20 lg:pb-0">
-            
-            {/* Sidebar Navigasi */}
-            <aside className="hidden lg:flex w-20 lg:w-24 bg-slate-900 flex-col items-center py-8 gap-10 shadow-2xl z-20 relative">
-                <div className="bg-emerald-500 p-3 rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                    <Store className="text-white" size={24} />
-                </div>
+        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden relative">
+            {/* Sidebar Standardized */}
+            {isAdmin ? (
+                <AdminSidebar 
+                    isOpen={isSidebarOpen} 
+                    setIsOpen={setIsSidebarOpen} 
+                    onOpenSettings={() => {
+                        setActiveSettingsTab('info-toko');
+                        setIsSettingsOpen(true);
+                    }} 
+                />
+            ) : (
+                <CashierSidebar 
+                    isOpen={isSidebarOpen} 
+                    setIsOpen={setIsSidebarOpen} 
+                    onOpenSettings={() => {
+                        setActiveSettingsTab('profil');
+                        setIsSettingsOpen(true);
+                    }} 
+                />
+            )}
 
-                <nav className="flex-1 flex flex-col gap-6">
-                    <button 
-                        onClick={() => router.back()}
-                        className="p-4 text-emerald-400 hover:text-white hover:bg-slate-800 rounded-2xl transition-all shadow-sm"
-                        title="Kembali"
-                    >
-                        <ArrowLeft size={24} />
-                    </button>
-                    <button className="p-4 bg-emerald-500/20 text-emerald-400 rounded-2xl transition-all shadow-sm border border-emerald-500/30" title="Riwayat">
-                        <FolderOpen size={24} />
-                    </button>
-                    <button 
-                        onClick={() => router.push('/penjualan')}
-                        className="p-4 text-emerald-400 hover:text-white hover:bg-slate-800 rounded-2xl transition-all shadow-sm"
-                        title="Penjualan"
-                    >
-                        <Tag size={24} />
-                    </button>
-                    <button 
-                        onClick={() => router.push('/kas-bank')}
-                        className="p-4 text-emerald-400 hover:text-white hover:bg-slate-800 rounded-2xl transition-all shadow-sm"
-                        title="Kas \u0026 Bank"
-                    >
-                        <Landmark size={24} />
-                    </button>
-                    <button 
-                        onClick={() => router.push('/buku-besar')}
-                        className="p-4 text-emerald-400 hover:text-white hover:bg-slate-800 rounded-2xl transition-all shadow-sm"
-                        title="Buku Besar"
-                    >
-                        <BookOpen size={24} />
-                    </button>
-                    <button 
-                        onClick={() => router.push('/perusahaan')}
-                        className="p-4 text-emerald-400 hover:text-white hover:bg-slate-800 rounded-2xl transition-all shadow-sm"
-                        title="Perusahaan"
-                    >
-                        <Building2 size={24} />
-                    </button>
-                    <button 
-                        onClick={() => router.push('/persediaan')}
-                        className="p-4 text-emerald-400 hover:text-white hover:bg-slate-800 rounded-2xl transition-all shadow-sm"
-                        title="Persediaan"
-                    >
-                        <Package size={24} />
-                    </button>
-                    <button 
-                        onClick={() => router.push('/pembelian')}
-                        className="p-4 text-emerald-400 hover:text-white hover:bg-slate-800 rounded-2xl transition-all shadow-sm"
-                        title="Pembelian"
-                    >
-                        <ShoppingBag size={24} />
-                    </button>
-                </nav>
-            </aside>
-
-            {/* Konten Utama */}
             <main className="flex-1 flex flex-col overflow-hidden relative">
-                {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#10b981 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
-                
-                <header className="px-6 py-6 lg:px-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 relative z-10 border-b border-slate-200/50 bg-white shadow-sm">
-                    <div className="w-full sm:w-auto">
-                        <div className="flex items-center gap-3 mb-2">
-                            <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                                <Receipt size={12} /> Database Terpusat
-                            </span>
-                            <span className="text-slate-400 text-xs font-bold bg-slate-100 px-3 py-1 rounded-full">{filteredTransactions.length} Transaksi</span>
-                        </div>
-                        <h1 className="text-2xl lg:text-3xl font-black text-slate-800 tracking-tight">Riwayat Pesanan</h1>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                        <div className="relative w-full sm:w-64">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                            <input
-                                type="text"
-                                placeholder="Cari nama atau ID..."
-                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm font-medium"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
-                        
-                        {/* Selector Bulan (Folder) */}
-                        <div className="relative w-full sm:w-auto shrink-0">
-                            <select 
-                                value={selectedMonth}
-                                onChange={(e) => setSelectedMonth(e.target.value)}
-                                className="w-full appearance-none bg-emerald-600 text-white font-bold text-sm px-5 py-3 pr-10 rounded-xl cursor-pointer outline-none hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all"
-                            >
-                                {availableMonths.map(month => (
-                                    <option key={month} value={month}>{formatMonthName(month)}</option>
-                                ))}
-                            </select>
-                            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-200 pointer-events-none" size={16} />
-                        </div>
-                    </div>
-                </header>
+                {/* Header Standardized */}
+                {isAdmin ? (
+                    <AdminHeader 
+                        title="Riwayat Akuntansi"
+                        subtitle="Monitoring Transaksi Penjualan & Pembelian Masa Lalu"
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                        onMenuClick={() => setIsSidebarOpen(true)}
+                    />
+                ) : (
+                    <CashierHeader 
+                        title="Riwayat Pesanan"
+                        subtitle="Daftar Transaksi Yang Telah Selesai"
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                        onOpenSettings={() => {
+                            setActiveSettingsTab('profil');
+                            setIsSettingsOpen(true);
+                        }}
+                        onMenuClick={() => setIsSidebarOpen(true)}
+                    />
+                )}
 
                 <div className="flex-1 overflow-y-auto p-6 lg:p-12 relative z-10">
                     
                     {/* Statistik Bulan Ini - Hanya untuk Owner/Admin */}
                     {isAdmin && (
-                        <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-8 lg:mb-10">
                             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4 lg:gap-6">
                                 <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                                    <TrendingUp size={24} className="lg:hidden" />
-                                    <TrendingUp size={32} className="hidden lg:block" />
+                                    <TrendingUp size={32} />
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Omset</p>
@@ -250,8 +240,7 @@ export default function HistoryPage() {
 
                             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4 lg:gap-6">
                                 <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-2xl bg-red-50 flex items-center justify-center text-red-500">
-                                    <ShoppingBag size={24} className="lg:hidden" />
-                                    <ShoppingBag size={32} className="hidden lg:block" />
+                                    <ShoppingBag size={32} />
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Belanja (Expense)</p>
@@ -261,8 +250,7 @@ export default function HistoryPage() {
 
                             <div className="bg-emerald-600 p-6 rounded-3xl shadow-xl shadow-emerald-900/10 flex items-center gap-4 lg:gap-6 text-white md:col-span-2 lg:col-span-1">
                                 <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-2xl bg-white/20 flex items-center justify-center text-white">
-                                    <Calculator size={24} className="lg:hidden" />
-                                    <Calculator size={32} className="hidden lg:block" />
+                                    <Calculator size={32} />
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-wider mb-1">Laba Bersih (Estimasi)</p>
@@ -270,8 +258,6 @@ export default function HistoryPage() {
                                 </div>
                             </div>
                         </div>
-
-                        </>
                     )}
 
                     {/* Tabel / Daftar Riwayat */}
@@ -280,6 +266,15 @@ export default function HistoryPage() {
                             <h2 className="font-bold text-slate-700 text-sm flex items-center gap-2">
                                 <Filter size={16} className="text-slate-400" /> Draft Laporan
                             </h2>
+                            <select 
+                                value={selectedMonth}
+                                onChange={(e) => setSelectedMonth(e.target.value)}
+                                className="bg-white border border-slate-200 text-slate-700 font-bold text-xs px-4 py-2 rounded-xl cursor-pointer outline-none"
+                            >
+                                {availableMonths.map(month => (
+                                    <option key={month} value={month}>{formatMonthName(month)}</option>
+                                ))}
+                            </select>
                         </div>
                         
                         {filteredTransactions.length === 0 ? (
@@ -289,66 +284,8 @@ export default function HistoryPage() {
                                 <p className="text-sm">Belum ada transaksi di bulan {formatMonthName(selectedMonth)}.</p>
                             </div>
                         ) : (
-                            <>
-                                {/* Mobile View: Card List */}
-                                <div className="lg:hidden divide-y divide-slate-100">
-                                    {filteredTransactions.map((trx, idx) => (
-                                        <div key={idx} className="p-5 space-y-4 hover:bg-emerald-50/30 transition-colors">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <div className="font-black text-xs text-slate-800 mb-1">{trx.id}</div>
-                                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
-                                                        <Clock size={10} />
-                                                        {new Date(trx.timestamp).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                                                    </div>
-                                                </div>
-                                                <span className={`inline-flex items-center px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border
-                                                    ${trx.status === 'Ditolak' ? 'bg-red-50 text-red-600 border-red-200' : 
-                                                      (!trx.status || trx.status === 'Selesai') ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
-                                                      'bg-blue-50 text-blue-600 border-blue-200'}`}>
-                                                    {trx.status === 'Ditolak' ? 'Ditolak' : (trx.status || 'Diterima')}
-                                                </span>
-                                            </div>
-
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
-                                                        <User size={14} />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-xs font-black text-slate-800 leading-none mb-1">{trx.customerName}</p>
-                                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Antrian {trx.queueNumber}</p>
-                                                    </div>
-                                                </div>
-                                                    <p className="text-sm font-black text-emerald-700 leading-none mb-1">Rp {trx.totalAmount?.toLocaleString()}</p>
-                                                </div>
-
-                                                <div className="bg-slate-50 p-3 rounded-xl space-y-1.5">
-                                                {trx.items && trx.items.map((item, i) => (
-                                                    <div key={i} className="text-[10px] text-slate-600 font-bold flex justify-between">
-                                                        <span>{item.quantity}x {item.name}</span>
-                                                        <span className="text-slate-400 italic">Rp {(item.price * item.quantity).toLocaleString()}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-
-                                            <div className="flex justify-between items-center pt-1">
-                                                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase">
-                                                    <User size={10} /> {trx.cashierName || 'Online'}
-                                                </div>
-                                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border
-                                                    ${trx.paymentMethod.toLowerCase() === 'tunai' ? 'bg-amber-50 text-amber-600 border-amber-200' : 
-                                                      'bg-emerald-50 text-emerald-600 border-emerald-200'}`}>
-                                                    {trx.paymentMethod}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* Desktop View: Table */}
-                                <div className="hidden lg:block overflow-x-auto">
-                                    <table className="w-full text-left border-collapse">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
                                     <thead>
                                         <tr className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">
                                             <th className="p-5">ID & Waktu</th>
@@ -401,9 +338,6 @@ export default function HistoryPage() {
                                                           'bg-emerald-50 text-emerald-600 border-emerald-200'}`}>
                                                         {trx.paymentMethod}
                                                     </span>
-                                                    <div className="mt-2 text-[9px] font-bold text-slate-400 uppercase">
-                                                        Source: {trx.source || '-'}
-                                                    </div>
                                                 </td>
                                                 <td className="p-5 align-top">
                                                     <span className={`inline-flex items-center px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border
@@ -429,35 +363,13 @@ export default function HistoryPage() {
                                         ))}
                                     </tbody>
                                 </table>
-                                </div>
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>
 
-                {/* Mobile Bottom Navigation */}
-                <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-4 flex justify-around items-center z-50">
-                    <button onClick={() => router.push('/homepage')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <Home size={20} />
-                        <span className="text-[10px] font-bold uppercase">Home</span>
-                    </button>
-                    <button onClick={() => router.push(isAdmin ? '/posin-adm' : '/posin-cas')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <ShoppingBag size={20} />
-                        <span className="text-[10px] font-bold uppercase">POS</span>
-                    </button>
-                    <button className="flex flex-col items-center gap-1 text-emerald-600">
-                        <FolderOpen size={20} />
-                        <span className="text-[10px] font-bold uppercase">Riwayat</span>
-                    </button>
-                    <button onClick={() => router.push('/pembelian')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <ShoppingBag size={20} />
-                        <span className="text-[10px] font-bold uppercase">Beli</span>
-                    </button>
-                    <button onClick={() => router.push('/waiting-list')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <ChefHat size={20} />
-                        <span className="text-[10px] font-bold uppercase">Antrean</span>
-                    </button>
-                </nav>
+                {/* Mobile Navigation Spacer */}
+                <div className="h-20 lg:hidden"></div>
             </main>
         </div>
     );

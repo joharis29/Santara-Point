@@ -3,25 +3,23 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-    ArrowLeft,
-    Clock,
-    ChefHat,
-    CheckCircle2,
-    RefreshCw,
-    User,
-    ListTodo,
-    ChevronRight,
-    Utensils,
-    Home,
-    ShoppingBag,
-    History,
-    MapPin,
-    Phone,
-    Info,
-    Hash,
-    Truck
+    Truck,
+    Building2,
+    Store,
+    Menu,
+    X,
+    TrendingUp,
+    Search,
+    Tag,
+    Landmark,
+    BookOpen
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
+import AdminHeader from '@/components/AdminHeader';
+import AdminSidebar from '@/components/AdminSidebar';
+import CashierHeader from '@/components/CashierHeader';
+import CashierSidebar from '@/components/CashierSidebar';
+import SettingsModal from '@/components/SettingsModal';
 
 const DEFAULT_SETTINGS = {
     storeName: 'Santara Point',
@@ -36,6 +34,28 @@ export default function WaitingListPage() {
     const router = useRouter();
     const [transactions, setTransactions] = useState([]);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
+    const [activeShift, setActiveShift] = useState('Pagi');
+
+    // --- State Standarisasi ---
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [activeSettingsTab, setActiveSettingsTab] = useState('profil');
+    const [userProfile, setUserProfile] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        whatsapp: '',
+        password: '••••••••',
+        addresses: []
+    });
+    const [newUserContact, setNewUserContact] = useState('');
+    const [newUserRole, setNewUserRole] = useState('Operator');
+
+    // --- State Perubahan Modals ---
+    const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
+    const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
     const loadData = async () => {
         try {
@@ -70,7 +90,6 @@ export default function WaitingListPage() {
     useEffect(() => {
         loadData();
 
-        // 1. Realtime Subscription for Cross-Device Sync
         const channel = supabase
             .channel('transaction-updates')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, (payload) => {
@@ -79,19 +98,69 @@ export default function WaitingListPage() {
             })
             .subscribe();
 
-        // 2. Polling Fallback (setiap 10 detik, lebih jarang karena sudah ada realtime)
-        const timer = setInterval(loadData, 10000);
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            setIsAdmin(params.get('role') === 'admin');
+        }
 
         const storedSettings = localStorage.getItem('santaraStoreSettings');
-        if (storedSettings) {
-            setStoreSettings(JSON.parse(storedSettings));
-        }
+
+        const storedShift = localStorage.getItem('activeCashierShift');
+        if (storedShift) setActiveShift(storedShift);
+
+        const fetchUserProfile = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const meta = user.user_metadata || {};
+                setUserProfile({
+                    firstName: meta.first_name || '',
+                    lastName: meta.last_name || '',
+                    email: user.email || '',
+                    whatsapp: meta.whatsapp || '',
+                    password: '••••••••',
+                    addresses: meta.addresses || []
+                });
+            }
+        };
+        fetchUserProfile();
 
         return () => {
             clearInterval(timer);
             supabase.removeChannel(channel);
         };
     }, []);
+
+    const handleSaveProfile = async (e) => {
+        e.preventDefault();
+        try {
+            const { error } = await supabase.auth.updateUser({
+                data: {
+                    first_name: userProfile.firstName,
+                    last_name: userProfile.lastName
+                }
+            });
+            if (error) throw error;
+            alert('Profil berhasil diperbarui!');
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    const addAddress = () => {
+        const newAddr = { id: Date.now(), label: '', details: '' };
+        setUserProfile({ ...userProfile, addresses: [...userProfile.addresses, newAddr] });
+    };
+
+    const removeAddress = (id) => {
+        setUserProfile({ ...userProfile, addresses: userProfile.addresses.filter(a => a.id !== id) });
+    };
+
+    const updateAddress = (id, field, value) => {
+        setUserProfile({
+            ...userProfile,
+            addresses: userProfile.addresses.map(a => a.id === id ? { ...a, [field]: value } : a)
+        });
+    };
 
     const handleChangeStatus = async (id, newStatus) => {
         try {
@@ -243,30 +312,51 @@ export default function WaitingListPage() {
     );
 
     return (
-        <div className="flex flex-col h-screen bg-slate-100 font-sans text-slate-900 overflow-hidden pb-20 lg:pb-0">
-            {/* Header */}
-            <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shrink-0 shadow-sm z-10 transition-all">
-                <div className="flex items-center gap-4">
-                    <button 
-                        onClick={() => router.back()}
-                        className="hidden sm:flex w-10 h-10 items-center justify-center bg-slate-50 hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 rounded-xl transition-colors"
-                        title="Kembali"
-                    >
-                        <ArrowLeft size={20} />
-                    </button>
-                    <div>
-                        <h1 className="text-lg lg:text-xl font-black text-slate-800 flex items-center gap-2">
-                            <ListTodo className="text-emerald-500" /> <span className="hidden sm:inline">Papan Manajemen</span> Dapur
-                        </h1>
-                        <p className="text-[10px] lg:text-xs font-bold text-slate-400">Update status pesanan secara Real-Time.</p>
-                    </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-1.5 text-[10px] lg:text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
-                        <RefreshCw size={12} className="animate-spin" /> <span className="hidden sm:inline">Live</span> Sync
-                    </span>
-                </div>
-            </header>
+        <div className="flex h-screen bg-slate-100 font-sans text-slate-900 overflow-hidden relative">
+            {/* Sidebar Standardized */}
+            {isAdmin ? (
+                <AdminSidebar 
+                    isOpen={isSidebarOpen} 
+                    setIsOpen={setIsSidebarOpen} 
+                    onOpenSettings={() => {
+                        setActiveSettingsTab('info-toko');
+                        setIsSettingsOpen(true);
+                    }} 
+                />
+            ) : (
+                <CashierSidebar 
+                    isOpen={isSidebarOpen} 
+                    setIsOpen={setIsSidebarOpen} 
+                    onOpenSettings={() => {
+                        setActiveSettingsTab('profil');
+                        setIsSettingsOpen(true);
+                    }} 
+                />
+            )}
+
+            <div className="flex-1 flex flex-col overflow-hidden">
+                {/* Header Standardized */}
+                {isAdmin ? (
+                    <AdminHeader 
+                        title="Daftar Antrean"
+                        subtitle="Monitoring Pesanan Menunggu, Diproses, & Selesai"
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                        onMenuClick={() => setIsSidebarOpen(true)}
+                    />
+                ) : (
+                    <CashierHeader 
+                        storeName={storeSettings.storeName}
+                        activeShift={activeShift}
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                        onSettingsClick={() => {
+                            setActiveSettingsTab('profil');
+                            setIsSettingsOpen(true);
+                        }}
+                        onMenuClick={() => setIsSidebarOpen(true)}
+                    />
+                )}
 
             {/* Kanban Board */}
             <main className="flex-1 overflow-x-auto lg:overflow-x-hidden overflow-y-auto lg:overflow-y-hidden p-4 lg:p-6 bg-slate-100">
@@ -328,30 +418,29 @@ export default function WaitingListPage() {
 
                 </div>
 
-                {/* Mobile Bottom Navigation */}
-                <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-4 flex justify-around items-center z-50">
-                    <button onClick={() => router.push('/homepage')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <Home size={20} />
-                        <span className="text-[10px] font-bold uppercase tracking-tight">Home</span>
-                    </button>
-                    <button onClick={() => router.push('/posin-adm')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <ShoppingBag size={20} />
-                        <span className="text-[10px] font-bold uppercase tracking-tight">POS</span>
-                    </button>
-                    <button onClick={() => router.push('/history?role=admin')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <History size={20} />
-                        <span className="text-[10px] font-bold uppercase tracking-tight">Riwayat</span>
-                    </button>
-                    <button onClick={() => router.push('/pembelian')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <ShoppingBag size={20} />
-                        <span className="text-[10px] font-bold uppercase tracking-tight">Beli</span>
-                    </button>
-                    <button className="flex flex-col items-center gap-1 text-emerald-600">
-                        <ChefHat size={20} />
-                        <span className="text-[10px] font-bold uppercase tracking-tight">Antrean</span>
-                    </button>
-                </nav>
-            </main>
+            {/* Standardized Settings Modal */}
+            <SettingsModal 
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                isAdmin={isAdmin}
+                activeTab={activeSettingsTab}
+                setActiveTab={setActiveSettingsTab}
+                userProfile={userProfile}
+                setUserProfile={setUserProfile}
+                handleSaveProfile={handleSaveProfile}
+                storeSettings={storeSettings}
+                setStoreSettings={setStoreSettings}
+                newUserContact={newUserContact}
+                setNewUserContact={setNewUserContact}
+                newUserRole={newUserRole}
+                setNewUserRole={setNewUserRole}
+                setIsChangeEmailOpen={setIsChangeEmailOpen}
+                setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+                setIsChangePasswordOpen={setIsChangePasswordOpen}
+                addAddress={addAddress}
+                removeAddress={removeAddress}
+                updateAddress={updateAddress}
+            />
         </div>
     );
 }

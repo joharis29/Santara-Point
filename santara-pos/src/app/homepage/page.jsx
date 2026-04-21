@@ -16,6 +16,9 @@ import {
   LogOut
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
+import CustomerHeader from '@/components/CustomerHeader';
+import CustomerBottomNav from '@/components/CustomerBottomNav';
+import SettingsModal from '@/components/SettingsModal';
 
 /**
  * SANTARA POINT - PREMIUM HOMEPAGE
@@ -40,6 +43,23 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [customerName, setCustomerName] = useState('Sobat Santara');
 
+  // --- State Pengaturan ---
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [activeSettingsTab, setActiveSettingsTab] = useState('profil');
+  const [userProfile, setUserProfile] = useState({
+      firstName: '',
+      lastName: '',
+      email: '',
+      whatsapp: '',
+      password: '••••••••',
+      addresses: []
+  });
+
+  // --- State Perubahan Modals ---
+  const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
+  const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+
   useEffect(() => {
     // Load store settings
     const stored = localStorage.getItem('santaraStoreSettings');
@@ -50,13 +70,22 @@ export default function App() {
     // Auth sync
     const checkUser = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          const meta = session.user.user_metadata || {};
-          if (meta.first_name || meta.last_name) {
-            setCustomerName(`${meta.first_name || ''} ${meta.last_name || ''}`.trim());
-          }
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+        if (user) {
+          const meta = user.user_metadata || {};
+          const fName = meta.first_name || '';
+          const lName = meta.last_name || '';
+          setCustomerName(`${fName} ${lName}`.trim() || 'Sobat Santara');
+
+          setUserProfile({
+            firstName: fName,
+            lastName: lName,
+            email: user.email || '',
+            whatsapp: meta.whatsapp || '',
+            password: '••••••••',
+            addresses: meta.addresses || []
+          });
         }
       } catch (err) {
         console.error("Auth check error:", err);
@@ -66,22 +95,40 @@ export default function App() {
     };
 
     checkUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const meta = session.user.user_metadata || {};
-        if (meta.first_name || meta.last_name) {
-          setCustomerName(`${meta.first_name || ''} ${meta.last_name || ''}`.trim());
-        }
-      }
-      setLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, []);
+
+  const handleSaveProfile = async (e) => {
+      e.preventDefault();
+      try {
+          const { error } = await supabase.auth.updateUser({
+              data: {
+                  first_name: userProfile.firstName,
+                  last_name: userProfile.lastName
+              }
+          });
+          if (error) throw error;
+          setCustomerName(`${userProfile.firstName} ${userProfile.lastName}`.trim());
+          alert('Profil berhasil diperbarui!');
+      } catch (err) {
+          alert(err.message);
+      }
+  };
+
+  const addAddress = () => {
+      const newAddr = { id: Date.now(), label: '', details: '' };
+      setUserProfile({ ...userProfile, addresses: [...userProfile.addresses, newAddr] });
+  };
+
+  const removeAddress = (id) => {
+      setUserProfile({ ...userProfile, addresses: userProfile.addresses.filter(a => a.id !== id) });
+  };
+
+  const updateAddress = (id, field, value) => {
+      setUserProfile({
+          ...userProfile,
+          addresses: userProfile.addresses.map(a => a.id === id ? { ...a, [field]: value } : a)
+      });
+  };
 
   // Fungsi placeholder untuk navigasi
   const handleAction = (type) => {
@@ -116,82 +163,14 @@ export default function App() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/30"></div>
       </div>
 
-      {/* 2. Navigation Bar */}
-      <nav className="relative z-50 flex justify-between items-center px-6 lg:px-12 py-4 border-b border-white/10 backdrop-blur-xl flex-none bg-black/20">
-        <div className="flex items-center gap-2 lg:gap-3">
-          <img src="/santara-logo.png" alt="Santara Point Logo" className="w-8 h-8 lg:w-10 lg:h-10 object-contain bg-white rounded-full p-0.5 shadow-lg shadow-black/20" />
-          <h1 className="text-xl lg:text-2xl font-black text-white tracking-tighter">
-            {storeSettings.storeName.split(' ')[0]}<span className="text-emerald-500">{storeSettings.storeName.split(' ').slice(1).join('')}</span>
-          </h1>
-        </div>
-
-        {/* Desktop Menu */}
-        <div className="hidden lg:flex items-center gap-6">
-          <button onClick={() => handleAction('dokumentasi')} className="text-gray-300 hover:text-white font-bold text-sm transition-all">
-            Dokumentasi
-          </button>
-          <button onClick={() => handleAction('kontak')} className="text-gray-300 hover:text-white font-bold text-sm transition-all">
-            Kontak
-          </button>
-
-          {!loading && (
-            user ? (
-              <button
-                onClick={() => handleAction('profile')}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-full font-black text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95 flex items-center gap-2"
-              >
-                <User size={18} /> Profil Saya
-              </button>
-            ) : (
-              <>
-                <button onClick={() => handleAction('login')} className="flex items-center gap-2 text-white font-bold hover:text-emerald-400 transition-all text-sm">
-                  <User size={18} /> Masuk
-                </button>
-                <button onClick={() => handleAction('register')} className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-full font-black text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95">
-                  Daftar Baru
-                </button>
-              </>
-            )
-          )}
-        </div>
-
-        {/* Mobile Toggle */}
-        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-white p-2">
-          {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
-
-        {/* Mobile Menu Overlay */}
-        {isMobileMenuOpen && (
-          <div className="fixed inset-0 top-[73px] bg-black/95 backdrop-blur-2xl z-50 flex flex-col p-8 gap-8 lg:hidden animate-in fade-in slide-in-from-top-4 duration-300">
-            {!loading && (
-              user ? (
-                <button onClick={() => handleAction('profile')} className="text-2xl font-black text-white flex items-center gap-4">
-                  <User size={24} className="text-emerald-500" /> Profil Saya
-                </button>
-              ) : (
-                <>
-                  <button onClick={() => handleAction('login')} className="text-2xl font-black text-white flex items-center gap-4">
-                    <User size={24} className="text-emerald-500" /> Masuk Akun
-                  </button>
-                  <button onClick={() => handleAction('register')} className="text-2xl font-black text-white flex items-center gap-4">
-                    <ShoppingCart size={24} className="text-emerald-500" /> Daftar Sekarang
-                  </button>
-                </>
-              )
-            )}
-            <button onClick={() => handleAction('kontak')} className="text-2xl font-black text-white flex items-center gap-4">
-              <MessageCircle size={24} className="text-emerald-500" /> Kontak Kami
-            </button>
-            <button onClick={() => handleAction('dokumentasi')} className="text-2xl font-black text-white flex items-center gap-4">
-              <ShieldCheck size={24} className="text-emerald-500" /> Dokumentasi Layanan
-            </button>
-            <div className="mt-auto border-t border-white/10 pt-8">
-              <p className="text-emerald-500 font-bold mb-2">Santara Point POS</p>
-              <p className="text-gray-500 text-sm">{storeSettings.storeTagline}</p>
-            </div>
-          </div>
-        )}
-      </nav>
+      {/* 2. Navigation Bar (Standardized) */}
+      <CustomerHeader 
+          title={storeSettings.storeName}
+          subtitle={storeSettings.storeTagline}
+          cartCount={0}
+          onSettingsClick={() => setIsSettingsOpen(true)}
+          isTransparent={true}
+      />
 
       {/* 3. Hero Section Content */}
       <main className="relative z-10 px-6 lg:px-12 py-10 lg:py-24 flex-1 flex flex-col justify-center min-h-[500px]">
@@ -264,6 +243,25 @@ export default function App() {
           <span className="hover:text-white cursor-pointer transition">Kebijakan Privasi</span>
         </div>
       </footer>
+      {/* Standardized Bottom Navigation (Mobile) */}
+      <CustomerBottomNav onOpenSettings={() => setIsSettingsOpen(true)} />
+
+      {/* Standardized Settings Modal */}
+      <SettingsModal 
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        activeTab={activeSettingsTab}
+        setActiveTab={setActiveSettingsTab}
+        userProfile={userProfile}
+        setUserProfile={setUserProfile}
+        handleSaveProfile={handleSaveProfile}
+        setIsChangeEmailOpen={setIsChangeEmailOpen}
+        setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+        setIsChangePasswordOpen={setIsChangePasswordOpen}
+        addAddress={addAddress}
+        removeAddress={removeAddress}
+        updateAddress={updateAddress}
+      />
     </div>
   );
 }

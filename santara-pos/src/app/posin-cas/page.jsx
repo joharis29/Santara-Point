@@ -25,9 +25,14 @@ import {
     ArrowUpDown,
     X,
     User,
-    CheckCircle2
+    CheckCircle2,
+    ArrowLeft,
+    Menu
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
+import CashierHeader from '@/components/CashierHeader';
+import CashierSidebar from '@/components/CashierSidebar';
+import SettingsModal from '@/components/SettingsModal';
 
 /**
  * SANTARA POINT - POS INPUT (KASIR ROLE)
@@ -134,10 +139,23 @@ export default function App() {
     const [paymentMethod, setPaymentMethod] = useState('');
     const [orderType, setOrderType] = useState('Dine-In');
 
-    const [products, setProducts] = useState(PRODUCTS);
-    const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
-    const [isWaitingOpen, setIsWaitingOpen] = useState(false);
-    const [currentTxId, setCurrentTxId] = useState(null);
+    // --- State Standarisasi ---
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [activeSettingsTab, setActiveSettingsTab] = useState('profil');
+    const [userProfile, setUserProfile] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        whatsapp: '',
+        password: '••••••••',
+        addresses: []
+    });
+
+    // --- State Perubahan Modals ---
+    const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
+    const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
     React.useEffect(() => {
         // Security Check
@@ -147,6 +165,22 @@ export default function App() {
             router.push('/login');
             return;
         }
+
+        const fetchUserProfile = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const meta = user.user_metadata || {};
+                setUserProfile({
+                    firstName: meta.first_name || '',
+                    lastName: meta.last_name || '',
+                    email: user.email || '',
+                    whatsapp: meta.whatsapp || '',
+                    password: '••••••••',
+                    addresses: meta.addresses || []
+                });
+            }
+        };
+        fetchUserProfile();
 
         const storedShift = localStorage.getItem('activeCashierShift');
         if (storedShift) setActiveShift(storedShift);
@@ -180,6 +214,38 @@ export default function App() {
             setIsWaitingOpen(true);
         }
     }, [router]);
+
+    const handleSaveProfile = async (e) => {
+        e.preventDefault();
+        try {
+            const { error } = await supabase.auth.updateUser({
+                data: {
+                    first_name: userProfile.firstName,
+                    last_name: userProfile.lastName
+                }
+            });
+            if (error) throw error;
+            alert('Profil berhasil diperbarui!');
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    const addAddress = () => {
+        const newAddr = { id: Date.now(), label: '', details: '' };
+        setUserProfile({ ...userProfile, addresses: [...userProfile.addresses, newAddr] });
+    };
+
+    const removeAddress = (id) => {
+        setUserProfile({ ...userProfile, addresses: userProfile.addresses.filter(a => a.id !== id) });
+    };
+
+    const updateAddress = (id, field, value) => {
+        setUserProfile({
+            ...userProfile,
+            addresses: userProfile.addresses.map(a => a.id === id ? { ...a, [field]: value } : a)
+        });
+    };
 
     // --- Perhitungan Total (Inclusive Pajak 10%) ---
     const menuTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -297,7 +363,7 @@ export default function App() {
         // Generate PDF Receipt
         generateReceiptPDF(newTransaction, storeSettings);
 
-        alert(`Pembayaran ${paymentMethod} Berhasil!\nNama: ${customerName}\nAntrian: ${queueNumber}\nNota Digital/Struk telah berhasil dibuat.\nJazakallahu Khairan.`);
+        alert(`Pembayaran ${paymentMethod} Berhasil!\n\nNama: ${customerName}\nTotal Tagihan: Rp ${totalAmount.toLocaleString('id-ID')}\nAntrian: ${queueNumber}\n\nNota Digital/Struk telah berhasil dibuat.\nJazakallahu Khairan.`);
     };
 
     const clearCart = () => {
@@ -319,63 +385,30 @@ export default function App() {
     return (
         <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
 
-            {/* 1. Sidebar Navigasi Kasir (Simplified) */}
-            <aside className="hidden lg:flex w-20 lg:w-24 bg-white border-r border-slate-200 flex-col items-center py-8 gap-10">
-                <button onClick={() => router.push('/homepage')} className="bg-white p-2.5 rounded-2xl shadow-lg shadow-slate-200 border border-slate-100 flex items-center justify-center hover:scale-105 transition-transform cursor-pointer" title="Ke Beranda">
-                    <img src="/santara-logo.png" alt="Santara Logo" className="w-8 h-8 object-contain" />
-                </button>
-
-                <nav className="flex-1 flex flex-col gap-6">
-                    <button className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl transition-all shadow-sm">
-                        <ShoppingBag size={24} />
-                    </button>
-                    <button onClick={() => router.push('/history?role=cashier')} className="p-4 text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 rounded-2xl transition-all">
-                        <History size={24} />
-                    </button>
-                    <button onClick={() => router.push('/waiting-list')} className="p-4 text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 rounded-2xl transition-all">
-                        <ChefHat size={24} />
-                    </button>
-                    <button onClick={() => router.push('/shift')} className="p-4 text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 rounded-2xl transition-all">
-                        <Clock size={24} />
-                    </button>
-                </nav>
-
-                <button
-                    onClick={() => window.location.href = '/login'}
-                    className="p-4 flex flex-col items-center gap-1 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
-                >
-                    <LogOut size={24} />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Keluar</span>
-                </button>
-            </aside>
+            {/* Standardized Sidebar */}
+            <CashierSidebar 
+                isOpen={isSidebarOpen} 
+                setIsOpen={setIsSidebarOpen} 
+                onOpenSettings={() => {
+                    setActiveSettingsTab('profil');
+                    setIsSettingsOpen(true);
+                }}
+            />
 
             {/* 2. Main Content: Grid Produk */}
             <main className="flex-1 flex flex-col overflow-hidden">
-                {/* Header Kasir */}
-                <header className="p-6 bg-white border-b border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="hidden md:block">
-                            <h2 className="text-xl font-bold text-slate-800">{storeSettings.storeName}</h2>
-                            <div className="flex items-center gap-2 mt-0.5">
-                                <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 uppercase">
-                                    <ShieldCheck size={12} /> Syariah Verified
-                                </span>
-                                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Shift: {activeShift}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="relative w-full max-w-md">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Cari menu (Ctrl + F)..."
-                            className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </header>
+                {/* Standardized Header Kasir */}
+                <CashierHeader 
+                    storeName={storeSettings.storeName}
+                    activeShift={activeShift}
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    onSettingsClick={() => {
+                        setActiveSettingsTab('profil');
+                        setIsSettingsOpen(true);
+                    }}
+                    onMenuClick={() => setIsSidebarOpen(true)}
+                />
 
                 <div className="px-6 mt-6 flex items-center justify-between gap-4 overflow-x-auto">
                     <div className="flex gap-3 pb-2">
@@ -604,34 +637,6 @@ export default function App() {
                 </button>
             </div>
 
-            {/* Bottom Navigation (Mobile Only) */}
-            <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-3 flex justify-between items-center z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
-                <button
-                    onClick={() => router.push('/homepage')}
-                    className="flex flex-col items-center gap-1 text-slate-400"
-                >
-                    <Home size={20} />
-                    <span className="text-[10px] font-bold uppercase tracking-tight">Beranda</span>
-                </button>
-                <button className="flex flex-col items-center gap-1 text-emerald-600">
-                    <ShoppingBag size={20} />
-                    <span className="text-[10px] font-bold uppercase tracking-tight">POS</span>
-                </button>
-                <button
-                    onClick={() => router.push('/history?role=cashier')}
-                    className="flex flex-col items-center gap-1 text-slate-400"
-                >
-                    <History size={20} />
-                    <span className="text-[10px] font-bold uppercase tracking-tight">Riwayat</span>
-                </button>
-                <button
-                    onClick={() => router.push('/waiting-list')}
-                    className="flex flex-col items-center gap-1 text-slate-400"
-                >
-                    <ChefHat size={20} />
-                    <span className="text-[10px] font-bold uppercase tracking-tight">Antrean</span>
-                </button>
-            </nav>
 
             {/* Cart Modal for Mobile (Cashier) */}
             {isCartModalOpen && (
@@ -769,6 +774,24 @@ export default function App() {
                 customerName={customerName}
                 totalAmount={totalAmount}
                 transactionId={currentTxId}
+            />
+            <SettingsModal 
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                isAdmin={false}
+                activeTab={activeSettingsTab}
+                setActiveTab={setActiveSettingsTab}
+                userProfile={userProfile}
+                setUserProfile={setUserProfile}
+                handleSaveProfile={handleSaveProfile}
+                storeSettings={storeSettings}
+                setStoreSettings={setStoreSettings}
+                setIsChangeEmailOpen={setIsChangeEmailOpen}
+                setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+                setIsChangePasswordOpen={setIsChangePasswordOpen}
+                addAddress={addAddress}
+                removeAddress={removeAddress}
+                updateAddress={updateAddress}
             />
         </div>
     );

@@ -21,9 +21,14 @@ import {
     Star,
     X,
     Filter,
-    HeartOff
+    HeartOff,
+    ArrowLeft
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 import WaitingOverlay from '../posin-cus/WaitingOverlay';
+import CustomerHeader from '@/components/CustomerHeader';
+import CustomerBottomNav from '@/components/CustomerBottomNav';
+import SettingsModal from '@/components/SettingsModal';
 
 const DEFAULT_SETTINGS = {
     storeName: 'Santara Point',
@@ -147,28 +152,70 @@ const ProductImageSlider = ({ product }) => {
 
 export default function App() {
     const router = useRouter();
-    // Simulasi status login customer
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [customerName, setCustomerName] = useState('Sobat Santara');
     const [favorites, setFavorites] = useState([]);
-
     const [products, setProducts] = useState(PRODUCTS);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
+    const [cart, setCart] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [activeCategory, setActiveCategory] = useState('Semua');
+    const [customerEmail, setCustomerEmail] = useState('');
+    const [customerPhone, setCustomerPhone] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('');
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [isWaitingOpen, setIsWaitingOpen] = useState(false);
+    const [currentTxId, setCurrentTxId] = useState(null);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [activeSettingsTab, setActiveSettingsTab] = useState('profil');
+    const [userProfile, setUserProfile] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        whatsapp: '',
+        password: '••••••••',
+        addresses: []
+    });
+    const [isCartModalOpen, setIsCartModalOpen] = useState(false);
 
-    React.useEffect(() => {
-        const storedName = localStorage.getItem('customerName');
-        if (storedName) {
-            setCustomerName(storedName);
-            setIsLoggedIn(true);
-        }
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const meta = user.user_metadata || {};
+                const fName = meta.first_name || '';
+                const lName = meta.last_name || '';
+                const fullName = `${fName} ${lName}`.trim() || 'Sobat Santara';
+
+                setCustomerName(fullName);
+                setIsLoggedIn(true);
+                setCustomerEmail(user.email || '');
+                setCustomerPhone(meta.whatsapp || '');
+
+                setUserProfile({
+                    firstName: fName,
+                    lastName: lName,
+                    email: user.email || '',
+                    whatsapp: meta.whatsapp || '',
+                    password: '••••••••',
+                    addresses: meta.addresses || []
+                });
+            } else {
+                const storedName = localStorage.getItem('customerName');
+                if (storedName) {
+                    setCustomerName(storedName);
+                    setIsLoggedIn(true);
+                }
+            }
+        };
+
+        fetchUserData();
         const storedFavs = JSON.parse(localStorage.getItem('santaraFavorites') || '[]');
         setFavorites(storedFavs);
 
         const storedProducts = localStorage.getItem('santaraProducts');
         if (storedProducts) {
             setProducts(JSON.parse(storedProducts));
-        } else {
-            localStorage.setItem('santaraProducts', JSON.stringify(PRODUCTS));
         }
 
         const storedSettings = localStorage.getItem('santaraStoreSettings');
@@ -176,13 +223,29 @@ export default function App() {
             setStoreSettings(JSON.parse(storedSettings));
         }
 
-        // Restore active transaction overlay if any
         const activeTxId = localStorage.getItem('santaraActiveTxId');
         if (activeTxId) {
             setCurrentTxId(activeTxId);
             setIsWaitingOpen(true);
         }
     }, []);
+
+    const handleSaveProfile = async (e) => {
+        e.preventDefault();
+        try {
+            const { error } = await supabase.auth.updateUser({
+                data: {
+                    first_name: userProfile.firstName,
+                    last_name: userProfile.lastName
+                }
+            });
+            if (error) throw error;
+            setCustomerName(`${userProfile.firstName} ${userProfile.lastName}`.trim());
+            alert('Profil berhasil diperbarui!');
+        } catch (err) {
+            alert(err.message);
+        }
+    };
 
     const toggleFavorite = (e, id) => {
         e.stopPropagation();
@@ -196,24 +259,8 @@ export default function App() {
         localStorage.setItem('santaraFavorites', JSON.stringify(newFavs));
     };
 
-    const [cart, setCart] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [activeCategory, setActiveCategory] = useState('Semua');
-    const [customerEmail, setCustomerEmail] = useState('');
-    const [customerPhone, setCustomerPhone] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('');
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [isWaitingOpen, setIsWaitingOpen] = useState(false);
-    const [currentTxId, setCurrentTxId] = useState(null);
-    const [toppingModalProduct, setToppingModalProduct] = useState(null);
-    const [isQrisOpen, setIsQrisOpen] = useState(false);
-    const [isCodOpen, setIsCodOpen] = useState(false);
-    const [isTransferOpen, setIsTransferOpen] = useState(false);
-    const [isCartModalOpen, setIsCartModalOpen] = useState(false);
-
     const categories = ['Semua', 'Makanan', 'Minuman', 'Snack', 'Frozen Food'];
 
-    // --- Perhitungan Total (Inclusive Pajak 10%) ---
     const menuTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const subtotal = menuTotal / 1.10;
     const pajakValue = Math.round(menuTotal - subtotal);
@@ -225,27 +272,13 @@ export default function App() {
         p.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // --- Logic Keranjang ---
     const addToCart = (product) => {
-        if (product.stock <= 0) return;
-        if (product.id === 35) {
-            setToppingModalProduct(product);
-            return;
-        }
-        confirmAddToCart(product);
-    };
-
-    const confirmAddToCart = (product, topping = null) => {
-        const finalId = topping && topping !== 'Tanpa Toping' ? `${product.id}-${topping}` : product.id;
-        const finalName = topping && topping !== 'Tanpa Toping' ? `${product.name} (${topping})` : product.name;
-
-        const exist = cart.find(x => x.id === finalId);
+        const exist = cart.find(x => x.id === product.id);
         if (exist) {
-            setCart(cart.map(x => x.id === finalId ? { ...x, quantity: x.quantity + 1 } : x));
+            setCart(cart.map(x => x.id === product.id ? { ...x, quantity: x.quantity + 1 } : x));
         } else {
-            setCart([...cart, { ...product, id: finalId, name: finalName, quantity: 1, originalId: product.id }]);
+            setCart([...cart, { ...product, quantity: 1 }]);
         }
-        setToppingModalProduct(null);
     };
 
     const updateQty = (id, delta) => {
@@ -258,124 +291,19 @@ export default function App() {
         }).filter(item => item.quantity > 0));
     };
 
-    const processTransactionData = () => {
-        const tId = 'TRX-' + Math.floor(Math.random() * 1000000);
-        const newTransaction = {
-            id: tId,
-            timestamp: new Date().toISOString(),
-            customerName: customerName || 'Pelanggan Online',
-            queueNumber: 'Online',
-            paymentMethod,
-            source: 'Customer',
-            cashierName: 'Online',
-            totalAmount,
-            pajak: pajakValue,
-            status: 'Menunggu',
-            items: cart.map(({ name, quantity, price }) => ({ name, quantity, price }))
-        };
-        const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
-        localStorage.setItem('santaraTransactionHistory', JSON.stringify([newTransaction, ...existingHistory]));
-        
-        // Persist active ID
-        localStorage.setItem('santaraActiveTxId', tId);
-        
-        setCurrentTxId(tId);
-        setIsWaitingOpen(true);
-    };
-
-    const handleCheckout = async () => {
-        if (!isLoggedIn) {
-            router.push('/login');
-            return;
-        }
-
-        if (cart.length === 0) return alert('Keranjang masih kosong!');
-        if (!customerName || !customerEmail || !customerPhone || !paymentMethod) {
-            return alert('Mohon lengkapi Data Diri Pemesan dan Metode Pembayaran!');
-        }
-
-        setIsProcessing(true);
-        try {
-            // Simulasi pemrosesan lokal (tanpa API eksternal)
-            await new Promise(resolve => setTimeout(resolve, 700));
-
-            if (paymentMethod === 'Gopay' || paymentMethod === 'Dana') {
-                setIsQrisOpen(true);
-            } else if (paymentMethod === 'COD') {
-                setIsCodOpen(true);
-            } else if (paymentMethod === 'Transfer Bank') {
-                setIsTransferOpen(true);
-            } else {
-                processTransactionData();
-            }
-        } catch (error) {
-            console.error(error);
-            alert('Kesalahan jaringan, gagal memproses pesanan.');
-        } finally {
-            setIsProcessing(false);
-        }
-    };
-
-    const handleCloseWaiting = () => {
-        setIsWaitingOpen(false);
-        setCurrentTxId(null);
-        localStorage.removeItem('santaraActiveTxId');
-        setCart([]);
-        setPaymentMethod('');
-    };
-
     return (
         <div className="flex h-screen bg-white font-sans text-slate-900 overflow-hidden relative">
-            {/* Sidebar Navigasi Customer */}
-            <aside className="hidden lg:flex w-24 bg-slate-50 border-r border-slate-100 flex-col items-center py-10 gap-12">
-                <button onClick={() => router.push('/homepage')} className="hover:scale-105 transition-transform" title="Ke Beranda">
-                    <img src="/santara-logo.png" alt="Santara Logo" className="w-10 h-10 object-contain" />
-                </button>
-                <nav className="flex-1 flex flex-col gap-8">
-                    <button onClick={() => router.push('/posin-cus')} className="p-3 text-slate-300 hover:text-emerald-600 transition-colors" title="Buka Menu Utama"><ShoppingBag size={24} /></button>
-                    <button onClick={() => router.push('/customer-history')} className="p-3 text-slate-300 hover:text-emerald-600 transition-colors" title="Riwayat Pesanan"><Clock size={24} /></button>
-                    <button className="p-3 text-red-500 bg-white rounded-2xl shadow-md" title="Menu Favorit">
-                        <Heart size={24} />
-                    </button>
-                </nav>
-                <button
-                    onClick={() => {
-                        localStorage.removeItem('customerName');
-                        setIsLoggedIn(false);
-                        setCustomerName('Sobat Santara');
-                        router.push('/login');
-                    }}
-                    className="p-3 flex flex-col items-center gap-1 text-slate-300 hover:text-red-500 transition-colors"
-                >
-                    <LogOut size={24} />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Keluar</span>
-                </button>
-            </aside>
+            <CustomerHeader 
+                title={storeSettings.storeName}
+                subtitle="Menu Favorit Berkah Anda"
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                cartCount={cart.length}
+                onCartClick={() => setIsCartModalOpen(true)}
+                onSettingsClick={() => setIsSettingsOpen(true)}
+            />
 
-            {/* Main Content Area */}
-            <main className="flex-1 flex flex-col overflow-hidden">
-                <header className="px-6 py-8 md:px-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div>
-                        <h1 className="text-xl lg:text-3xl font-black text-slate-800 tracking-tight">Menu Favorit</h1>
-                        <div className="flex items-center gap-2 mt-1 lg:mt-2">
-                            <span className="bg-emerald-600 text-white px-2 py-0.5 lg:px-3 lg:py-1 rounded-full text-[8px] lg:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-emerald-100">
-                                <ShieldCheck size={10} className="lg:w-3 lg:h-3" /> Syariah
-                            </span>
-                            <span className="text-slate-400 text-[10px] lg:text-xs font-bold">Halo, {customerName}!</span>
-                        </div>
-                    </div>
-                    <div className="relative w-full md:w-80">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Cari rasa yang berkah..."
-                            className="w-full pl-12 pr-4 py-3 bg-slate-100 border-none rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm font-medium"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </header>
-
+            <main className="flex-1 flex flex-col overflow-hidden pt-20 pb-20 md:pb-0">
                 <div className="px-6 md:px-10 mb-8 overflow-x-auto">
                     <div className="flex gap-3">
                         {categories.map(cat => (
@@ -435,38 +363,8 @@ export default function App() {
                     )}
                 </section>
 
-                {/* Mobile Bottom Navigation */}
-                <nav className="lg:hidden fixed bottom-6 left-6 right-6 bg-white/90 backdrop-blur-2xl border border-slate-200/50 px-8 py-4 rounded-[2.5rem] flex justify-between items-center z-50 shadow-2xl">
-                    <button onClick={() => router.push('/homepage')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <Home size={22} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Home</span>
-                    </button>
-                    <button onClick={() => router.push('/posin-cus')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <ShoppingBag size={22} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Menu</span>
-                    </button>
-                    <button className="flex flex-col items-center gap-1 text-red-500">
-                        <Heart size={22} fill="currentColor" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Favorit</span>
-                    </button>
-                    <button onClick={() => router.push('/customer-history')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <Clock size={22} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Riwayat</span>
-                    </button>
-                </nav>
-
-                {/* Floating Cart Button (Mobile Only) */}
-                {cart.length > 0 && (
-                    <button 
-                        onClick={() => setIsCartModalOpen(true)}
-                        className="lg:hidden fixed bottom-28 right-6 bg-emerald-600 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-2xl z-50 animate-bounce group active:scale-95 transition-all"
-                    >
-                        <ShoppingCart size={28} />
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-2 border-white">
-                            {cart.length}
-                        </span>
-                    </button>
-                )}
+                {/* Standardized Bottom Navigation */}
+                <CustomerBottomNav onOpenSettings={() => setIsSettingsOpen(true)} />
             </main>
 
             {/* Right Side: Order Summary */}
@@ -586,7 +484,10 @@ export default function App() {
                             <X size={20} />
                         </button>
                         <h3 className="text-xl font-black text-slate-800 mb-2">Scan QRIS</h3>
-                        <p className="text-sm text-slate-500 mb-4">Silakan scan kode QR di bawah menggunakan aplikasi {paymentMethod} Anda (Total: Rp {totalAmount.toLocaleString('en-US')})</p>
+                        <div className="bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-100 mb-4 inline-block">
+                             <p className="text-sm font-black text-emerald-700">Total Tagihan: Rp {totalAmount.toLocaleString('id-ID')}</p>
+                        </div>
+                        <p className="text-sm text-slate-500 mb-4">Silakan scan kode QR di bawah menggunakan aplikasi {paymentMethod} Anda.</p>
                         <div className="bg-white border rounded-xl p-2 mb-6">
                             <img src={paymentMethod === 'Gopay' ? "/qris-gopay.jpg" : "/qris-dana.jpg"} alt={`QRIS ${paymentMethod}`} className="w-full max-w-[250px] mx-auto rounded-lg" />
                         </div>
@@ -613,6 +514,9 @@ export default function App() {
                             <MessageCircle size={32} />
                         </div>
                         <h3 className="text-xl font-black text-slate-800 mb-2">Konfirmasi Pesanan</h3>
+                        <div className="bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-100 mb-4 inline-block">
+                             <p className="text-sm font-black text-emerald-700">Total Tagihan: Rp {totalAmount.toLocaleString('id-ID')}</p>
+                        </div>
                         <p className="text-sm text-slate-500 mb-4">Silakan konfirmasi pesanan Anda dengan menekan tombol dibawah ini: </p>
 
                         <a
@@ -644,7 +548,10 @@ export default function App() {
                             <X size={20} />
                         </button>
                         <h3 className="text-xl font-black text-slate-800 mb-2 mt-4">Transfer Bank</h3>
-                        <p className="text-sm text-slate-500 mb-6">Silakan transfer sebesar <strong className="text-emerald-600 text-base">Rp {totalAmount.toLocaleString('en-US')}</strong> ke salah satu rekening berikut:</p>
+                        <div className="bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-100 mb-4 inline-block">
+                             <p className="text-sm font-black text-emerald-700">Total Tagihan: Rp {totalAmount.toLocaleString('id-ID')}</p>
+                        </div>
+                        <p className="text-sm text-slate-500 mb-6">Silakan transfer sesuai nominal total di atas ke salah satu rekening berikut:</p>
                         
                         <div className="w-full flex flex-col gap-4 mb-6">
                             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left">

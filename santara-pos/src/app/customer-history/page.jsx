@@ -15,37 +15,83 @@ import {
     Calendar,
     ChevronRight,
     ShoppingBag as ShoppingBagIcon,
-    Receipt
+    Receipt,
+    ArrowLeft
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
+import CustomerHeader from '@/components/CustomerHeader';
+import CustomerBottomNav from '@/components/CustomerBottomNav';
+import SettingsModal from '@/components/SettingsModal';
+import { Settings } from 'lucide-react';
 
 export default function CustomerHistory() {
     const router = useRouter();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [customerName, setCustomerName] = useState('Sobat Santara');
     const [history, setHistory] = useState([]);
+    const [searchTerm, setSearchTerm] = useState(''); // Needed for CustomerHeader
+
+    // --- State Pengaturan ---
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [activeSettingsTab, setActiveSettingsTab] = useState('profil');
+    const [userProfile, setUserProfile] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        whatsapp: '',
+        password: '••••••••',
+        addresses: []
+    });
+
+    // --- State Perubahan Modals ---
+    const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
+    const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
     useEffect(() => {
-        const storedName = localStorage.getItem('customerName');
-        if (storedName) {
-            setCustomerName(storedName);
-            setIsLoggedIn(true);
-        }
+        const fetchUserData = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const meta = user.user_metadata || {};
+                const fName = meta.first_name || '';
+                const lName = meta.last_name || '';
+                const fullName = `${fName} ${lName}`.trim() || 'Sobat Santara';
 
-        const loadHistory = async () => {
+                setCustomerName(fullName);
+                setIsLoggedIn(true);
+
+                setUserProfile({
+                    firstName: fName,
+                    lastName: lName,
+                    email: user.email || '',
+                    whatsapp: meta.whatsapp || '',
+                    password: '••••••••',
+                    addresses: meta.addresses || []
+                });
+                
+                loadHistory(fullName);
+            } else {
+                const storedName = localStorage.getItem('customerName');
+                if (storedName) {
+                    setCustomerName(storedName);
+                    setIsLoggedIn(true);
+                    loadHistory(storedName);
+                }
+            }
+        };
+
+        const loadHistory = async (name) => {
             try {
-                // Priority 1: Fetch from Supabase
                 const { data, error } = await supabase
                     .from('transactions')
                     .select('*')
-                    .eq('customer_name', storedName)
+                    .eq('customer_name', name)
                     .in('status', ['Selesai', 'Ditolak'])
                     .order('timestamp', { ascending: false });
 
                 if (error) throw error;
 
                 if (data && data.length > 0) {
-                    // Map snake_case to camelCase for UI compatibility
                     const mapped = data.map(trx => ({
                         id: trx.id,
                         timestamp: trx.timestamp,
@@ -63,39 +109,75 @@ export default function CustomerHistory() {
                     }));
                     setHistory(mapped);
                 } else {
-                    // Priority 2: Fallback to LocalStorage
                     const rawHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
                     const userHistory = rawHistory.filter(trx => 
-                        trx.customerName === storedName && 
+                        trx.customerName === name && 
                         (trx.status === 'Selesai' || trx.status === 'Ditolak')
                     );
                     setHistory(userHistory);
                 }
             } catch (err) {
                 console.error("Error loading Supabase history:", err);
-                // Fallback
                 const rawHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
-                setHistory(rawHistory.filter(trx => trx.customerName === storedName && ['Selesai', 'Ditolak'].includes(trx.status)));
+                setHistory(rawHistory.filter(trx => trx.customerName === name && ['Selesai', 'Ditolak'].includes(trx.status)));
             }
         };
 
-        if (storedName) {
-            loadHistory();
-        }
+        fetchUserData();
     }, []);
 
+    const handleSaveProfile = async (e) => {
+        e.preventDefault();
+        try {
+            const { error } = await supabase.auth.updateUser({
+                data: {
+                    first_name: userProfile.firstName,
+                    last_name: userProfile.lastName
+                }
+            });
+            if (error) throw error;
+            setCustomerName(`${userProfile.firstName} ${userProfile.lastName}`.trim());
+            alert('Profil berhasil diperbarui!');
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    const addAddress = () => {
+        const newAddr = { id: Date.now(), label: '', details: '' };
+        setUserProfile({ ...userProfile, addresses: [...userProfile.addresses, newAddr] });
+    };
+
+    const removeAddress = (id) => {
+        setUserProfile({ ...userProfile, addresses: userProfile.addresses.filter(a => a.id !== id) });
+    };
+
+    const updateAddress = (id, field, value) => {
+        setUserProfile({
+            ...userProfile,
+            addresses: userProfile.addresses.map(a => a.id === id ? { ...a, [field]: value } : a)
+        });
+    };
+
     return (
-        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
-            {/* Sidebar Navigasi Customer */}
+        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden relative">
+            {/* Standardized Sidebar (Desktop) */}
             <aside className="hidden lg:flex w-24 bg-white border-r border-slate-100 flex-col items-center py-10 gap-12">
                 <button onClick={() => router.push('/homepage')} className="hover:scale-105 transition-transform" title="Ke Beranda">
                     <img src="/santara-logo.png" alt="Santara Logo" className="w-10 h-10 object-contain" />
                 </button>
                 <nav className="flex-1 flex flex-col gap-8">
-                    <button onClick={() => router.push('/posin-cus')} className="p-3 text-slate-300 hover:text-emerald-600 transition-colors" title="Buka Menu Utama"><ShoppingBag size={24} /></button>
-                    <button className="p-3 text-emerald-600 bg-emerald-50 rounded-2xl shadow-md" title="Riwayat Pesanan"><Clock size={24} /></button>
+                    <button onClick={() => router.push('/posin-cus')} className="p-3 text-slate-300 hover:text-emerald-600 transition-colors" title="Buka Menu Utama">
+                        <ShoppingBag size={24} />
+                    </button>
+                    <button className="p-3 text-emerald-600 bg-emerald-50 rounded-2xl shadow-md" title="Riwayat Pesanan">
+                        <Clock size={24} />
+                    </button>
                     <button onClick={() => router.push('/favorites')} className="p-3 text-slate-300 hover:text-red-500 transition-colors" title="Menu Favorit">
                         <Heart size={24} />
+                    </button>
+                    <button onClick={() => setIsSettingsOpen(true)} className="p-3 text-slate-300 hover:text-emerald-600 transition-colors" title="Pengaturan">
+                        <Settings size={24} />
                     </button>
                 </nav>
                 <button
@@ -114,17 +196,15 @@ export default function CustomerHistory() {
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col overflow-hidden">
-                <header className="bg-white px-6 py-8 md:px-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-slate-100">
-                    <div>
-                        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Riwayat Pesanan Anda</h1>
-                        <div className="flex items-center gap-2 mt-2">
-                            <span className="bg-emerald-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-emerald-100">
-                                <ShieldCheck size={12} /> Syariah Verified
-                            </span>
-                            <span className="text-slate-400 text-xs font-bold">Halo, {customerName}! Ini adalah catatan riwayat pesanan Anda.</span>
-                        </div>
-                    </div>
-                </header>
+                {/* Standardized Header */}
+                <CustomerHeader 
+                    title="Santara Point"
+                    subtitle="Riwayat Pesanan Berkah Anda"
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    cartCount={0}
+                    onSettingsClick={() => setIsSettingsOpen(true)}
+                />
 
                 <div className="flex-1 overflow-y-auto px-6 md:px-10 py-10 bg-slate-50">
                     <div className="max-w-4xl mx-auto space-y-6">
@@ -204,7 +284,26 @@ export default function CustomerHistory() {
                         )}
                     </div>
                 </div>
+                {/* Standardized Bottom Navigation */}
+                <CustomerBottomNav onOpenSettings={() => setIsSettingsOpen(true)} />
             </main>
+
+            {/* Standardized Settings Modal */}
+            <SettingsModal 
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                activeTab={activeSettingsTab}
+                setActiveTab={setActiveSettingsTab}
+                userProfile={userProfile}
+                setUserProfile={setUserProfile}
+                handleSaveProfile={handleSaveProfile}
+                setIsChangeEmailOpen={setIsChangeEmailOpen}
+                setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+                setIsChangePasswordOpen={setIsChangePasswordOpen}
+                addAddress={addAddress}
+                removeAddress={removeAddress}
+                updateAddress={updateAddress}
+            />
         </div>
     );
 }

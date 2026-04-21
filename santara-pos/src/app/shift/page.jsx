@@ -2,11 +2,35 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Store, Clock, User, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Store, Clock, User, CheckCircle2, ShoppingBag, ChefHat, History, LogOut } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import CashierHeader from '@/components/CashierHeader';
+import CashierSidebar from '@/components/CashierSidebar';
+import SettingsModal from '@/components/SettingsModal';
 
 export default function ShiftPage() {
     const router = useRouter();
     const [activeShift, setActiveShift] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    });
+    
+    // --- State Standarisasi ---
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [activeSettingsTab, setActiveSettingsTab] = useState('profil');
+    const [userProfile, setUserProfile] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        whatsapp: '',
+        password: '••••••••',
+        addresses: []
+    });
+
+    // --- State Perubahan Modals ---
+    const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
+    const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
     const shiftSchedules = [
         { id: 1, name: 'Zaid', shift: 'Pagi', time: '08:00 - 15:00', role: 'Kasir Utama' },
@@ -22,6 +46,27 @@ export default function ShiftPage() {
         } else {
             setActiveShift('Pagi (Zaid)');
         }
+
+        const storedSettings = localStorage.getItem('santaraStoreSettings');
+        if (storedSettings) {
+            setStoreSettings(JSON.parse(storedSettings));
+        }
+
+        const fetchUserProfile = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const meta = user.user_metadata || {};
+                setUserProfile({
+                    firstName: meta.first_name || '',
+                    lastName: meta.last_name || '',
+                    email: user.email || '',
+                    whatsapp: meta.whatsapp || '',
+                    password: '••••••••',
+                    addresses: meta.addresses || []
+                });
+            }
+        };
+        fetchUserProfile();
     }, []);
 
     const handleClockIn = (name, shift) => {
@@ -30,42 +75,64 @@ export default function ShiftPage() {
         localStorage.setItem('activeCashierShift', newShiftStr);
     };
 
-    return (
-        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
-            {/* Sidebar Navigasi */}
-            <aside className="w-20 lg:w-24 bg-slate-900 flex flex-col items-center py-8 gap-10 shadow-2xl z-20 relative">
-                <div className="bg-emerald-500 p-3 rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                    <Store className="text-white" size={24} />
-                </div>
+    const handleSaveProfile = async (e) => {
+        e.preventDefault();
+        try {
+            const { error } = await supabase.auth.updateUser({
+                data: {
+                    first_name: userProfile.firstName,
+                    last_name: userProfile.lastName
+                }
+            });
+            if (error) throw error;
+            alert('Profil berhasil diperbarui!');
+        } catch (err) {
+            alert(err.message);
+        }
+    };
 
-                <nav className="flex-1 flex flex-col gap-6">
-                    <button 
-                        onClick={() => router.push('/posin-cas')}
-                        className="p-4 text-emerald-400 hover:text-white hover:bg-slate-800 rounded-2xl transition-all shadow-sm"
-                        title="Kembali"
-                    >
-                        <ArrowLeft size={24} />
-                    </button>
-                    <button className="p-4 bg-emerald-500/20 text-emerald-400 rounded-2xl transition-all shadow-sm border border-emerald-500/30" title="Manajemen Shift">
-                        <Clock size={24} />
-                    </button>
-                </nav>
-            </aside>
+    const addAddress = () => {
+        const newAddr = { id: Date.now(), label: '', details: '' };
+        setUserProfile({ ...userProfile, addresses: [...userProfile.addresses, newAddr] });
+    };
+
+    const removeAddress = (id) => {
+        setUserProfile({ ...userProfile, addresses: userProfile.addresses.filter(a => a.id !== id) });
+    };
+
+    const updateAddress = (id, field, value) => {
+        setUserProfile({
+            ...userProfile,
+            addresses: userProfile.addresses.map(a => a.id === id ? { ...a, [field]: value } : a)
+        });
+    };
+
+    return (
+        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden relative">
+            {/* Standardized Sidebar (Desktop) */}
+            <CashierSidebar 
+                isOpen={isSidebarOpen} 
+                setIsOpen={setIsSidebarOpen} 
+                onOpenSettings={() => {
+                    setActiveSettingsTab('profil');
+                    setIsSettingsOpen(true);
+                }}
+            />
 
             {/* Konten Utama */}
             <main className="flex-1 flex flex-col overflow-hidden relative">
-                <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#10b981 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
-                
-                <header className="px-8 py-8 lg:px-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 relative z-10 border-b border-slate-200/50 bg-white shadow-sm">
-                    <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                                <User size={12} /> Akses Karyawan
-                            </span>
-                        </div>
-                        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Sistem Shift Kasir</h1>
-                    </div>
-                </header>
+                {/* Standardized Header Kasir */}
+                <CashierHeader 
+                    storeName={storeSettings.storeName}
+                    activeShift={activeShift}
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    onSettingsClick={() => {
+                        setActiveSettingsTab('profil');
+                        setIsSettingsOpen(true);
+                    }}
+                    onMenuClick={() => setIsSidebarOpen(true)}
+                />
 
                 <div className="flex-1 overflow-y-auto p-8 lg:p-12 relative z-10">
                     
@@ -149,7 +216,29 @@ export default function ShiftPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Mobile Bottom Navigation (optional for cashier, but let's keep it clean) */}
             </main>
+
+            {/* Standardized Settings Modal */}
+            <SettingsModal 
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                isAdmin={false}
+                activeTab={activeSettingsTab}
+                setActiveTab={setActiveSettingsTab}
+                userProfile={userProfile}
+                setUserProfile={setUserProfile}
+                handleSaveProfile={handleSaveProfile}
+                storeSettings={storeSettings}
+                setStoreSettings={setStoreSettings}
+                setIsChangeEmailOpen={setIsChangeEmailOpen}
+                setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+                setIsChangePasswordOpen={setIsChangePasswordOpen}
+                addAddress={addAddress}
+                removeAddress={removeAddress}
+                updateAddress={updateAddress}
+            />
         </div>
     );
 }

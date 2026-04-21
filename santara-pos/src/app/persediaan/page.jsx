@@ -30,8 +30,14 @@ import {
     Tag,
     Landmark,
     BookOpen,
-    Building2
+    Building2,
+    Store,
+    Menu
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import AdminHeader from '@/components/AdminHeader';
+import AdminSidebar from '@/components/AdminSidebar';
+import SettingsModal from '@/components/SettingsModal';
 
 const CATEGORIES = ['Bahan Baku', 'Bahan Tambahan', 'Kemasan', 'Jasa'];
 
@@ -49,13 +55,69 @@ export default function PersediaanPage() {
     const [newProduct, setNewProduct] = useState({ name: '', price: '', stock: '', category: 'Bahan Baku', img: '' });
     const [newAdjustment, setNewAdjustment] = useState({ productId: '', type: 'Tambah', qty: '', reason: '', date: new Date().toISOString().split('T')[0] });
 
+    // --- State Standarisasi ---
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [activeSettingsTab, setActiveSettingsTab] = useState('profil');
+    const [storeSettings, setStoreSettings] = useState({
+        storeName: 'Santara Point',
+        storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
+        isPajakActive: true,
+        authorizedUsers: []
+    });
+    const [userProfile, setUserProfile] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        whatsapp: '',
+        password: '••••••••',
+        addresses: []
+    });
+    const [newUserContact, setNewUserContact] = useState('');
+    const [newUserRole, setNewUserRole] = useState('Operator');
+
     useEffect(() => {
         const storedProducts = localStorage.getItem('santaraRawMaterials');
         if (storedProducts) setProducts(JSON.parse(storedProducts));
 
         const storedAdjustments = localStorage.getItem('santaraRawAdjustments');
         if (storedAdjustments) setAdjustments(JSON.parse(storedAdjustments));
+
+        const storedSettings = localStorage.getItem('santaraStoreSettings');
+        if (storedSettings) setStoreSettings(JSON.parse(storedSettings));
+
+        const fetchUserProfile = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const meta = user.user_metadata || {};
+                setUserProfile({
+                    firstName: meta.first_name || '',
+                    lastName: meta.last_name || '',
+                    email: user.email || '',
+                    whatsapp: meta.whatsapp || '',
+                    password: '••••••••',
+                    addresses: meta.addresses || []
+                });
+            }
+        };
+        fetchUserProfile();
     }, []);
+
+    const handleSaveProfile = async (e) => {
+        e.preventDefault();
+        try {
+            const { error } = await supabase.auth.updateUser({
+                data: {
+                    first_name: userProfile.firstName,
+                    last_name: userProfile.lastName
+                }
+            });
+            if (error) throw error;
+            alert('Profil berhasil diperbarui!');
+        } catch (err) {
+            alert(err.message);
+        }
+    };
 
     const saveProducts = (data) => {
         setProducts(data);
@@ -125,61 +187,6 @@ export default function PersediaanPage() {
     const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
     return (
-        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden pb-20 lg:pb-0">
-            {/* Sidebar (Eksklusif Owner/Admin) */}
-            <aside className="hidden lg:flex w-64 bg-slate-900 text-white flex-col shadow-2xl z-40">
-                <div className="p-6 flex items-center gap-3 border-b border-slate-800 bg-slate-900">
-                    <button onClick={() => router.push('/homepage')} className="bg-white p-1.5 rounded-lg flex items-center justify-center hover:scale-110 transition-transform shadow-md cursor-pointer">
-                        <img src="/santara-logo.png" alt="Santara" className="w-6 h-6 object-contain" />
-                    </button>
-                    <span className="font-black tracking-tighter text-xl italic uppercase">Santara Ops</span>
-                </div>
-                
-                <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-                    {[
-                        { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, action: () => router.push('/posin-adm') },
-                        { id: 'pos', label: 'POS Kasir', icon: <ShoppingBag size={20} />, action: () => router.push('/posin-adm') },
-                        { id: 'penjualan', label: 'Penjualan', icon: <Tag size={20} />, action: () => router.push('/penjualan') },
-                        { id: 'kas-bank', label: 'Kas \u0026 Bank', icon: <Landmark size={20} />, action: () => router.push('/kas-bank') },
-                        { id: 'buku-besar', label: 'Buku Besar', icon: <BookOpen size={20} />, action: () => router.push('/buku-besar') },
-                        { id: 'perusahaan', label: 'Perusahaan', icon: <Building2 size={20} />, action: () => router.push('/perusahaan') },
-                        { id: 'antrean', label: 'Daftar Antrean', icon: <ChefHat size={20} />, action: () => router.push('/waiting-list') },
-                        { id: 'persediaan', label: 'Persediaan', icon: <Package size={20} />, active: true, action: () => {} },
-                        { id: 'pembelian', label: 'Pembelian', icon: <ShoppingBag size={20} />, action: () => router.push('/pembelian') },
-                        { id: 'laporan', label: 'Laporan', icon: <TrendingUp size={20} />, action: () => router.push('/history?role=admin') },
-                    ].map((item) => (
-                        <button 
-                            key={item.id}
-                            onClick={item.action}
-                            className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all ${item.active ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/40' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
-                        >
-                            {item.icon}
-                            <span className="font-bold text-sm">{item.label}</span>
-                        </button>
-                    ))}
-                </nav>
-
-                <div className="p-4 border-t border-slate-800">
-                    <button onClick={() => window.location.href = '/login'} className="w-full flex items-center gap-4 p-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all">
-                        <LogOut size={20} />
-                        <span className="font-bold text-sm">Keluar</span>
-                    </button>
-                </div>
-            </aside>
-
-            {/* Area Utama */}
-            <main className="flex-1 flex flex-col overflow-hidden">
-                {/* Header */}
-                <header className="bg-white border-b border-slate-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 z-10">
-                    <div>
-                        <h2 className="text-xl lg:text-2xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-                            <Package size={24} className="text-emerald-600" />
-                            Manajemen Persediaan
-                        </h2>
-                        <p className="text-slate-400 text-[10px] lg:text-xs font-medium mt-0.5">Kelola aset barang, jasa, dan rekonsiliasi stok.</p>
-                    </div>
-
-                    <div className="flex items-center gap-3 w-full md:w-auto">
                         <div className="relative flex-1 md:w-80">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                             <input
@@ -324,8 +331,26 @@ export default function PersediaanPage() {
                         <Home size={20} />
                         <span className="text-[10px] font-bold uppercase tracking-tight">Home</span>
                     </button>
-                </nav>
+                </div>
             </main>
+
+            {/* Standardized Settings Modal (Admin) */}
+            <SettingsModal 
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                isAdmin={true}
+                activeTab={activeSettingsTab}
+                setActiveTab={setActiveSettingsTab}
+                userProfile={userProfile}
+                setUserProfile={setUserProfile}
+                handleSaveProfile={handleSaveProfile}
+                storeSettings={storeSettings}
+                setStoreSettings={setStoreSettings}
+                newUserContact={newUserContact}
+                setNewUserContact={setNewUserContact}
+                newUserRole={newUserRole}
+                setNewUserRole={setNewUserRole}
+            />
 
             {/* Modal Tambah Item (Barang & Jasa) */}
             {isProductModalOpen && (

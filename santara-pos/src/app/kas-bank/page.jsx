@@ -30,8 +30,14 @@ import {
     History,
     Tag,
     BookOpen,
-    Building2
+    Building2,
+    Store,
+    Menu
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import AdminHeader from '@/components/AdminHeader';
+import AdminSidebar from '@/components/AdminSidebar';
+import SettingsModal from '@/components/SettingsModal';
 
 const INITIAL_ACCOUNTS = [
     { id: 1, name: 'Kas Utama (Toko)', balance: 0, icon: <Wallet size={20} /> },
@@ -77,13 +83,29 @@ export default function KasBankPage() {
         date: new Date().toISOString().split('T')[0]
     });
 
-    const [transferData, setTransferData] = useState({
-        fromAccountId: '',
-        toAccountId: '',
-        amount: '',
-        note: '',
         date: new Date().toISOString().split('T')[0]
     });
+
+    // --- State Standarisasi ---
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [activeSettingsTab, setActiveSettingsTab] = useState('profil');
+    const [storeSettings, setStoreSettings] = useState({
+        storeName: 'Santara Point',
+        storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
+        isPajakActive: true,
+        authorizedUsers: []
+    });
+    const [userProfile, setUserProfile] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        whatsapp: '',
+        password: '••••••••',
+        addresses: []
+    });
+    const [newUserContact, setNewUserContact] = useState('');
+    const [newUserRole, setNewUserRole] = useState('Operator');
 
     useEffect(() => {
         const storedAccounts = localStorage.getItem('santaraAccounts');
@@ -95,7 +117,42 @@ export default function KasBankPage() {
 
         const storedTransactions = localStorage.getItem('santaraKasTransactions');
         if (storedTransactions) setTransactions(JSON.parse(storedTransactions));
+
+        const storedSettings = localStorage.getItem('santaraStoreSettings');
+        if (storedSettings) setStoreSettings(JSON.parse(storedSettings));
+
+        const fetchUserProfile = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const meta = user.user_metadata || {};
+                setUserProfile({
+                    firstName: meta.first_name || '',
+                    lastName: meta.last_name || '',
+                    email: user.email || '',
+                    whatsapp: meta.whatsapp || '',
+                    password: '••••••••',
+                    addresses: meta.addresses || []
+                });
+            }
+        };
+        fetchUserProfile();
     }, []);
+
+    const handleSaveProfile = async (e) => {
+        e.preventDefault();
+        try {
+            const { error } = await supabase.auth.updateUser({
+                data: {
+                    first_name: userProfile.firstName,
+                    last_name: userProfile.lastName
+                }
+            });
+            if (error) throw error;
+            alert('Profil berhasil diperbarui!');
+        } catch (err) {
+            alert(err.message);
+        }
+    };
 
     const saveAccounts = (data) => {
         setAccounts(data);
@@ -220,45 +277,26 @@ export default function KasBankPage() {
                         { id: 'pembelian', label: 'Pembelian', icon: <ShoppingBag size={20} />, action: () => router.push('/pembelian') },
                         { id: 'laporan', label: 'Riwayat', icon: <History size={20} />, action: () => router.push('/history?role=admin') },
                     ].map((item) => (
-                        <button 
-                            key={item.id}
-                            onClick={item.action}
-                            className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all ${item.active ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-950/20' : 'text-emerald-300 hover:bg-emerald-800 hover:text-white'}`}
-                        >
-                            {item.icon}
-                            <span className="font-bold text-sm tracking-tight">{item.label}</span>
-                        </button>
-                    ))}
-                </nav>
+        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden relative">
+            {/* Standardized Sidebar Admin */}
+            <AdminSidebar 
+                isOpen={isSidebarOpen} 
+                setIsOpen={setIsSidebarOpen} 
+                onOpenSettings={() => {
+                    setActiveSettingsTab('info-toko');
+                    setIsSettingsOpen(true);
+                }} 
+            />
 
-                <div className="p-4 border-t border-emerald-800">
-                    <button onClick={() => window.location.href = '/login'} className="w-full flex items-center gap-4 p-3 rounded-xl text-red-300 hover:bg-red-500/10 hover:text-red-400 transition-all">
-                        <LogOut size={20} />
-                        <span className="font-bold text-sm">Keluar</span>
-                    </button>
-                </div>
-            </aside>
-
-            {/* Main Area */}
             <main className="flex-1 flex flex-col overflow-hidden relative">
-                <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#10b981 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-
-                <header className="bg-white border-b border-slate-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 z-10 shadow-sm">
-                    <div>
-                        <h2 className="text-xl lg:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-                            <Landmark size={28} className="text-emerald-600" />
-                            Kas \u0026 Bank
-                        </h2>
-                        <p className="text-slate-400 text-xs font-medium mt-1">Monitoring saldo, penerimaan, dan pembayaran operasional.</p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <div className="bg-emerald-50 px-6 py-3 rounded-2xl border border-emerald-100 hidden md:block">
-                            <p className="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-1">Total Saldo (All Accounts)</p>
-                            <h4 className="text-xl font-black text-slate-800">Rp {totalBalance.toLocaleString()}</h4>
-                        </div>
-                    </div>
-                </header>
+                {/* Standardized Header Admin */}
+                <AdminHeader 
+                    title="Kas & Bank"
+                    subtitle="Manajemen Rekening, Penerimaan, & Pengeluaran Kas"
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    onMenuClick={() => setIsSidebarOpen(true)}
+                />
 
                 <div className="bg-white border-b border-slate-100 flex overflow-x-auto scrollbar-hide z-10">
                     {[
@@ -405,27 +443,25 @@ export default function KasBankPage() {
                         </div>
                     )}
                 </div>
-
-                {/* Mobile Bottom Navigation */}
-                <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-4 flex justify-around items-center z-50">
-                    <button onClick={() => router.push('/posin-adm')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <LayoutDashboard size={20} />
-                        <span className="text-[10px] font-bold uppercase">POS</span>
-                    </button>
-                    <button className="flex flex-col items-center gap-1 text-emerald-600">
-                        <Landmark size={20} />
-                        <span className="text-[10px] font-bold uppercaseTracking-tight">Kas</span>
-                    </button>
-                    <button onClick={() => router.push('/penjualan')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <Tag size={20} />
-                        <span className="text-[10px] font-bold uppercase">Jual</span>
-                    </button>
-                    <button onClick={() => router.push('/pembelian')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <ShoppingBag size={20} />
-                        <span className="text-[10px] font-bold uppercase">Beli</span>
-                    </button>
-                </nav>
             </main>
+
+            {/* Standardized Settings Modal (Admin) */}
+            <SettingsModal 
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                isAdmin={true}
+                activeTab={activeSettingsTab}
+                setActiveTab={setActiveSettingsTab}
+                userProfile={userProfile}
+                setUserProfile={setUserProfile}
+                handleSaveProfile={handleSaveProfile}
+                storeSettings={storeSettings}
+                setStoreSettings={setStoreSettings}
+                newUserContact={newUserContact}
+                setNewUserContact={setNewUserContact}
+                newUserRole={newUserRole}
+                setNewUserRole={setNewUserRole}
+            />
 
             {/* Modal Penerimaan */}
             {isPenerimaanModalOpen && (

@@ -36,8 +36,14 @@ import {
     Tag,
     Landmark,
     BookOpen,
-    Building2
+    Building2,
+    Store,
+    Menu
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import AdminHeader from '@/components/AdminHeader';
+import AdminSidebar from '@/components/AdminSidebar';
+import SettingsModal from '@/components/SettingsModal';
 
 /**
  * SANTARA POINT - MODUL PEMBELIAN (OWNER ONLY)
@@ -69,6 +75,27 @@ export default function PembelianPage() {
     });
     const [poSearchTerm, setPoSearchTerm] = useState('');
 
+    // --- State Standarisasi ---
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [activeSettingsTab, setActiveSettingsTab] = useState('profil');
+    const [storeSettings, setStoreSettings] = useState({
+        storeName: 'Santara Point',
+        storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
+        isPajakActive: true,
+        authorizedUsers: []
+    });
+    const [userProfile, setUserProfile] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        whatsapp: '',
+        password: '••••••••',
+        addresses: []
+    });
+    const [newUserContact, setNewUserContact] = useState('');
+    const [newUserRole, setNewUserRole] = useState('Operator');
+
     useEffect(() => {
         // Load data from LocalStorage
         const storedProducts = localStorage.getItem('santaraProducts');
@@ -88,7 +115,42 @@ export default function PembelianPage() {
 
         const storedReturns = localStorage.getItem('santaraPurchaseReturns');
         if (storedReturns) setReturns(JSON.parse(storedReturns));
+
+        const storedSettings = localStorage.getItem('santaraStoreSettings');
+        if (storedSettings) setStoreSettings(JSON.parse(storedSettings));
+
+        const fetchUserProfile = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const meta = user.user_metadata || {};
+                setUserProfile({
+                    firstName: meta.first_name || '',
+                    lastName: meta.last_name || '',
+                    email: user.email || '',
+                    whatsapp: meta.whatsapp || '',
+                    password: '••••••••',
+                    addresses: meta.addresses || []
+                });
+            }
+        };
+        fetchUserProfile();
     }, []);
+
+    const handleSaveProfile = async (e) => {
+        e.preventDefault();
+        try {
+            const { error } = await supabase.auth.updateUser({
+                data: {
+                    first_name: userProfile.firstName,
+                    last_name: userProfile.lastName
+                }
+            });
+            if (error) throw error;
+            alert('Profil berhasil diperbarui!');
+        } catch (err) {
+            alert(err.message);
+        }
+    };
 
     const saveToLocal = (key, data) => {
         localStorage.setItem(key, JSON.stringify(data));
@@ -173,96 +235,26 @@ export default function PembelianPage() {
     ];
 
     return (
-        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden pb-20 lg:pb-0">
-            {/* Sidebar (Tablet/Desktop) */}
-            <aside className="hidden lg:flex w-64 bg-slate-900 text-white flex-col shadow-2xl z-40">
-                <div className="p-6 flex items-center gap-3 border-b border-slate-800 bg-slate-900">
-                    <button onClick={() => router.push('/homepage')} className="bg-white p-1.5 rounded-lg flex items-center justify-center hover:scale-110 transition-transform shadow-md cursor-pointer">
-                        <img src="/santara-logo.png" alt="Santara" className="w-6 h-6 object-contain" />
-                    </button>
-                    <span className="font-black tracking-tighter text-xl italic uppercase">Santara Purchasing</span>
-                </div>
-                
-                <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-                    {NavItems.map((item) => (
-                        <button 
-                            key={item.id}
-                            onClick={() => setActiveTab(item.id)}
-                            className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all ${activeTab === item.id ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/40' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
-                        >
-                            {item.icon}
-                            <span className="font-bold text-sm">{item.label}</span>
-                        </button>
-                    ))}
-                    <div className="pt-6 pb-2 px-4">
-                        <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em]">Sistem Utama</p>
-                    </div>
-                    <button onClick={() => router.push('/posin-adm')} className="w-full flex items-center gap-4 p-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-                        <ShoppingBag size={20} />
-                        <span className="font-bold text-sm">POS Kasir</span>
-                    </button>
-                    <button onClick={() => router.push('/penjualan')} className="w-full flex items-center gap-4 p-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-                        <Tag size={20} />
-                        <span className="font-bold text-sm">Penjualan</span>
-                    </button>
-                    <button onClick={() => router.push('/kas-bank')} className="w-full flex items-center gap-4 p-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-                        <Landmark size={20} />
-                        <span className="font-bold text-sm">Kas \u0026 Bank</span>
-                    </button>
-                    <button onClick={() => router.push('/buku-besar')} className="w-full flex items-center gap-4 p-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-                        <BookOpen size={20} />
-                        <span className="font-bold text-sm">Buku Besar</span>
-                    </button>
-                    <button onClick={() => router.push('/perusahaan')} className="w-full flex items-center gap-4 p-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-                        <Building2 size={20} />
-                        <span className="font-bold text-sm">Perusahaan</span>
-                    </button>
-                    <button onClick={() => router.push('/manajemen-stok')} className="w-full flex items-center gap-4 p-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-                        <ClipboardList size={20} />
-                        <span className="font-bold text-sm">Manajemen Stok</span>
-                    </button>
-                    <button onClick={() => router.push('/persediaan')} className="w-full flex items-center gap-4 p-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-                        <Package size={20} />
-                        <span className="font-bold text-sm">Persediaan</span>
-                    </button>
-                </nav>
+        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden relative">
+            {/* Standardized Sidebar Admin */}
+            <AdminSidebar 
+                isOpen={isSidebarOpen} 
+                setIsOpen={setIsSidebarOpen} 
+                onOpenSettings={() => {
+                    setActiveSettingsTab('info-toko');
+                    setIsSettingsOpen(true);
+                }} 
+            />
 
-                <div className="p-4 border-t border-slate-800">
-                    <button onClick={() => window.location.href = '/login'} className="w-full flex items-center gap-4 p-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all">
-                        <LogOut size={20} />
-                        <span className="font-bold text-sm">Keluar Admin</span>
-                    </button>
-                </div>
-            </aside>
-
-            {/* Area Utama */}
             <main className="flex-1 flex flex-col overflow-hidden relative">
-                {/* Header Dinamis */}
-                <header className="bg-white border-b border-slate-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 z-10">
-                    <div className="flex items-center gap-4 lg:gap-0">
-                        <button onClick={() => router.back()} className="lg:hidden p-2 bg-slate-100 rounded-lg text-slate-600">
-                            <ArrowLeft size={20} />
-                        </button>
-                        <div>
-                            <h2 className="text-xl lg:text-2xl font-black text-slate-800 tracking-tight flex items-center gap-3 capitalize">
-                                {NavItems.find(n => n.id === activeTab)?.icon}
-                                {activeTab === 'po' ? 'Pesanan Pembelian (PO)' : activeTab}
-                            </h2>
-                            <p className="text-slate-400 text-[10px] lg:text-xs font-medium mt-0.5">Modul Pengadaan Barang & Operasional.</p>
-                        </div>
-                    </div>
-
-                    <div className="relative w-full md:w-80">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Cari transaksi atau vendor..."
-                            className="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </header>
+                {/* Standardized Header Admin */}
+                <AdminHeader 
+                    title="Modul Pembelian"
+                    subtitle="Manajemen Pemasok, PO, Faktur, & Retur Pembelian"
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    onMenuClick={() => setIsSidebarOpen(true)}
+                />
 
                 {/* Konten Tab */}
                 <div className="flex-1 overflow-y-auto p-6 lg:p-10">
@@ -596,31 +588,25 @@ export default function PembelianPage() {
                         </div>
                     )}
                 </div>
-
-                {/* Mobile Bottom Navigation (Admin Only) */}
-                <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-4 flex justify-around items-center z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
-                    <button onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center gap-1 ${activeTab === 'dashboard' ? 'text-emerald-600' : 'text-slate-400'}`}>
-                        <LayoutDashboard size={20} />
-                        <span className="text-[10px] font-bold uppercase tracking-tight">Dash</span>
-                    </button>
-                    <button onClick={() => setActiveTab('pemasok')} className={`flex flex-col items-center gap-1 ${activeTab === 'pemasok' ? 'text-emerald-600' : 'text-slate-400'}`}>
-                        <Truck size={20} />
-                        <span className="text-[10px] font-bold uppercase tracking-tight">Vendor</span>
-                    </button>
-                    <button onClick={() => setActiveTab('po')} className={`flex flex-col items-center gap-1 ${activeTab === 'po' ? 'text-emerald-600' : 'text-slate-400'}`}>
-                        <FileText size={20} />
-                        <span className="text-[10px] font-bold uppercase tracking-tight">Order</span>
-                    </button>
-                    <button onClick={() => setActiveTab('faktur')} className={`flex flex-col items-center gap-1 ${activeTab === 'faktur' ? 'text-emerald-600' : 'text-slate-400'}`}>
-                        <Receipt size={20} />
-                        <span className="text-[10px] font-bold uppercase tracking-tight">Faktur</span>
-                    </button>
-                    <button onClick={() => router.push('/posin-adm')} className="flex flex-col items-center gap-1 text-slate-300">
-                         <ShoppingBag size={20} />
-                        <span className="text-[10px] font-bold uppercase tracking-tight">POS</span>
-                    </button>
-                </nav>
             </main>
+
+            {/* Standardized Settings Modal (Admin) */}
+            <SettingsModal 
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                isAdmin={true}
+                activeTab={activeSettingsTab}
+                setActiveTab={setActiveSettingsTab}
+                userProfile={userProfile}
+                setUserProfile={setUserProfile}
+                handleSaveProfile={handleSaveProfile}
+                storeSettings={storeSettings}
+                setStoreSettings={setStoreSettings}
+                newUserContact={newUserContact}
+                setNewUserContact={setNewUserContact}
+                newUserRole={newUserRole}
+                setNewUserRole={setNewUserRole}
+            />
 
             {/* Modal Tambah Pemasok */}
             {isSupplierModalOpen && (

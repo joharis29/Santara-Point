@@ -148,7 +148,7 @@ export default function Register() {
                                         value={formData.firstName}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-900 font-bold"
                                         placeholder="Budi"
                                         required
                                     />
@@ -167,7 +167,7 @@ export default function Register() {
                                         value={formData.lastName}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-900 font-bold"
                                         placeholder="Santoso"
                                         required
                                     />
@@ -187,7 +187,7 @@ export default function Register() {
                                     value={formData.email}
                                     onChange={handleChange}
                                     onBlur={handleBlur}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-900 font-bold"
                                     placeholder="budi123@gmail.com"
                                     required
                                 />
@@ -206,7 +206,7 @@ export default function Register() {
                                     value={formData.whatsapp}
                                     onChange={handleChange}
                                     onBlur={handleBlur}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-900 font-bold"
                                     placeholder="0821XXXXXXXX"
                                     required
                                 />
@@ -224,7 +224,7 @@ export default function Register() {
                                     value={formData.address}
                                     onChange={handleChange}
                                     onBlur={handleBlur}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all resize-none h-20"
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all resize-none h-20 text-slate-900 font-bold"
                                     placeholder="Jl. Merdeka No. 10, RT 01/RW 02..."
                                     required
                                 />
@@ -243,7 +243,7 @@ export default function Register() {
                                     value={formData.password}
                                     onChange={handleChange}
                                     onBlur={handleBlur}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-900 font-bold"
                                     placeholder="••••••••"
                                     required
                                 />
@@ -262,7 +262,7 @@ export default function Register() {
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
                                     onBlur={handleBlur}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-900 font-bold"
                                     placeholder="••••••••"
                                     required
                                 />

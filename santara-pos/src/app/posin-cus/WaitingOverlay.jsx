@@ -9,6 +9,8 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
     // states: 'KONFIRMASI' -> 'DISIAPKAN' -> 'SELESAI'
     const [status, setStatus] = useState('KONFIRMASI');
     const [waitSeconds, setWaitSeconds] = useState(0);
+    const [displayAmount, setDisplayAmount] = useState(totalAmount || 0);
+    const [dbItems, setDbItems] = useState([]);
 
     // Stopwatch Visual
     useEffect(() => {
@@ -31,27 +33,32 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                 // Priority 1: Supabase for cross-device sync
                 const { data, error } = await supabase
                     .from('transactions')
-                    .select('status')
+                    .select('status, total_amount, items')
                     .eq('id', transactionId)
                     .single();
 
                 if (error) throw error;
 
-                if (data && data.status) {
+                if (data) {
                     if (data.status === 'Menunggu') setStatus('KONFIRMASI');
                     if (data.status === 'Diproses') setStatus('DISIAPKAN');
                     if (data.status === 'Selesai') setStatus('SELESAI');
                     if (data.status === 'Ditolak') setStatus('DITOLAK');
+                    
+                    if (data.total_amount) setDisplayAmount(data.total_amount);
+                    if (data.items) setDbItems(data.items);
                 }
             } catch (err) {
                 // Fallback to localstorage
                 const history = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
                 const t = history.find(x => x.id === transactionId);
-                if (t && t.status) {
+                if (t) {
                     if (t.status === 'Menunggu') setStatus('KONFIRMASI');
                     if (t.status === 'Diproses') setStatus('DISIAPKAN');
                     if (t.status === 'Selesai') setStatus('SELESAI');
                     if (t.status === 'Ditolak') setStatus('DITOLAK');
+                    
+                    if (t.totalAmount || t.total_amount) setDisplayAmount(t.totalAmount || t.total_amount);
                 }
             }
         }, 2000);
@@ -78,7 +85,9 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                         </div>
                         <h2 className="text-xl font-black text-slate-800">Pelacakan Pesanan</h2>
                         <p className="text-sm text-slate-500 font-medium">Bpk/Ibu {customerName}</p>
-                        <p className="text-xs font-bold text-emerald-600 mt-1">Total tagihan: Rp {totalAmount?.toLocaleString('en-US')}</p>
+                        <div className="mt-2 bg-emerald-50 px-4 py-1.5 rounded-full border border-emerald-100">
+                             <p className="text-xs font-black text-emerald-700">Total Tagihan: Rp {displayAmount?.toLocaleString('id-ID')}</p>
+                        </div>
                         {transactionId && (
                             <span className="mt-2 bg-white border border-slate-200 px-3 py-1 text-[10px] rounded-full font-mono text-slate-400">ID: {transactionId}</span>
                         )}
@@ -94,9 +103,31 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                                 <h3 className="text-xl font-black text-slate-800 mb-2">Pesanan Ditolak</h3>
                                 <p className="text-sm text-slate-500">Mohon maaf, pesanan Anda telah ditolak / dibatalkan oleh pihak toko. Silakan buat pesanan baru atau hubungi staf kasir.</p>
                             </div>
+                        ) : status === 'SELESAI' ? (
+                            <div className="flex flex-col items-center justify-center text-center py-6 animate-in zoom-in duration-500">
+                                <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-emerald-100 ring-8 ring-emerald-50">
+                                    <CheckCircle2 size={48} strokeWidth={3} />
+                                </div>
+                                <h3 className="text-2xl font-black text-slate-800 mb-2 tracking-tight">Pesanan Selesai!</h3>
+                                <p className="text-sm text-slate-500 mb-6 font-medium">Hidangan Anda telah siap. Terima kasih telah memesan di Santara Point.</p>
+                                
+                                <div className="w-full bg-slate-50 rounded-3xl p-6 border border-slate-100">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Pembayaran</p>
+                                    <p className="text-3xl font-black text-emerald-600 tracking-tighter">Rp {displayAmount?.toLocaleString('id-ID')}</p>
+                                    
+                                    <div className="mt-4 pt-4 border-t border-slate-200 flex flex-col gap-2">
+                                        {dbItems.map((item, idx) => (
+                                            <div key={idx} className="flex justify-between text-xs font-bold text-slate-500">
+                                                <span>{item.name} x{item.quantity}</span>
+                                                <span>Rp {(item.price * item.quantity).toLocaleString('id-ID')}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
                         ) : (
                             <div className="relative border-l-2 border-slate-200 ml-4 space-y-10 py-2">
-
+                                {/* Flow steps ... */}
                                 {/* Step 1: Konfirmasi */}
                                 <div className="relative pl-8">
                                     <div className={`absolute -left-[17px] top-1 w-8 h-8 rounded-full flex items-center justify-center border-4 border-white transition-colors duration-500 ${status === 'KONFIRMASI' ? 'bg-amber-500 shadow-lg shadow-amber-200' : 'bg-emerald-500'
@@ -113,7 +144,7 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                                 <div className="relative pl-8">
                                     <div className={`absolute -left-[17px] top-1 w-8 h-8 rounded-full flex items-center justify-center border-4 border-white transition-colors duration-500 ${status === 'KONFIRMASI' ? 'bg-slate-200' : status === 'DISIAPKAN' ? 'bg-blue-500 shadow-lg shadow-blue-200' : 'bg-emerald-500'
                                         }`}>
-                                        {status === 'SELESAI' ? <CheckCircle2 size={16} className="text-white" /> : <ChefHat size={14} className={status === 'KONFIRMASI' ? 'text-slate-400' : 'text-white'} />}
+                                        {status === 'DISIAPKAN' ? <ChefHat size={14} className="text-white" /> : status === 'KONFIRMASI' ? <ChefHat size={14} className="text-slate-400" /> : <CheckCircle2 size={16} className="text-white" />}
                                     </div>
                                     <h3 className={`font-bold transition-all ${status === 'KONFIRMASI' ? 'text-slate-400' : status === 'DISIAPKAN' ? 'text-blue-600' : 'text-slate-800'}`}>
                                         Makanan Sedang Disiapkan
@@ -125,14 +156,13 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
 
                                 {/* Step 3: Selesai */}
                                 <div className="relative pl-8">
-                                    <div className={`absolute -left-[17px] top-1 w-8 h-8 rounded-full flex items-center justify-center border-4 border-white transition-colors duration-500 ${status === 'SELESAI' ? 'bg-emerald-500 shadow-lg shadow-emerald-200' : 'bg-slate-200'
-                                        }`}>
-                                        <CheckCircle2 size={16} className={status === 'SELESAI' ? 'text-white' : 'text-slate-400'} />
+                                    <div className={`absolute -left-[17px] top-1 w-8 h-8 rounded-full flex items-center justify-center border-4 border-white transition-colors duration-500 bg-slate-200`}>
+                                        <CheckCircle2 size={16} className="text-slate-400" />
                                     </div>
-                                    <h3 className={`font-bold transition-all ${status === 'SELESAI' ? 'text-emerald-600 text-lg' : 'text-slate-400'}`}>
+                                    <h3 className={`font-bold transition-all text-slate-400`}>
                                         Pesanan Siap Disajikan
                                     </h3>
-                                    <p className={`text-xs mt-1 leading-relaxed ${status === 'SELESAI' ? 'text-emerald-700/70' : 'text-slate-300'}`}>
+                                    <p className={`text-xs mt-1 leading-relaxed text-slate-300`}>
                                         Pesanan telah ditandai Selesai oleh staf! Mohon tunggu hidangan sampai ditujuan.
                                     </p>
                                 </div>

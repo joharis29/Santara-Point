@@ -19,8 +19,14 @@ import {
     Image as ImageIcon,
     Home,
     History,
-    Package
+    Package,
+    Store,
+    Menu
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import AdminHeader from '@/components/AdminHeader';
+import AdminSidebar from '@/components/AdminSidebar';
+import SettingsModal from '@/components/SettingsModal';
 
 const INITIAL_PRODUCTS = [
     { id: 7, name: 'Nasi Kuning', price: 15000, stock: 15, category: 'Makanan', img: '/nasi-kuning-baru.jpg' },
@@ -78,13 +84,29 @@ export default function ManajemenStok() {
     const [products, setProducts] = useState(INITIAL_PRODUCTS);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [newProduct, setNewProduct] = useState({
-        name: '',
-        price: '',
-        category: 'Makanan',
-        stock: '',
         img: ''
     });
+
+    // --- State Standarisasi ---
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [activeSettingsTab, setActiveSettingsTab] = useState('profil');
+    const [storeSettings, setStoreSettings] = useState({
+        storeName: 'Santara Point',
+        storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
+        isPajakActive: true,
+        authorizedUsers: []
+    });
+    const [userProfile, setUserProfile] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        whatsapp: '',
+        password: '••••••••',
+        addresses: []
+    });
+    const [newUserContact, setNewUserContact] = useState('');
+    const [newUserRole, setNewUserRole] = useState('Operator');
 
     const filteredProducts = products.filter(p => 
         p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -108,7 +130,42 @@ export default function ManajemenStok() {
         } else {
             localStorage.setItem('santaraProducts', JSON.stringify(INITIAL_PRODUCTS));
         }
+
+        const storedSettings = localStorage.getItem('santaraStoreSettings');
+        if (storedSettings) setStoreSettings(JSON.parse(storedSettings));
+
+        const fetchUserProfile = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const meta = user.user_metadata || {};
+                setUserProfile({
+                    firstName: meta.first_name || '',
+                    lastName: meta.last_name || '',
+                    email: user.email || '',
+                    whatsapp: meta.whatsapp || '',
+                    password: '••••••••',
+                    addresses: meta.addresses || []
+                });
+            }
+        };
+        fetchUserProfile();
     }, []);
+
+    const handleSaveProfile = async (e) => {
+        e.preventDefault();
+        try {
+            const { error } = await supabase.auth.updateUser({
+                data: {
+                    first_name: userProfile.firstName,
+                    last_name: userProfile.lastName
+                }
+            });
+            if (error) throw error;
+            alert('Profil berhasil diperbarui!');
+        } catch (err) {
+            alert(err.message);
+        }
+    };
 
     const handleUpdateStock = (id, newStock) => {
         const updated = products.map(p => p.id === id ? { ...p, stock: newStock } : p);
@@ -138,7 +195,7 @@ export default function ManajemenStok() {
             price: parseInt(newProduct.price) || 0,
             stock: parseInt(newProduct.stock) || 0,
             category: newProduct.category,
-            img: newProduct.img || '/placeholder.jpg', // Default jika gambar kosong
+            img: newProduct.img || '/placeholder.jpg',
             isNew: true
         };
 
@@ -151,60 +208,26 @@ export default function ManajemenStok() {
     };
 
     return (
-        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden pb-20 lg:pb-0">
-            {/* Sidebar Navigasi (Eksklusif Owner) */}
-            <aside className="hidden lg:flex w-20 lg:w-64 bg-emerald-900 text-white flex-col transition-all duration-300">
-                <div className="p-6 flex items-center gap-3 border-b border-emerald-800">
-                    <button onClick={() => router.push('/homepage')} className="bg-white p-1.5 rounded-lg flex items-center justify-center hover:scale-105 transition-transform cursor-pointer" title="Ke Beranda">
-                        <img src="/santara-logo.png" alt="Santara" className="w-6 h-6 object-contain" />
-                    </button>
-                    <span className="hidden lg:block font-black tracking-tighter text-xl italic uppercase">SANTARA OPS</span>
-                </div>
-                <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-                    {[
-                        { icon: <LayoutDashboard size={20} />, label: "Dashboard", active: false, action: () => router.push('/posin-adm') },
-                        { icon: <ShoppingBag size={20} />, label: "POS Kasir", active: false, action: () => router.push('/posin-adm') },
-                        { icon: <ChefHat size={20} />, label: "Daftar Antrean", active: false, action: () => router.push('/waiting-list') },
-                        { icon: <ClipboardList size={20} />, label: "Manajemen Stok", active: true, action: () => router.push('/manajemen-stok') },
-                        { icon: <Package size={20} />, label: "Persediaan", active: false, action: () => router.push('/persediaan') },
-                        { icon: <ShoppingBag size={20} />, label: "Pembelian", active: false, action: () => router.push('/pembelian') },
-                        { icon: <TrendingUp size={20} />, label: "Laporan Keuangan", active: false, action: () => router.push('/history?role=admin') },
-                        { icon: <Settings size={20} />, label: "Pengaturan Toko", active: false },
-                    ].map((item, i) => (
-                        <button key={i} onClick={item.action} className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all ${item.active ? 'bg-emerald-600 shadow-lg shadow-emerald-950/20 text-white' : 'hover:bg-emerald-800 text-emerald-300 hover:text-white'}`}>
-                            {item.icon}
-                            <span className="hidden lg:block font-bold text-sm">{item.label}</span>
-                        </button>
-                    ))}
-                </nav>
-                <div className="p-4 border-t border-emerald-800">
-                    <button onClick={() => window.location.href = '/login'} className="w-full flex items-center gap-4 p-3 rounded-xl text-red-300 hover:bg-red-500/10 hover:text-red-400 transition-all">
-                        <LogOut size={20} />
-                        <span className="hidden lg:block font-bold text-sm">Keluar</span>
-                    </button>
-                </div>
-            </aside>
+        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden relative">
+            {/* Standardized Sidebar Admin */}
+            <AdminSidebar 
+                isOpen={isSidebarOpen} 
+                setIsOpen={setIsSidebarOpen} 
+                onOpenSettings={() => {
+                    setActiveSettingsTab('info-toko');
+                    setIsSettingsOpen(true);
+                }} 
+            />
 
-            {/* Area Utama */}
-            <main className="flex-1 flex flex-col overflow-hidden">
-                {/* Header */}
-                <header className="bg-white border-b border-slate-200 p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h2 className="text-xl lg:text-2xl font-black text-slate-800 tracking-tight">Manajemen Stok</h2>
-                        <p className="text-slate-400 text-[10px] lg:text-xs font-medium mt-0.5 lg:mt-1">Kelola ketersediaan produk dan inventaris.</p>
-                    </div>
-
-                    <div className="relative w-full sm:w-80 lg:w-96">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Cari menu..."
-                            className="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </header>
+            <main className="flex-1 flex flex-col overflow-hidden relative">
+                {/* Standardized Header Admin */}
+                <AdminHeader 
+                    title="Manajemen Stok"
+                    subtitle="Kelola Data Produk, Harga, & Ketersediaan Stok"
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    onMenuClick={() => setIsSidebarOpen(true)}
+                />
 
                 <div className="p-6 lg:p-10 flex-1 overflow-y-auto">
                     <div className="flex justify-between items-center mb-6">
@@ -324,31 +347,25 @@ export default function ManajemenStok() {
                         </div>
                     </div>
                 </div>
-
-                {/* Mobile Bottom Navigation */}
-                <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-4 flex justify-around items-center z-50">
-                    <button onClick={() => router.push('/homepage')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <Home size={20} />
-                        <span className="text-[10px] font-bold uppercase tracking-tight">Home</span>
-                    </button>
-                    <button onClick={() => router.push('/posin-adm')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <ShoppingBag size={20} />
-                        <span className="text-[10px] font-bold uppercase tracking-tight">POS</span>
-                    </button>
-                    <button onClick={() => router.push('/history?role=admin')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <History size={20} />
-                        <span className="text-[10px] font-bold uppercase tracking-tight">Riwayat</span>
-                    </button>
-                    <button onClick={() => router.push('/pembelian')} className="flex flex-col items-center gap-1 text-slate-400">
-                        <ShoppingBag size={20} />
-                        <span className="text-[10px] font-bold uppercase tracking-tight">Beli</span>
-                    </button>
-                    <button className="flex flex-col items-center gap-1 text-emerald-600">
-                        <ClipboardList size={20} />
-                        <span className="text-[10px] font-bold uppercase tracking-tight">Stok</span>
-                    </button>
-                </nav>
             </main>
+
+            {/* Standardized Settings Modal (Admin) */}
+            <SettingsModal 
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                isAdmin={true}
+                activeTab={activeSettingsTab}
+                setActiveTab={setActiveSettingsTab}
+                userProfile={userProfile}
+                setUserProfile={setUserProfile}
+                handleSaveProfile={handleSaveProfile}
+                storeSettings={storeSettings}
+                setStoreSettings={setStoreSettings}
+                newUserContact={newUserContact}
+                setNewUserContact={setNewUserContact}
+                newUserRole={newUserRole}
+                setNewUserRole={setNewUserRole}
+            />
 
             {/* Modal Tambah Produk */}
             {isModalOpen && (

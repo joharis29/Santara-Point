@@ -28,10 +28,14 @@ import {
     ArrowUpDown,
     MapPin,
     ChevronRight,
-    MessageCircle
+    MessageCircle,
+    ArrowLeft
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import WaitingOverlay from './WaitingOverlay';
+import CustomerHeader from '@/components/CustomerHeader';
+import CustomerBottomNav from '@/components/CustomerBottomNav';
+import SettingsModal from '@/components/SettingsModal';
 
 const DEFAULT_SETTINGS = {
     storeName: 'Santara Point',
@@ -657,19 +661,26 @@ function CustomerPortalContent() {
 
     return (
         <div className="flex h-screen bg-white font-sans text-slate-900 overflow-hidden">
-            {/* Sidebar Navigasi Customer */}
-            <aside className="hidden lg:flex w-24 bg-slate-50 border-r border-slate-100 flex-col items-center py-10 gap-12">
-                <button onClick={() => router.push('/homepage')} className="hover:scale-105 transition-transform" title="Ke Beranda">
-                    <img src="/santara-logo.png" alt="Santara Logo" className="w-10 h-10 object-contain" />
-                </button>
-                <nav className="flex-1 flex flex-col gap-8">
-                    <button className="p-3 text-emerald-600 bg-white rounded-2xl shadow-md" title="Menu Utama"><ShoppingBag size={24} /></button>
-                    <button onClick={() => router.push('/customer-history')} className="p-3 text-slate-300 hover:text-emerald-600 transition-colors" title="Riwayat Pesanan"><Clock size={24} /></button>
-                    <button onClick={() => router.push('/favorites')} className="p-3 text-slate-300 hover:text-red-500 transition-colors" title="Menu Favorit">
-                        <Heart size={24} />
+            {/* Sidebar (Desktop) */}
+            <aside className="hidden md:flex w-24 bg-slate-900 flex-col items-center py-8 gap-8 shrink-0">
+                <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <Store className="text-white" size={24} strokeWidth={3} />
+                </div>
+                <nav className="flex-1 flex flex-col gap-4">
+                    <button 
+                        onClick={() => setActiveCategory('Semua')}
+                        className={`p-4 rounded-2xl transition-all ${activeCategory === 'Semua' ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/20' : 'text-slate-500 hover:bg-slate-800 hover:text-slate-300'}`}
+                    >
+                        <TrendingUp size={24} />
                     </button>
-                    <button onClick={() => setIsSettingsOpen(true)} className="p-3 text-slate-300 hover:text-emerald-600 transition-colors" title="Pengaturan">
-                        <Settings size={24} />
+                    <button 
+                        onClick={() => {
+                            setActiveSettingsTab('profil');
+                            setIsSettingsOpen(true);
+                        }}
+                        className="p-4 rounded-2xl text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition-all"
+                    >
+                        <Menu size={24} />
                     </button>
                 </nav>
                 <button
@@ -689,13 +700,22 @@ function CustomerPortalContent() {
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col overflow-hidden">
                 <header className="px-6 py-8 md:px-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div>
-                        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Pilih Menu Favorit</h1>
-                        <div className="flex items-center gap-2 mt-2">
-                            <span className="bg-emerald-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-emerald-100">
-                                <ShieldCheck size={12} /> Syariah Verified
-                            </span>
-                            <span className="text-slate-400 text-xs font-bold">Halo, {customerName.trim().split(' ')[0]}!</span>
+                    <div className="flex items-center gap-4">
+                        <button 
+                            onClick={() => router.push('/homepage')}
+                            className="p-2.5 hover:bg-slate-100 rounded-2xl transition-all text-slate-600 border border-slate-100 shadow-sm md:shadow-none md:border-none"
+                            title="Kembali ke Beranda"
+                        >
+                            <ArrowLeft size={24} strokeWidth={3} />
+                        </button>
+                        <div>
+                            <h1 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Pilih Menu Favorit</h1>
+                            <div className="flex items-center gap-2 mt-1 md:mt-2">
+                                <span className="bg-emerald-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-emerald-100">
+                                    <ShieldCheck size={12} /> Syariah Verified
+                                </span>
+                                <span className="text-slate-400 text-xs font-bold">Halo, {customerName.trim().split(' ')[0]}!</span>
+                            </div>
                         </div>
                     </div>
                     <div className="relative w-full md:w-80">
@@ -857,7 +877,7 @@ function CustomerPortalContent() {
                                         </button>
                                     </div>
                                     {userProfile.addresses.length === 0 && (
-                                        <p className="text-[10px] text-amber-600 font-bold ml-1">* Belum ada alamat. Silakan tambah alamat baru.</p>
+                                        <p className="text-[10px] text-amber-600 font-bold">* Belum ada alamat. Silakan tambah alamat baru.</p>
                                     )}
                                 </div>
                                 <textarea
@@ -940,7 +960,10 @@ function CustomerPortalContent() {
                             <X size={20} />
                         </button>
                         <h3 className="text-xl font-black text-slate-800 mb-2">Scan QRIS</h3>
-                        <p className="text-sm text-slate-500 mb-4">Silakan scan kode QR di bawah menggunakan aplikasi {paymentMethod} Anda (Total: Rp {totalAmount.toLocaleString('en-US')})</p>
+                        <div className="bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-100 mb-4 inline-block">
+                            <p className="text-sm font-black text-emerald-700">Total Tagihan: Rp {totalAmount.toLocaleString('id-ID')}</p>
+                        </div>
+                        <p className="text-sm text-slate-500 mb-4">Silakan scan kode QR di bawah menggunakan aplikasi {paymentMethod} Anda.</p>
                         <div className="bg-white border rounded-xl p-2 mb-6">
                             <img src={paymentMethod === 'Gopay' ? "/qris-gopay.jpg" : "/qris-dana.jpg"} alt={`QRIS ${paymentMethod}`} className="w-full max-w-[250px] mx-auto rounded-lg" />
                         </div>
@@ -967,6 +990,9 @@ function CustomerPortalContent() {
                             <MessageCircle size={32} />
                         </div>
                         <h3 className="text-xl font-black text-slate-800 mb-2">Konfirmasi Pesanan</h3>
+                        <div className="bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-100 mb-4 inline-block">
+                             <p className="text-sm font-black text-emerald-700">Total Tagihan: Rp {totalAmount.toLocaleString('id-ID')}</p>
+                        </div>
                         <p className="text-sm text-slate-500 mb-4">Silakan konfirmasi pesanan Anda dengan menekan tombol dibawah ini: </p>
 
                         <a
@@ -998,7 +1024,10 @@ function CustomerPortalContent() {
                             <X size={20} />
                         </button>
                         <h3 className="text-xl font-black text-slate-800 mb-2 mt-4">Transfer Bank</h3>
-                        <p className="text-sm text-slate-500 mb-6">Silakan transfer sebesar <strong className="text-emerald-600 text-base">Rp {totalAmount.toLocaleString('en-US')}</strong> ke salah satu rekening berikut:</p>
+                        <div className="bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-100 mb-4 inline-block">
+                             <p className="text-sm font-black text-emerald-700">Total Tagihan: Rp {totalAmount.toLocaleString('id-ID')}</p>
+                        </div>
+                        <p className="text-sm text-slate-500 mb-6">Silakan transfer sesuai nominal total di atas ke salah satu rekening berikut:</p>
 
                         <div className="w-full flex flex-col gap-4 mb-6">
                             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left">
@@ -1063,41 +1092,8 @@ function CustomerPortalContent() {
                 </button>
             </div>
 
-            {/* Bottom Navigation (Mobile Only) */}
-            <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-3 flex justify-between items-center z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
-                <button
-                    onClick={() => router.push('/homepage')}
-                    className="flex flex-col items-center gap-1 text-slate-400"
-                >
-                    <Home size={20} />
-                    <span className="text-[10px] font-bold uppercase tracking-tight">Beranda</span>
-                </button>
-                <button className="flex flex-col items-center gap-1 text-emerald-600">
-                    <ShoppingBag size={20} />
-                    <span className="text-[10px] font-bold uppercase tracking-tight">Menu</span>
-                </button>
-                <button
-                    onClick={() => router.push('/favorites')}
-                    className="flex flex-col items-center gap-1 text-slate-400"
-                >
-                    <Heart size={20} />
-                    <span className="text-[10px] font-bold uppercase tracking-tight">Favorit</span>
-                </button>
-                <button
-                    onClick={() => router.push('/customer-history')}
-                    className="flex flex-col items-center gap-1 text-slate-400"
-                >
-                    <Clock size={20} />
-                    <span className="text-[10px] font-bold uppercase tracking-tight">Riwayat</span>
-                </button>
-                <button
-                    onClick={() => setIsSettingsOpen(true)}
-                    className="flex flex-col items-center gap-1 text-slate-400"
-                >
-                    <Settings size={20} />
-                    <span className="text-[10px] font-bold uppercase tracking-tight">Pengaturan</span>
-                </button>
-            </nav>
+            {/* Standardized Bottom Navigation */}
+            <CustomerBottomNav onOpenSettings={() => setIsSettingsOpen(true)} />
 
             {/* Cart Modal for Mobile */}
             {isCartModalOpen && (
@@ -1230,284 +1226,22 @@ function CustomerPortalContent() {
                 </div>
             )}
 
-            {/* Modal Pengaturan */}
-            {isSettingsOpen && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row h-[80vh] md:h-auto max-h-[90vh]">
-                        {/* Sidebar Modal */}
-                        <div className="w-full md:w-64 bg-slate-50 p-6 flex flex-col gap-2">
-                            <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2 px-2">
-                                <Settings className="text-emerald-600" />
-                                Pengaturan
-                            </h3>
-                            <button
-                                onClick={() => setActiveSettingsTab('profil')}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${activeSettingsTab === 'profil' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
-                            >
-                                <User size={20} />
-                                Profil Saya
-                            </button>
-                            <button
-                                onClick={() => setActiveSettingsTab('bahasa')}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${activeSettingsTab === 'bahasa' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
-                            >
-                                <Languages size={20} />
-                                Bahasa
-                            </button>
-                            <button
-                                onClick={() => setActiveSettingsTab('tema')}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${activeSettingsTab === 'tema' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
-                            >
-                                <Palette size={20} />
-                                Tema
-                            </button>
-                            <button
-                                onClick={() => setIsSettingsOpen(false)}
-                                className="mt-auto flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-slate-400 hover:text-red-500 transition-all border border-transparent hover:border-red-100 mb-2"
-                            >
-                                <X size={20} />
-                                Tutup
-                            </button>
-                        </div>
-
-                        {/* Content Modal */}
-                        <div className="flex-1 p-8 md:p-10 bg-white overflow-y-auto">
-                            {activeSettingsTab === 'profil' && (
-                                <div className="space-y-6">
-                                    <div>
-                                        <h4 className="text-2xl font-black text-slate-800 tracking-tight">Profil Saya</h4>
-                                        <p className="text-slate-400 text-sm font-medium mt-1">Kelola informasi data diri Anda.</p>
-                                    </div>
-                                    <form onSubmit={handleSaveProfile} className="space-y-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Depan</label>
-                                                <input
-                                                    type="text"
-                                                    value={userProfile.firstName}
-                                                    onChange={(e) => setUserProfile({ ...userProfile, firstName: e.target.value })}
-                                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 transition-all"
-                                                    placeholder="Nama Depan"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Belakang</label>
-                                                <input
-                                                    type="text"
-                                                    value={userProfile.lastName}
-                                                    onChange={(e) => setUserProfile({ ...userProfile, lastName: e.target.value })}
-                                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 transition-all"
-                                                    placeholder="Nama Belakang"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between items-center ml-1">
-                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Alamat Email</label>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setNewEmailInput('');
-                                                        setIsChangeEmailOpen(true);
-                                                    }}
-                                                    className="text-[10px] font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-widest transition-colors"
-                                                >
-                                                    Ganti Email
-                                                </button>
-                                            </div>
-                                            <input
-                                                type="email"
-                                                value={userProfile.email}
-                                                readOnly
-                                                className="w-full px-5 py-3 bg-slate-50 shadow-sm border border-slate-100 rounded-2xl outline-none font-bold text-slate-400 cursor-not-allowed"
-                                                placeholder="email@contoh.com"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between items-center ml-1">
-                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Nomor WhatsApp</label>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setNewWhatsappInput(userProfile.whatsapp);
-                                                        setIsChangeWhatsappOpen(true);
-                                                    }}
-                                                    className="text-[10px] font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-widest transition-colors"
-                                                >
-                                                    Ganti WhatsApp
-                                                </button>
-                                            </div>
-                                            <input
-                                                type="tel"
-                                                value={userProfile.whatsapp}
-                                                readOnly
-                                                className="w-full px-5 py-3 bg-slate-50 shadow-sm border border-slate-100 rounded-2xl outline-none font-bold text-slate-400 cursor-not-allowed"
-                                                placeholder="08xxxxxxxxxx"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between items-center ml-1">
-                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Kata Sandi</label>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setNewPasswordInput('');
-                                                        setConfirmPasswordInput('');
-                                                        setIsChangePasswordOpen(true);
-                                                    }}
-                                                    className="text-[10px] font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-widest transition-colors"
-                                                >
-                                                    Ganti Sandi
-                                                </button>
-                                            </div>
-                                            <div className="relative">
-                                                <input
-                                                    type="password"
-                                                    value="••••••••"
-                                                    readOnly
-                                                    className="w-full px-5 py-3 bg-slate-50 shadow-sm border border-slate-100 rounded-2xl outline-none font-bold text-slate-400 cursor-not-allowed pr-14"
-                                                    placeholder="••••••••"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        {/* Address Section */}
-                                        <div className="pt-6 border-t border-slate-100 space-y-4">
-                                            <div className="flex items-center justify-between px-1">
-                                                <div className="flex items-center gap-2">
-                                                    <MapPin size={18} className="text-emerald-600" />
-                                                    <h5 className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Alamat Pengiriman</h5>
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={addAddress}
-                                                    className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:bg-emerald-50 px-3 py-1.5 rounded-lg transition-all border border-emerald-100"
-                                                >
-                                                    + Tambah Alamat
-                                                </button>
-                                            </div>
-
-                                            <div className="space-y-4">
-                                                {userProfile.addresses.length === 0 ? (
-                                                    <div className="p-8 bg-slate-50 border border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center text-center gap-2">
-                                                        <MapPin size={24} className="text-slate-300" />
-                                                        <p className="text-xs font-bold text-slate-400">Belum ada alamat tersimpan.</p>
-                                                    </div>
-                                                ) : (
-                                                    userProfile.addresses.map((addr, idx) => (
-                                                        <div key={addr.id} className="p-5 bg-slate-50 rounded-[2rem] border border-slate-100 space-y-3 relative group/address">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => removeAddress(addr.id)}
-                                                                className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors"
-                                                                title="Hapus Alamat"
-                                                            >
-                                                                <Trash2 size={16} />
-                                                            </button>
-                                                            <div className="space-y-2">
-                                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Label Alamat (ex: Rumah, Kantor)</label>
-                                                                <input
-                                                                    type="text"
-                                                                    value={addr.label}
-                                                                    onChange={(e) => updateAddress(addr.id, 'label', e.target.value)}
-                                                                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 text-sm"
-                                                                    placeholder="Contoh: Rumah"
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-2">
-                                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Detail Alamat Lengkap</label>
-                                                                <textarea
-                                                                    value={addr.details}
-                                                                    onChange={(e) => updateAddress(addr.id, 'details', e.target.value)}
-                                                                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-600 text-sm min-h-[80px] leading-relaxed resize-none"
-                                                                    placeholder="Jl. Merdeka No. 123, Kel. Kebon Jeruk..."
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    ))
-                                                )}
-                                            </div>
-                                        </div>
-                                        <button
-                                            type="submit"
-                                            className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all mt-4 active:scale-95"
-                                        >
-                                            Simpan Perubahan
-                                        </button>
-                                    </form>
-                                </div>
-                            )}
-
-                            {activeSettingsTab === 'bahasa' && (
-                                <div className="space-y-6">
-                                    <div>
-                                        <h4 className="text-2xl font-black text-slate-800 tracking-tight">Pilih Bahasa</h4>
-                                        <p className="text-slate-400 text-sm font-medium mt-1">Sesuaikan bahasa tampilan aplikasi.</p>
-                                    </div>
-                                    <div className="grid gap-3">
-                                        {[
-                                            { id: 'ID', name: 'Bahasa Indonesia', flag: '🇮🇩' },
-                                            { id: 'EN', name: 'English (US)', flag: '🇺🇸' }
-                                        ].map(lang => (
-                                            <button
-                                                key={lang.id}
-                                                onClick={() => handleSaveLanguage(lang.id)}
-                                                className={`flex items-center justify-between p-5 rounded-3xl border-2 transition-all ${language === lang.id ? 'border-emerald-500 bg-emerald-50/30' : 'border-slate-50 hover:border-emerald-200 bg-white'}`}
-                                            >
-                                                <div className="flex items-center gap-4">
-                                                    <span className="text-2xl">{lang.flag}</span>
-                                                    <span className={`font-black tracking-tight ${language === lang.id ? 'text-emerald-700' : 'text-slate-700'}`}>{lang.name}</span>
-                                                </div>
-                                                {language === lang.id && (
-                                                    <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white">
-                                                        <CheckCircle2 size={14} strokeWidth={3} />
-                                                    </div>
-                                                )}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {activeSettingsTab === 'tema' && (
-                                <div className="space-y-6">
-                                    <div>
-                                        <h4 className="text-2xl font-black text-slate-800 tracking-tight">Tema Aplikasi</h4>
-                                        <p className="text-slate-400 text-sm font-medium mt-1">Pilih tampilan yang paling nyaman untuk Anda.</p>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        {[
-                                            { id: 'Light', name: 'Terang', color: 'bg-white', border: 'border-slate-200' },
-                                            { id: 'Dark', name: 'Gelap', color: 'bg-slate-900', border: 'border-slate-800' }
-                                        ].map(tm => (
-                                            <button
-                                                key={tm.id}
-                                                onClick={() => handleSaveTheme(tm.id)}
-                                                className={`p-1 rounded-[2rem] border-4 transition-all ${theme === tm.id ? 'border-emerald-500' : 'border-transparent shadow-sm hover:scale-105'}`}
-                                            >
-                                                <div className={`${tm.color} ${tm.border} border rounded-[1.8rem] h-32 flex flex-col items-center justify-center gap-3 overflow-hidden relative`}>
-                                                    <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center">
-                                                        <Palette size={24} className={tm.id === 'Light' ? 'text-emerald-600' : 'text-emerald-400'} />
-                                                    </div>
-                                                    <span className={`text-xs font-black uppercase tracking-widest ${tm.id === 'Light' ? 'text-slate-600' : 'text-slate-300'}`}>{tm.name}</span>
-                                                    {theme === tm.id && (
-                                                        <div className="absolute top-3 right-3 bg-emerald-500 text-white rounded-full p-1 shadow-lg">
-                                                            <CheckCircle2 size={14} strokeWidth={3} />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <p className="p-4 bg-amber-50 rounded-2xl text-[11px] font-bold text-amber-700 italic border border-amber-100/50 leading-relaxed capitalize">
-                                        * Fitur Tema Gelap akan segera hadir secara menyeluruh di seluruh halaman aplikasi.
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Standardized Settings Modal */}
+            <SettingsModal 
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                activeTab={activeSettingsTab}
+                setActiveTab={setActiveSettingsTab}
+                userProfile={userProfile}
+                setUserProfile={setUserProfile}
+                handleSaveProfile={handleSaveProfile}
+                setIsChangeEmailOpen={setIsChangeEmailOpen}
+                setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+                setIsChangePasswordOpen={setIsChangePasswordOpen}
+                addAddress={addAddress}
+                removeAddress={removeAddress}
+                updateAddress={updateAddress}
+            />
             <ChangeEmailModal
                 isOpen={isChangeEmailOpen}
                 onClose={() => setIsChangeEmailOpen(false)}
