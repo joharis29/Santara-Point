@@ -163,8 +163,6 @@ export default function App() {
     const [toppingModalProduct, setToppingModalProduct] = useState(null);
     const [currentTxId, setCurrentTxId] = useState(null);
 
-    const totalAmount = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
-
     const handleCloseWaiting = () => {
         setIsWaitingOpen(false);
         localStorage.removeItem('santaraActiveTxId');

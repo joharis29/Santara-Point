@@ -227,14 +227,6 @@ function CustomerPortalContent() {
     const [newPasswordInput, setNewPasswordInput] = useState('');
     const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
     const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-    const [isWaitingOpen, setIsWaitingOpen] = useState(false);
-    const [currentTxId, setCurrentTxId] = useState(null);
-
-    const handleCloseWaiting = () => {
-        setIsWaitingOpen(false);
-        localStorage.removeItem('santaraActiveTxId');
-        setCurrentTxId(null);
-    };
 
     React.useEffect(() => {
         const fetchUserData = async () => {
