@@ -171,7 +171,7 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                     </div>
 
                     {/* Footer Controls */}
-                    <div className="p-6 bg-slate-50 border-t border-slate-100 flex flex-col gap-3 sticky bottom-0 z-10 backdrop-blur-md bg-slate-50/90">
+                    <div className="p-6 pb-24 md:pb-6 bg-slate-50 border-t border-slate-100 flex flex-col gap-3 sticky bottom-0 z-10 backdrop-blur-md bg-slate-50/90">
                         {/* Waktu Menunggu visual */}
                         <div className="flex items-center justify-center mb-2 gap-2 text-xs text-slate-500 font-medium">
                             <Clock size={14} /> Waktu Menunggu: <span className="font-mono bg-white px-2 py-0.5 rounded border border-slate-200">{formatTime(waitSeconds)}</span>
@@ -191,13 +191,13 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
 
                         {transactionId && (
                             <button
-                                onClick={() => {
+                                onClick={async () => {
                                     try {
                                         const history = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
                                         const t = history.find(x => x.id === transactionId);
                                         const settings = JSON.parse(localStorage.getItem('santaraStoreSettings') || '{}');
                                         if (t) {
-                                            generateReceiptPDF(t, settings);
+                                            await generateReceiptPDF(t, settings);
                                         } else {
                                             alert('Data transaksi tidak ditemukan di memori lokal.');
                                         }
