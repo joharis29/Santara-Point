@@ -113,7 +113,7 @@ export default function App() {
     };
 
     return (
-        <div className="relative min-h-screen w-full flex flex-col font-sans overflow-x-hidden selection:bg-emerald-200 selection:text-emerald-900">
+        <div className="relative h-screen w-full flex flex-col font-sans overflow-hidden selection:bg-emerald-200 selection:text-emerald-900">
 
             {/* 1. Background Layer (Kompilasi Makanan) */}
             <div
@@ -168,7 +168,7 @@ export default function App() {
                                     onClick={() => handleAction('login')}
                                     className="hidden sm:flex items-center gap-2 text-white font-black hover:text-emerald-400 transition text-xs uppercase tracking-widest"
                                 >
-                                    Login Admin
+                                    Masuk
                                 </button>
                                 <button
                                     onClick={() => handleAction('register')}
@@ -191,7 +191,7 @@ export default function App() {
             </nav>
 
             {/* 3. Hero Section Content */}
-            <main className="relative z-10 px-6 lg:px-16 py-8 lg:py-12 flex-1 flex flex-col justify-center min-h-0">
+            <main className="relative z-10 px-6 lg:px-16 py-4 lg:py-8 flex-1 flex flex-col justify-center min-h-0">
                 <div className="max-w-4xl">
                     {/* Badge Syariah */}
                     <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-4 py-1.5 rounded-full text-emerald-400 text-[10px] lg:text-xs font-black mb-6 backdrop-blur-xl animate-fade-in uppercase tracking-[0.2em] shadow-lg shadow-emerald-950/20">
@@ -205,7 +205,7 @@ export default function App() {
                         </span>
                     </h2>
 
-                    <p className="text-gray-400 text-sm lg:text-base mb-10 leading-relaxed max-w-xl font-bold italic opacity-80">
+                    <p className="text-gray-400 text-sm lg:text-base mb-6 leading-relaxed max-w-xl font-bold italic opacity-80">
                         Nikmati kemudahan memesan menu pilihan Anda secara online. Sistem yang transparan, amanah, dan membawa keberkahan dalam setiap transaksi.
                     </p>
 
@@ -217,24 +217,12 @@ export default function App() {
                             <ShoppingCart size={22} /> Pesan Sekarang
                         </button>
                         
-                        <div className="hidden sm:flex items-center gap-3 ml-4">
-                            <div className="flex -space-x-3">
-                                {[1, 2, 3].map(i => (
-                                    <div key={i} className="w-10 h-10 rounded-full border-2 border-emerald-900 overflow-hidden shadow-lg bg-slate-800">
-                                        <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="User" />
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="text-left">
-                                <p className="text-white font-black text-xs">5,000+ Pelanggan</p>
-                                <p className="text-emerald-500 font-bold text-[10px] uppercase">Telah Bergabung</p>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
 
                 {/* 4. Features Section (Bottom Grid) - Minimalist Refinement */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mt-16 pb-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mt-8 pb-4">
                     {[
                         {
                             icon: <MessageCircle className="text-emerald-400" size={22} />,
