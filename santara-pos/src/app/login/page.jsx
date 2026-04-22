@@ -174,8 +174,17 @@ const LoginContent = () => {
                 />
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Kata Sandi</label>
+            <div className="flex flex-col gap-1">
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-sm font-medium text-gray-700">Kata Sandi</label>
+                <button 
+                  type="button" 
+                  onClick={() => router.push('/forgot-password')}
+                  className="text-xs font-bold text-emerald-600 hover:underline"
+                >
+                  Lupa Kata Sandi?
+                </button>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                 <input
