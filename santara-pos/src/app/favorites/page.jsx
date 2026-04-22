@@ -474,8 +474,6 @@ function FavoritesContent() {
                     subtitle="Menu Favorit Berkah Anda"
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
-                    cartCount={cart.length}
-                    onCartClick={() => setIsCartModalOpen(true)}
                     onSettingsClick={() => setIsSettingsOpen(true)}
                 />
 
@@ -507,8 +505,7 @@ function FavoritesContent() {
                             {filteredProducts.map(product => (
                                 <div
                                     key={product.id}
-                                    onClick={() => addToCart(product)}
-                                    className={`bg-white p-3 rounded-[1.5rem] lg:rounded-[2rem] shadow-sm hover:shadow-xl transition-all border border-transparent hover:border-emerald-500 cursor-pointer group flex flex-col ${product.stock <= 0 ? 'opacity-60 grayscale' : ''}`}
+                                    className={`bg-white p-3 rounded-[1.5rem] lg:rounded-[2rem] shadow-sm transition-all border border-transparent flex flex-col ${product.stock <= 0 ? 'opacity-60 grayscale' : ''}`}
                                 >
                                     <div className="relative">
                                         <button 
