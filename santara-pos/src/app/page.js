@@ -140,7 +140,7 @@ export default function App() {
                         <h1 className="text-lg lg:text-2xl font-black text-white tracking-tighter leading-none">
                             Santara<span className="text-emerald-500">Point</span>
                         </h1>
-                        <span className="text-[6.5px] lg:text-[9px] text-emerald-400/80 font-black uppercase tracking-[0.2em] mt-1.5 block">POS Full Online Berbasis Syariah</span>
+                        <span className="text-[9px] text-emerald-400/80 font-black uppercase tracking-[0.3em] mt-1 hidden sm:block">POS Full Online Berbasis Syariah</span>
                     </div>
                 </div>
 
@@ -253,8 +253,8 @@ export default function App() {
             )}
 
             {/* 3. Hero Section Content */}
-            <main className="relative z-10 px-6 lg:px-16 py-2 lg:py-4 flex-1 flex flex-col justify-center min-h-0">
-                <div className="max-w-4xl">
+            <main className="relative z-10 px-6 lg:px-16 py-8 lg:py-4 flex-1 flex flex-col justify-center min-h-0">
+                <div className="max-w-4xl mt-12 lg:mt-0">
                     {/* Badge Syariah */}
                     <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-4 py-1.5 rounded-full text-emerald-400 text-[10px] lg:text-xs font-black mb-3 backdrop-blur-xl animate-fade-in uppercase tracking-[0.2em] shadow-lg shadow-emerald-950/20">
                         <ShieldCheck size={14} className="animate-pulse" /> POS Full Online Berbasis Syariah
