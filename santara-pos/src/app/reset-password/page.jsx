@@ -24,7 +24,8 @@ export default function ResetPasswordPage() {
     const router = useRouter();
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
@@ -97,7 +98,7 @@ export default function ResetPasswordPage() {
                                     <div className="relative">
                                         <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                                         <input
-                                            type={showPassword ? "text" : "password"}
+                                            type={showNewPassword ? "text" : "password"}
                                             className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-slate-900 font-bold"
                                             placeholder="••••••••"
                                             value={newPassword}
@@ -106,10 +107,10 @@ export default function ResetPasswordPage() {
                                         />
                                         <button
                                             type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
+                                            onClick={() => setShowNewPassword(!showNewPassword)}
                                             className="absolute right-3 top-2.5 text-gray-400 hover:text-emerald-600 transition-colors"
                                         >
-                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                            {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                         </button>
                                     </div>
                                 </div>
@@ -119,13 +120,20 @@ export default function ResetPasswordPage() {
                                     <div className="relative">
                                         <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                                         <input
-                                            type={showPassword ? "text" : "password"}
+                                            type={showConfirmPassword ? "text" : "password"}
                                             className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-slate-900 font-bold"
                                             placeholder="••••••••"
                                             value={confirmPassword}
                                             onChange={(e) => setConfirmPassword(e.target.value)}
                                             required
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute right-3 top-2.5 text-gray-400 hover:text-emerald-600 transition-colors"
+                                        >
+                                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                        </button>
                                     </div>
                                 </div>
 
