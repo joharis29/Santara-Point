@@ -279,7 +279,22 @@ function FavoritesContent() {
             setCurrentTxId(activeTxId);
             setIsWaitingOpen(true);
         }
+
+        // Load cart from localStorage
+        const storedCart = localStorage.getItem('santaraCart');
+        if (storedCart) {
+            try {
+                setCart(JSON.parse(storedCart));
+            } catch (e) {
+                console.error("Error parsing cart", e);
+            }
+        }
     }, [router]);
+
+    // Save cart to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('santaraCart', JSON.stringify(cart));
+    }, [cart]);
 
     const handleSaveProfile = async (e) => {
         e.preventDefault();
@@ -397,6 +412,7 @@ function FavoritesContent() {
             setCurrentTxId(tId);
             setIsWaitingOpen(true);
             setCart([]);
+            localStorage.removeItem('santaraCart');
         } catch (err) {
             console.error("Error syncing transaction:", err);
             alert("Gagal mengirim pesanan ke sistem.");

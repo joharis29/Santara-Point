@@ -338,7 +338,22 @@ function CustomerPortalContent() {
                 setActiveSettingsTab('profil');
             }
         }
+
+        // Load cart from localStorage
+        const storedCart = localStorage.getItem('santaraCart');
+        if (storedCart) {
+            try {
+                setCart(JSON.parse(storedCart));
+            } catch (e) {
+                console.error("Error parsing cart", e);
+            }
+        }
     }, [router]);
+
+    // Save cart to localStorage whenever it changes
+    React.useEffect(() => {
+        localStorage.setItem('santaraCart', JSON.stringify(cart));
+    }, [cart]);
 
     const addAddress = () => {
         const newAddress = { id: Date.now(), label: '', details: '' };

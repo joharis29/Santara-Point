@@ -60,6 +60,7 @@ export default function CustomerHistory() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [customerName, setCustomerName] = useState('Sobat Santara');
     const [history, setHistory] = useState([]);
+    const [cart, setCart] = useState([]);
     const [searchTerm, setSearchTerm] = useState(''); // Needed for CustomerHeader
 
     // --- State Pengaturan ---
@@ -170,8 +171,23 @@ export default function CustomerHistory() {
             }
         }
 
+        // Load cart from localStorage
+        const storedCart = localStorage.getItem('santaraCart');
+        if (storedCart) {
+            try {
+                setCart(JSON.parse(storedCart));
+            } catch (e) {
+                console.error("Error parsing cart", e);
+            }
+        }
+
         fetchUserData();
     }, []);
+
+    // Save cart to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('santaraCart', JSON.stringify(cart));
+    }, [cart]);
 
     const handleSaveProfile = async (e) => {
         e.preventDefault();
@@ -248,7 +264,7 @@ export default function CustomerHistory() {
                     title="Santara Point"
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
-                    cartCount={0}
+                    cartCount={cart.length}
                     onSettingsClick={() => setIsSettingsOpen(true)}
                 />
 
