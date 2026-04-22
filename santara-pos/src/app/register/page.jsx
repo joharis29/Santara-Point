@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Lock, ShieldCheck, AlertCircle, ArrowRight, Phone, ArrowLeft, MapPin } from 'lucide-react';
+import { User, Mail, Lock, ShieldCheck, AlertCircle, ArrowRight, Phone, ArrowLeft, MapPin, Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient'; // Sesuaikan jalur/path ini dengan letak file Supabase Anda
 
@@ -16,6 +16,8 @@ const DEFAULT_SETTINGS = {
 export default function Register() {
     const router = useRouter();
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     useEffect(() => {
         const stored = localStorage.getItem('santaraStoreSettings');
@@ -238,15 +240,22 @@ export default function Register() {
                             <div className="mt-1 relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                                 <input
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     name="password"
                                     value={formData.password}
                                     onChange={handleChange}
                                     onBlur={handleBlur}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-900 font-bold"
+                                    className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-900 font-bold"
                                     placeholder="••••••••"
                                     required
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors"
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
                             </div>
                             {touched.password && !formData.password && (
                                 <p className="text-red-500 text-xs mt-1 font-medium">Wajib diisi!</p>
@@ -257,15 +266,22 @@ export default function Register() {
                             <div className="mt-1 relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                                 <input
-                                    type="password"
+                                    type={showConfirmPassword ? "text" : "password"}
                                     name="confirmPassword"
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
                                     onBlur={handleBlur}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-900 font-bold"
+                                    className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-900 font-bold"
                                     placeholder="••••••••"
                                     required
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors"
+                                >
+                                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
                             </div>
                             {touched.confirmPassword && !formData.confirmPassword ? (
                                 <p className="text-red-500 text-xs mt-1 font-medium">Wajib diisi!</p>
