@@ -23,11 +23,11 @@ import {
     LogOut,
     ClipboardList,
     Settings,
-    ArrowUpDown,
-    Store,
     ChefHat,
     CreditCard,
     UserCircle,
+    ShoppingCart,
+    ArrowUpDown,
     X,
     MapPin,
     Phone,
@@ -49,7 +49,6 @@ import {
     Clock,
     Users,
     Menu,
-    ShoppingCart,
     User,
     CheckCircle2
 } from 'lucide-react';
@@ -188,6 +187,7 @@ export default function App() {
     const [isChangeEmailOpen, setIsChangeEmailOpen] = useState(false);
     const [isChangeWhatsappOpen, setIsChangeWhatsappOpen] = useState(false);
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+    const [isCartModalOpen, setIsCartModalOpen] = useState(false);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
 
     React.useEffect(() => {
@@ -325,11 +325,62 @@ export default function App() {
         }).filter(item => item.quantity > 0));
     };
 
-    const handleCheckout = () => {
+    const handleCheckout = async () => {
         if (cart.length === 0) return alert('Keranjang masih kosong!');
         if (!customerName || !queueNumber) return alert('Mohon lengkapi Nama Pemesan dan Nomor Antrian!');
         if (!paymentMethod) return alert('Mohon pilih Metode Pembayaran!');
-        alert(`Transaksi ${paymentMethod} Berhasil!`);
+
+        const trxId = 'TRX-' + Math.floor(Math.random() * 1000000);
+        const newTransaction = {
+            id: trxId,
+            timestamp: new Date().toISOString(),
+            customer_name: customerName,
+            queue_number: queueNumber,
+            order_type: orderType,
+            keterangan: orderNote,
+            payment_method: paymentMethod,
+            source: 'Adm', // Admin source
+            cashier_name: 'Administrator',
+            total_amount: totalAmount,
+            pajak: pajakValue,
+            status: 'Selesai',
+            items: cart.map(item => ({
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity
+            }))
+        };
+
+        try {
+            // 1. Sync to Supabase
+            const { error } = await supabase.from('transactions').insert([newTransaction]);
+            if (error) throw error;
+
+            // 2. Save to Local History
+            const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
+            localStorage.setItem('santaraTransactionHistory', JSON.stringify([newTransaction, ...existingHistory]));
+
+            // 3. Mark Queue as Used
+            const newUsed = [...usedQueueNumbers, queueNumber.toString()];
+            setUsedQueueNumbers(newUsed);
+            localStorage.setItem('santaraUsedQueue', JSON.stringify(newUsed));
+
+            // 4. Generate PDF Receipt
+            generateReceiptPDF(newTransaction, storeSettings);
+
+            alert(`Transaksi Admin Berhasil!\nMetode: ${paymentMethod}\nNota telah dibuat.`);
+            
+            // 5. Clear Cart & State
+            setCart([]);
+            setCustomerName('');
+            setQueueNumber('');
+            setOrderNote('');
+            setPaymentMethod('');
+
+        } catch (err) {
+            console.error("Error processing admin transaction:", err);
+            alert("Gagal memproses transaksi: " + err.message);
+        }
     };
 
     return (
@@ -408,6 +459,208 @@ export default function App() {
                     </div>
                 </section>
             </main>
+
+            {/* 3. Right Sidebar: Keranjang & Checkout (Desktop) */}
+            <aside className="hidden lg:flex w-[400px] bg-white border-l border-slate-200 flex-col shadow-2xl z-30">
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-10">
+                    <div className="flex items-center gap-2">
+                        <ShoppingBag size={20} className="text-emerald-600" />
+                        <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest text-[11px] lg:text-sm">Ringkasan Pesanan</h2>
+                    </div>
+                    <span className="bg-emerald-50 text-emerald-600 text-[10px] font-black px-3 py-1 rounded-full border border-emerald-100">
+                        {cart.length} Item
+                    </span>
+                    <button 
+                        onClick={() => setCart([])}
+                        className="text-[10px] font-bold text-red-500 hover:underline"
+                    >
+                        Bersihkan
+                    </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
+                    {cart.length === 0 ? (
+                        <div className="h-40 flex flex-col items-center justify-center text-slate-300 gap-2 italic">
+                            <ShoppingCart size={40} className="opacity-20" />
+                            <p className="text-xs">Silakan pilih menu</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {cart.map(item => (
+                                <div key={item.id} className="flex items-center justify-between bg-slate-50 p-3.5 rounded-2xl border border-slate-100 hover:border-emerald-200 transition-all">
+                                    <div className="flex-1">
+                                        <h5 className="font-bold text-[13px] text-slate-800 leading-tight">{item.name}</h5>
+                                        <p className="text-[10px] text-emerald-600 font-black mt-0.5">Rp {(item.price * item.quantity).toLocaleString('en-US')}</p>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2.5 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
+                                            <button onClick={() => updateQty(item.id, -1)} className="w-6 h-6 flex items-center justify-center bg-slate-50 rounded shadow-sm text-slate-400 hover:text-emerald-600 transition-colors">
+                                                <Minus size={10} />
+                                            </button>
+                                            <span className="text-[12px] font-black w-4 text-center">{item.quantity}</span>
+                                            <button onClick={() => addToCart(item)} className="w-6 h-6 flex items-center justify-center bg-slate-50 rounded shadow-sm text-slate-400 hover:text-emerald-600 transition-colors">
+                                                <Plus size={10} />
+                                            </button>
+                                        </div>
+                                        <button onClick={() => updateQty(item.id, -item.quantity)} className="text-slate-200 hover:text-red-400 transition-colors p-1">
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Customer Details Form */}
+                    <div className="mt-6 p-5 bg-slate-50 border border-slate-200 rounded-[24px] space-y-4 shadow-sm">
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Keterangan Pesanan</h3>
+                        <div className="space-y-3">
+                            <input type="text" placeholder="Nama Pemesan" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-[13px] px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700" />
+                            <select
+                                value={queueNumber}
+                                onChange={(e) => setQueueNumber(e.target.value)}
+                                className="w-full text-[13px] px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 cursor-pointer"
+                            >
+                                <option value="" disabled>Pilih Nomor Antrian</option>
+                                {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
+                                    const isUsed = usedQueueNumbers.includes(num.toString());
+                                    return (
+                                        <option key={num} value={num} disabled={isUsed}>
+                                            Antrian {num} {isUsed ? '(Terpakai)' : ''}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                            <select
+                                value={orderType}
+                                onChange={(e) => setOrderType(e.target.value)}
+                                className="w-full text-[13px] px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 cursor-pointer"
+                            >
+                                <option value="Dine-In">Dine-In</option>
+                                <option value="Takeaway">Takeaway</option>
+                            </select>
+                            <textarea 
+                                placeholder="Keterangan (Optional)..." 
+                                value={orderNote} 
+                                onChange={(e) => setOrderNote(e.target.value)} 
+                                className="w-full text-[13px] px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 min-h-[80px] resize-none"
+                            ></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Payment Summary */}
+                <div className="p-6 bg-slate-50 border-t border-slate-200">
+                    <div className="space-y-3 mb-5">
+                        <div className="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
+                            <span>Subtotal</span>
+                            <span className="text-slate-800">Rp {subtotal.toLocaleString('en-US')}</span>
+                        </div>
+                        {storeSettings.isPajakActive && (
+                            <div className="flex items-center justify-between p-3 rounded-xl border bg-emerald-600 border-emerald-600 text-white shadow-lg">
+                                <div className="flex items-center gap-3">
+                                    <Calculator size={14} />
+                                    <span className="text-[10px] font-black uppercase">Pajak Daerah (10%)</span>
+                                </div>
+                                <span className="text-xs font-black">Rp {pajakValue.toLocaleString('en-US')}</span>
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex justify-between items-center mb-5">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Tagihan</span>
+                        <span className="text-2xl font-black text-emerald-700 tracking-tight">Rp {totalAmount.toLocaleString('en-US')}</span>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <select
+                            value={paymentMethod}
+                            onChange={(e) => setPaymentMethod(e.target.value)}
+                            className="w-full text-xs px-3 py-3 bg-white border-2 border-emerald-600 rounded-xl outline-none font-black text-emerald-700 cursor-pointer uppercase text-center appearance-none"
+                        >
+                            <option value="" disabled>Pilih Pembayaran</option>
+                            <option value="Tunai">Tunai</option>
+                            <option value="Transfer">Transfer</option>
+                        </select>
+                        <button
+                            onClick={handleCheckout}
+                            disabled={cart.length === 0}
+                            className="w-full py-3 rounded-xl bg-emerald-600 text-white font-black text-xs uppercase tracking-widest hover:bg-emerald-700 shadow-lg active:scale-95 disabled:opacity-50"
+                        >
+                            Proses Pesanan
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            {/* Floating Cart Button (Mobile) */}
+            <div className="lg:hidden fixed bottom-6 right-6 z-40">
+                <button
+                    onClick={() => setIsCartModalOpen(true)}
+                    className="relative bg-emerald-600 text-white p-4 rounded-full shadow-2xl active:scale-95 transition-all outline-none"
+                >
+                    <ShoppingBag size={24} />
+                    {cart.length > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-2 border-white animate-bounce">
+                            {cart.length}
+                        </span>
+                    )}
+                </button>
+            </div>
+
+            {/* Cart Modal Mobile (Admin) */}
+            {isCartModalOpen && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] lg:hidden">
+                    <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+                        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                            <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest">Ringkasan Pesanan</h2>
+                            <button onClick={() => setIsCartModalOpen(false)} className="p-2 bg-slate-100 rounded-full text-slate-400">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6">
+                            {cart.length === 0 ? (
+                                <div className="h-40 flex flex-col items-center justify-center text-slate-300 italic">
+                                    <ShoppingCart size={40} className="opacity-20" />
+                                    <p className="text-xs">Keranjang kosong</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {cart.map(item => (
+                                        <div key={item.id} className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border">
+                                            <div className="flex-1">
+                                                <h5 className="font-bold text-sm">{item.name}</h5>
+                                                <p className="text-xs font-black text-emerald-600">Rp {(item.price * item.quantity).toLocaleString('en-US')}</p>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-3 bg-white p-1 rounded-lg border">
+                                                    <button onClick={() => updateQty(item.id, -1)} className="w-7 h-7 flex items-center justify-center bg-slate-50 rounded"><Minus size={12}/></button>
+                                                    <span className="font-black text-sm">{item.quantity}</span>
+                                                    <button onClick={() => addToCart(item)} className="w-7 h-7 flex items-center justify-center bg-slate-50 rounded"><Plus size={12}/></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className="mt-8 space-y-4">
+                                <input type="text" placeholder="Nama Pemesan" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full px-4 py-4 bg-slate-50 border rounded-2xl font-bold" />
+                                <select value={queueNumber} onChange={(e) => setQueueNumber(e.target.value)} className="w-full px-4 py-4 bg-slate-50 border rounded-2xl font-bold">
+                                    <option value="" disabled>No Antrian</option>
+                                    {Array.from({ length: 100 }, (_, i) => i + 1).map(num => <option key={num} value={num}>Antrian {num}</option>)}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="p-6 bg-slate-50 border-t border-slate-100">
+                            <div className="flex justify-between items-center mb-6">
+                                <span className="font-black text-slate-400 uppercase text-[10px]">Total Bayar</span>
+                                <span className="text-2xl font-black text-emerald-700">Rp {totalAmount.toLocaleString('en-US')}</span>
+                            </div>
+                            <button onClick={handleCheckout} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-emerald-100">Proses Pembayaran</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Tracking Overlay */}
             <WaitingOverlay 
                 isOpen={isWaitingOpen}

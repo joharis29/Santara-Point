@@ -163,7 +163,7 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                                         Pesanan Siap Disajikan
                                     </h3>
                                     <p className={`text-xs mt-1 leading-relaxed text-slate-300`}>
-                                        Pesanan telah ditandai Selesai oleh staf! Mohon tunggu hidangan sampai ditujuan.
+                                        Pesanan telah ditandai Selesai oleh staf! Mohon tunggu hidangan sampai di tempat tujuan Anda.
                                     </p>
                                 </div>
                             </div>
