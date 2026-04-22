@@ -341,17 +341,19 @@ function AdminPortalContent() {
         if (!paymentMethod) return alert('Mohon pilih Metode Pembayaran!');
 
         const trxId = 'TRX-' + Math.floor(Math.random() * 1000000);
+        
+        // 1. Create CamelCase object for PDF & Local Logic
         const newTransaction = {
             id: trxId,
             timestamp: new Date().toISOString(),
-            customer_name: customerName,
-            queue_number: queueNumber,
-            order_type: orderType,
+            customerName: customerName,
+            queueNumber: queueNumber,
+            orderType: orderType,
             keterangan: orderNote,
-            payment_method: paymentMethod,
-            source: 'Adm', // Admin source
-            cashier_name: 'Administrator',
-            total_amount: totalAmount,
+            paymentMethod: paymentMethod,
+            source: 'Adm', 
+            cashierName: 'Administrator',
+            totalAmount: totalAmount,
             pajak: pajakValue,
             status: 'Selesai',
             items: cart.map(item => ({
@@ -361,26 +363,43 @@ function AdminPortalContent() {
             }))
         };
 
+        // 2. Create SnakeCase object for Supabase
+        const dbTransaction = {
+            id: newTransaction.id,
+            timestamp: newTransaction.timestamp,
+            customer_name: newTransaction.customerName,
+            queue_number: newTransaction.queueNumber,
+            order_type: newTransaction.orderType,
+            keterangan: newTransaction.keterangan,
+            payment_method: newTransaction.paymentMethod,
+            source: newTransaction.source,
+            cashier_name: newTransaction.cashierName,
+            total_amount: newTransaction.totalAmount,
+            pajak: newTransaction.pajak,
+            status: newTransaction.status,
+            items: newTransaction.items
+        };
+
         try {
-            // 1. Sync to Supabase
-            const { error } = await supabase.from('transactions').insert([newTransaction]);
+            // 3. Sync to Supabase
+            const { error } = await supabase.from('transactions').insert([dbTransaction]);
             if (error) throw error;
 
-            // 2. Save to Local History
+            // 4. Save to Local History
             const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
             localStorage.setItem('santaraTransactionHistory', JSON.stringify([newTransaction, ...existingHistory]));
 
-            // 3. Mark Queue as Used
+            // 5. Mark Queue as Used
             const newUsed = [...usedQueueNumbers, queueNumber.toString()];
             setUsedQueueNumbers(newUsed);
             localStorage.setItem('santaraUsedQueue', JSON.stringify(newUsed));
 
-            // 4. Generate PDF Receipt
+            // 6. Generate PDF Receipt (Expects CamelCase)
             generateReceiptPDF(newTransaction, storeSettings);
 
             alert(`Transaksi Admin Berhasil!\nMetode: ${paymentMethod}\nNota telah dibuat.`);
             
-            // 5. Clear Cart & State
+            // 7. Clear Cart & State
             setCart([]);
             setCustomerName('');
             setQueueNumber('');

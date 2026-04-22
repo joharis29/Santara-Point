@@ -30,7 +30,7 @@ const AdminSidebar = ({ isOpen, setIsOpen, onOpenSettings }) => {
         { icon: <Landmark size={20} />, label: "Kas & Bank", href: "/kas-bank", id: 'kas-bank' },
         { icon: <BookOpen size={20} />, label: "Buku Besar", href: "/buku-besar", id: 'buku-besar' },
         { icon: <Building2 size={20} />, label: "Perusahaan", href: "/perusahaan", id: 'perusahaan' },
-        { icon: <ChefHat size={20} />, label: "Daftar Antrean", href: "/waiting-list", id: 'waiting-list' },
+        { icon: <ChefHat size={20} />, label: "Daftar Antrean", href: "/waiting-list?role=admin", id: 'waiting-list' },
         { icon: <Package size={20} />, label: "Persediaan", href: "/persediaan", id: 'persediaan' },
         { icon: <ClipboardList size={20} />, label: "Manajemen Stok", href: "/manajemen-stok", id: 'manajemen-stok' },
         { icon: <ShoppingBag size={20} />, label: "Pembelian", href: "/pembelian", id: 'pembelian' },
@@ -39,8 +39,8 @@ const AdminSidebar = ({ isOpen, setIsOpen, onOpenSettings }) => {
     ];
 
     const isActive = (item) => {
-        if (item.href === '/history?role=admin') return pathname === '/history';
-        return pathname === item.href;
+        const itemPath = item.href.split('?')[0];
+        return pathname === itemPath;
     };
 
     return (

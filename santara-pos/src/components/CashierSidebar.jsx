@@ -59,8 +59,8 @@ const CashierSidebar = ({ isOpen, setIsOpen, onOpenSettings }) => {
     ];
 
     const isActive = (item) => {
-        if (item.href === '/history?role=cashier') return pathname === '/history';
-        return pathname === item.href;
+        const itemPath = item.href ? item.href.split('?')[0] : '';
+        return pathname === itemPath;
     };
 
     return (

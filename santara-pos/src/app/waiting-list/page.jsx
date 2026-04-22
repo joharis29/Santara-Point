@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     Truck,
     Building2,
@@ -40,10 +40,11 @@ const DEFAULT_SETTINGS = {
     footerText: '© 2024 Santara Point. Berkah setiap saat.'
 };
 
-export default function WaitingListPage() {
+function WaitingListContent() {
     // --- State Standarisasi ---
     const [searchTerm, setSearchTerm] = useState('');
     const [isAdmin, setIsAdmin] = useState(false);
+    const searchParams = useSearchParams();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [activeSettingsTab, setActiveSettingsTab] = useState('profil');
@@ -116,9 +117,8 @@ export default function WaitingListPage() {
             })
             .subscribe();
 
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            setIsAdmin(params.get('role') === 'admin');
+        if (searchParams) {
+            setIsAdmin(searchParams.get('role') === 'admin');
         }
 
         const storedSettings = localStorage.getItem('santaraStoreSettings');
@@ -143,7 +143,6 @@ export default function WaitingListPage() {
         fetchUserProfile();
 
         return () => {
-            clearInterval(timer);
             supabase.removeChannel(channel);
         };
     }, []);
@@ -225,7 +224,14 @@ export default function WaitingListPage() {
                         {trx.source}
                     </span>
                     <p className="text-[10px] text-slate-400 font-medium mt-1">
-                        {new Date(trx.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                        {(() => {
+                            try {
+                                const d = new Date(trx.timestamp);
+                                return isNaN(d.getTime()) ? '...' : d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                            } catch (e) {
+                                return '...';
+                            }
+                        })()}
                     </p>
                 </div>
             </div>
@@ -460,5 +466,13 @@ export default function WaitingListPage() {
                 updateAddress={updateAddress}
             />
         </div>
+    );
+}
+
+export default function WaitingListPage() {
+    return (
+        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div></div>}>
+            <WaitingListContent />
+        </Suspense>
     );
 }

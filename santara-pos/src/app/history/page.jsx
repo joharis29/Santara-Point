@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { generateReceiptPDF } from '@/lib/receiptPdf';
 import {
     ArrowLeft,
@@ -27,12 +27,13 @@ import CashierHeader from '@/components/CashierHeader';
 import CashierSidebar from '@/components/CashierSidebar';
 import SettingsModal from '@/components/SettingsModal';
 
-export default function HistoryPage() {
+function HistoryContent() {
     const router = useRouter();
     const [transactions, setTransactions] = useState([]);
     const [selectedMonth, setSelectedMonth] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [isAdmin, setIsAdmin] = useState(false);
+    const searchParams = useSearchParams();
     const [purchasePayments, setPurchasePayments] = useState([]);
 
     // --- State Standarisasi ---
@@ -62,9 +63,8 @@ export default function HistoryPage() {
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            setIsAdmin(params.get('role') === 'admin');
+        if (searchParams) {
+            setIsAdmin(searchParams.get('role') === 'admin');
         }
 
         const loadTransactions = async () => {
@@ -105,9 +105,14 @@ export default function HistoryPage() {
                     history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                     setTransactions(history);
                     if (history.length > 0) {
-                        const months = Array.from(new Set(history.map(t => new Date(t.timestamp).toISOString().slice(0, 7))));
+                        const months = Array.from(new Set(history.map(t => {
+                            try {
+                                const d = new Date(t.timestamp);
+                                return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 7);
+                            } catch (e) { return null; }
+                        }).filter(m => m !== null)));
                         months.sort().reverse();
-                        setSelectedMonth(months[0]);
+                        setSelectedMonth(months[0] || new Date().toISOString().slice(0, 7));
                     }
                 }
             } catch (err) {
@@ -176,18 +181,24 @@ export default function HistoryPage() {
 
     // Get unique months from transactions for the 'folder' dropdown
     const availableMonths = Array.from(new Set([
-        ...transactions.map(t => new Date(t.timestamp).toISOString().slice(0, 7)),
+        ...transactions.map(t => {
+            try {
+                const d = new Date(t.timestamp);
+                return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 7);
+            } catch (e) { return null; }
+        }).filter(m => m !== null),
         selectedMonth
     ])).sort().reverse();
 
     const formatMonthName = (YYYYMM) => {
+        if (!YYYYMM) return 'Bulan Tidak Diketahui';
         const [year, month] = YYYYMM.split('-');
         const date = new Date(year, parseInt(month) - 1, 1);
         return date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
     };
 
     const filteredTransactions = transactions.filter(t => {
-        const isCurrentMonth = t.timestamp.startsWith(selectedMonth);
+        const isCurrentMonth = t.timestamp && t.timestamp.startsWith(selectedMonth);
         const matchesSearch = t.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || 
                               t.id.toLowerCase().includes(searchTerm.toLowerCase());
         return isCurrentMonth && matchesSearch;
@@ -239,7 +250,7 @@ export default function HistoryPage() {
                         subtitle="Daftar Transaksi Yang Telah Selesai"
                         searchTerm={searchTerm}
                         setSearchTerm={setSearchTerm}
-                        onOpenSettings={() => {
+                        onSettingsClick={() => {
                             setActiveSettingsTab('profil');
                             setIsSettingsOpen(true);
                         }}
@@ -328,7 +339,12 @@ export default function HistoryPage() {
                                                     <div className="font-bold text-xs text-slate-700 mb-1">{trx.id}</div>
                                                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
                                                         <Clock size={10} />
-                                                        {new Date(trx.timestamp).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                                        {(() => {
+                                                            try {
+                                                                const d = new Date(trx.timestamp);
+                                                                return isNaN(d.getTime()) ? '...' : d.toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+                                                            } catch (e) { return '...'; }
+                                                        })()}
                                                     </div>
                                                 </td>
                                                 <td className="p-5 align-top">
@@ -358,9 +374,9 @@ export default function HistoryPage() {
                                                 </td>
                                                 <td className="p-5 align-top">
                                                     <span className={`inline-flex items-center px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border
-                                                        ${trx.paymentMethod.toLowerCase() === 'tunai' ? 'bg-amber-50 text-amber-600 border-amber-200' : 
+                                                        ${(trx.paymentMethod || '').toLowerCase() === 'tunai' ? 'bg-amber-50 text-amber-600 border-amber-200' : 
                                                           'bg-emerald-50 text-emerald-600 border-emerald-200'}`}>
-                                                        {trx.paymentMethod}
+                                                        {trx.paymentMethod || 'N/A'}
                                                     </span>
                                                 </td>
                                                 <td className="p-5 align-top">
@@ -420,5 +436,13 @@ export default function HistoryPage() {
                 />
             </main>
         </div>
+    );
+}
+
+export default function HistoryPage() {
+    return (
+        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div></div>}>
+            <HistoryContent />
+        </Suspense>
     );
 }

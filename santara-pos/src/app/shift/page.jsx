@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Store, Clock, User, CheckCircle2, ShoppingBag, ChefHat, History, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
@@ -8,7 +8,7 @@ import CashierHeader from '@/components/CashierHeader';
 import CashierSidebar from '@/components/CashierSidebar';
 import SettingsModal from '@/components/SettingsModal';
 
-export default function ShiftPage() {
+function ShiftContent() {
     const router = useRouter();
     const [activeShift, setActiveShift] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
@@ -243,5 +243,13 @@ export default function ShiftPage() {
                 updateAddress={updateAddress}
             />
         </div>
+    );
+}
+
+export default function ShiftPage() {
+    return (
+        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div></div>}>
+            <ShiftContent />
+        </Suspense>
     );
 }

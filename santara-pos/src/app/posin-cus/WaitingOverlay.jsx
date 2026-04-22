@@ -118,8 +118,8 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                                     <div className="mt-4 pt-4 border-t border-slate-200 flex flex-col gap-2">
                                         {dbItems.map((item, idx) => (
                                             <div key={idx} className="flex justify-between text-xs font-bold text-slate-500">
-                                                <span>{item.name} x{item.quantity}</span>
-                                                <span>Rp {(item.price * item.quantity).toLocaleString('id-ID')}</span>
+                                                <span>{item.name} x{item.quantity || 0}</span>
+                                                <span>Rp {((item.price || 0) * (item.quantity || 0)).toLocaleString('id-ID')}</span>
                                             </div>
                                         ))}
                                     </div>
