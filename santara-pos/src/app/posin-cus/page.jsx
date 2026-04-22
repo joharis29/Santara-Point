@@ -689,7 +689,7 @@ function CustomerPortalContent() {
                         onClick={() => setActiveCategory('Semua')}
                         className={`p-4 rounded-2xl transition-all ${activeCategory === 'Semua' ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/20' : 'text-slate-500 hover:bg-slate-800 hover:text-slate-300'}`}
                     >
-                        <TrendingUp size={24} />
+                        <ShoppingBag size={24} />
                     </button>
                     <button 
                         onClick={() => router.push('/favorites')}

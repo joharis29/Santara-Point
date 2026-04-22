@@ -85,19 +85,7 @@ const CustomerHeader = ({
                         </button>
                     )}
                     
-                    {onCartClick && (
-                        <button 
-                            onClick={onCartClick}
-                            className="relative p-2.5 bg-slate-900 rounded-xl text-white hover:bg-emerald-600 transition-all shadow-lg shadow-slate-200 group"
-                        >
-                            <ShoppingCart size={18} />
-                            {cartCount > 0 && (
-                                <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
-                                    {cartCount}
-                                </span>
-                            )}
-                        </button>
-                    )}
+
                 </div>
             </div>
         </header>
