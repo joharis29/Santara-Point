@@ -459,10 +459,13 @@ function FavoritesContent() {
                     onSettingsClick={() => setIsSettingsOpen(true)}
                 />
 
-                <div className="flex-1 flex flex-col overflow-hidden pt-6 pb-20 md:pb-0">
-                    <div className="px-6 md:px-10 mb-6 overflow-x-auto">
-                    <div className="flex gap-3">
-                        {categories.map(cat => (
+                {/* Content Area with Right Sidebar */}
+                <div className="flex-1 flex overflow-hidden">
+                    {/* Left: Products List */}
+                    <div className="flex-1 flex flex-col overflow-hidden pt-6 pb-20 md:pb-0">
+                        <div className="px-6 md:px-10 mb-6 overflow-x-auto">
+                            <div className="flex gap-3">
+                                {categories.map(cat => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
@@ -519,11 +522,10 @@ function FavoritesContent() {
                     )}
                 </section>
 
-                {/* Standardized Bottom Navigation */}
-                <CustomerBottomNav onOpenSettings={() => setIsSettingsOpen(true)} />
-            </main>
+                    <CustomerBottomNav onOpenSettings={() => setIsSettingsOpen(true)} />
+                </div>
 
-            {/* Right Side: Order Summary */}
+                {/* Right Side: Order Summary */}
             <aside className="hidden md:flex w-[320px] lg:w-[420px] shrink-0 bg-slate-50 p-4 lg:p-6 flex-col">
                 <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 flex-1 flex flex-col overflow-hidden">
                     <div className="p-6 border-b border-slate-100 flex items-center gap-3">
@@ -623,6 +625,7 @@ function FavoritesContent() {
                     </div>
                 </div>
             </aside>
+        </div>
 
             {/* Injected Waiting Tracker Overlay */}
             <WaitingOverlay
@@ -843,27 +846,29 @@ function FavoritesContent() {
                 </div>
             )}
 
-                <SettingsModal 
-                    isOpen={isSettingsOpen}
-                    onClose={() => setIsSettingsOpen(false)}
-                    isAdmin={false}
-                    activeTab={activeSettingsTab}
-                    setActiveTab={setActiveSettingsTab}
-                    userProfile={userProfile}
-                    setUserProfile={setUserProfile}
-                    handleSaveProfile={handleSaveProfile}
-                    storeSettings={storeSettings}
-                    setIsChangeEmailOpen={setIsChangeEmailOpen}
-                    setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
-                    setIsChangePasswordOpen={setIsChangePasswordOpen}
-                    addAddress={addAddress}
-                    removeAddress={removeAddress}
-                    updateAddress={updateAddress}
-                />
-                </div>
-            </main>
-        </div>
-    );
+
+    </main>
+
+    {/* Standardized Settings Modal (Customer) */}
+    <SettingsModal 
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        isAdmin={false}
+        activeTab={activeSettingsTab}
+        setActiveTab={setActiveSettingsTab}
+        userProfile={userProfile}
+        setUserProfile={setUserProfile}
+        handleSaveProfile={handleSaveProfile}
+        storeSettings={storeSettings}
+        setIsChangeEmailOpen={setIsChangeEmailOpen}
+        setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+        setIsChangePasswordOpen={setIsChangePasswordOpen}
+        addAddress={addAddress}
+        removeAddress={removeAddress}
+        updateAddress={updateAddress}
+    />
+</div>
+);
 }
 
 export default function App() {
