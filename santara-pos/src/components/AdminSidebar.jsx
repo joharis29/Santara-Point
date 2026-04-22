@@ -39,6 +39,7 @@ const AdminSidebar = ({ isOpen, setIsOpen, onOpenSettings }) => {
     ];
 
     const isActive = (item) => {
+        if (!item.href) return false;
         const itemPath = item.href.split('?')[0];
         return pathname === itemPath;
     };

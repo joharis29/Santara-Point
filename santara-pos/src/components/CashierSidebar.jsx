@@ -59,7 +59,8 @@ const CashierSidebar = ({ isOpen, setIsOpen, onOpenSettings }) => {
     ];
 
     const isActive = (item) => {
-        const itemPath = item.href ? item.href.split('?')[0] : '';
+        if (!item.href) return false;
+        const itemPath = item.href.split('?')[0];
         return pathname === itemPath;
     };
 

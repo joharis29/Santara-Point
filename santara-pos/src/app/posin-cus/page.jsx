@@ -732,7 +732,7 @@ function CustomerPortalContent() {
                                 <span className="bg-emerald-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-emerald-100">
                                     <ShieldCheck size={12} /> Syariah Verified
                                 </span>
-                                <span className="text-slate-400 text-xs font-bold">Halo, {customerName.trim().split(' ')[0]}!</span>
+                                <span className="text-slate-400 text-xs font-bold">Halo, {(customerName || '').trim().split(' ')[0] || 'Tamu'}!</span>
                             </div>
                         </div>
                     </div>
