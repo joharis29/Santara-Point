@@ -395,7 +395,7 @@ function AdminPortalContent() {
             localStorage.setItem('santaraUsedQueue', JSON.stringify(newUsed));
 
             // 6. Generate PDF Receipt (Expects CamelCase)
-            generateReceiptPDF(newTransaction, storeSettings);
+            await generateReceiptPDF(newTransaction, storeSettings);
 
             alert(`Transaksi Admin Berhasil!\nMetode: ${paymentMethod}\nNota telah dibuat.`);
             

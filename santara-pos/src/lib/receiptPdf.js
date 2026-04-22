@@ -5,7 +5,7 @@ import autoTable from 'jspdf-autotable';
  * SANTARA POINT - PDF Receipt Generator
  * Generates a professional, branded PDF receipt.
  */
-export const generateReceiptPDF = (transaction, storeSettings) => {
+export const generateReceiptPDF = async (transaction, storeSettings) => {
     if (!transaction || !transaction.items || transaction.items.length === 0) {
         console.error('Invalid transaction data for PDF generation');
         return;
@@ -23,27 +23,44 @@ export const generateReceiptPDF = (transaction, storeSettings) => {
     let currentY = 10;
 
     // --- Header Section ---
-    // Logo (Simulated for now, since we need Base64 for local files in jsPDF)
-    // For now we use text-based branding
+    // Load Logo
+    try {
+        const logoUrl = '/santara-logo.png';
+        const img = new Image();
+        img.src = logoUrl;
+        
+        // Wait for image to load
+        await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+        });
+
+        // Add Logo on the left
+        doc.addImage(img, 'PNG', margin, 8, 10, 10);
+    } catch (err) {
+        console.warn('Could not load logo for PDF:', err);
+    }
+
+    // Text Branding (Shifted right of logo)
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
     doc.setTextColor(16, 185, 129); // Emerald-500
-    doc.text(storeSettings.storeName || 'Santara Point', pageWidth / 2, currentY, { align: 'center' });
+    doc.text(storeSettings.storeName || 'Santara Point', 18, 14);
     
-    currentY += 5;
+    currentY = 18;
     doc.setFontSize(8);
     doc.setTextColor(100);
     doc.setFont('helvetica', 'italic');
-    doc.text(storeSettings.storeTagline || 'Hidangan Lezat, Penuh Keberkahan.', pageWidth / 2, currentY, { align: 'center' });
+    doc.text(storeSettings.storeTagline || 'Hidangan Lezat, Penuh Keberkahan.', 18, currentY);
 
     currentY += 6;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
     const addressLines = doc.splitTextToSize(storeSettings.address || 'Jl. Raya Santara No. 123, Bandung', pageWidth - 10);
-    doc.text(addressLines, pageWidth / 2, currentY, { align: 'center' });
+    doc.text(addressLines, margin, currentY);
     
     currentY += (addressLines.length * 3) + 2;
-    doc.text(`WA: ${storeSettings.whatsapp || '6285846802177'} | Email: ${storeSettings.email || 'santarapoint@gmail.com'}`, pageWidth / 2, currentY, { align: 'center' });
+    doc.text(`WA: ${storeSettings.whatsapp || '6285846802177'} | Email: ${storeSettings.email || 'santarapoint@gmail.com'}`, margin, currentY);
 
     // Divider
     currentY += 4;

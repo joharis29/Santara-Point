@@ -309,9 +309,9 @@ export default function CustomerHistory() {
                                             <p className="font-black text-emerald-600 text-2xl tracking-tighter">Rp {trx.totalAmount?.toLocaleString('id-ID') || 0}</p>
                                             
                                             <button
-                                                onClick={() => {
+                                                onClick={async () => {
                                                     const settings = JSON.parse(localStorage.getItem('santaraStoreSettings') || '{}');
-                                                    generateReceiptPDF(trx, settings);
+                                                    await generateReceiptPDF(trx, settings);
                                                 }}
                                                 className="mt-4 w-full py-2.5 bg-white border-2 border-emerald-500 text-emerald-600 rounded-xl font-bold hover:bg-emerald-50 transition-all flex items-center justify-center gap-2 text-xs"
                                             >
