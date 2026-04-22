@@ -117,6 +117,7 @@ function LoginContentBody() {
                         <img src="/santara-logo.png" alt="Logo" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
                     </div>
                     <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 'bold' }}>MASUK</h1>
+                    <p style={{ fontSize: '10px', opacity: 0.7, marginTop: '5px' }}>V2.0.1 - STABLE DEPLOY</p>
                 </div>
 
                 <div style={{ padding: '30px' }}>
