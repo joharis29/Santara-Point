@@ -22,7 +22,8 @@ import {
     X,
     Filter,
     HeartOff,
-    ArrowLeft
+    ArrowLeft,
+    Settings
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import WaitingOverlay from '../posin-cus/WaitingOverlay';
