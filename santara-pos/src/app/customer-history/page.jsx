@@ -20,6 +20,7 @@ import {
     Settings
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
+import WaitingOverlay from '@/app/posin-cus/WaitingOverlay';
 import CustomerHeader from '@/components/CustomerHeader';
 import CustomerBottomNav from '@/components/CustomerBottomNav';
 import SettingsModal from '@/components/SettingsModal';
@@ -79,6 +80,12 @@ export default function CustomerHistory() {
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
 
+    // --- State Pelacakan Pesanan ---
+    const [isWaitingOpen, setIsWaitingOpen] = useState(false);
+    const [currentTrackingId, setCurrentTrackingId] = useState(null);
+    const [trackingName, setTrackingName] = useState('');
+    const [trackingAmount, setTrackingAmount] = useState(0);
+
     useEffect(() => {
         const fetchUserData = async () => {
             const { data: { user } } = await supabase.auth.getUser();
@@ -117,7 +124,6 @@ export default function CustomerHistory() {
                     .from('transactions')
                     .select('*')
                     .eq('customer_name', name)
-                    .in('status', ['Selesai', 'Ditolak'])
                     .order('timestamp', { ascending: false });
 
                 if (error) throw error;
@@ -268,10 +274,12 @@ export default function CustomerHistory() {
                                         <div className={`px-4 py-2 rounded-full font-black text-xs uppercase tracking-widest flex items-center gap-2 ${
                                             trx.status === 'Selesai' 
                                             ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' 
-                                            : 'bg-red-50 text-red-500 border border-red-200'
+                                            : trx.status === 'Ditolak'
+                                            ? 'bg-red-50 text-red-500 border border-red-200'
+                                            : 'bg-amber-50 text-amber-600 border border-amber-200 animate-pulse'
                                         }`}>
-                                            {trx.status === 'Selesai' ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
-                                            {trx.status}
+                                            {trx.status === 'Selesai' ? <CheckCircle2 size={16} /> : trx.status === 'Ditolak' ? <XCircle size={16} /> : <Clock size={16} />}
+                                            {trx.status === 'Selesai' ? 'Selesai' : trx.status === 'Ditolak' ? 'Dibatalkan' : 'Diproses'}
                                         </div>
                                         <div className="text-xs font-bold text-slate-400 flex items-center gap-2 uppercase">
                                             <Calendar size={14} />
@@ -308,15 +316,31 @@ export default function CustomerHistory() {
                                             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Total Dibayar</p>
                                             <p className="font-black text-emerald-600 text-2xl tracking-tighter">Rp {trx.totalAmount?.toLocaleString('id-ID') || 0}</p>
                                             
-                                            <button
-                                                onClick={async () => {
-                                                    const settings = JSON.parse(localStorage.getItem('santaraStoreSettings') || '{}');
-                                                    await generateReceiptPDF(trx, settings);
-                                                }}
-                                                className="mt-4 w-full py-2.5 bg-white border-2 border-emerald-500 text-emerald-600 rounded-xl font-bold hover:bg-emerald-50 transition-all flex items-center justify-center gap-2 text-xs"
-                                            >
-                                                <Receipt size={14} /> Cetak Struk (PDF)
-                                            </button>
+                                            {trx.status === 'Selesai' ? (
+                                                <button
+                                                    onClick={async () => {
+                                                        const settings = JSON.parse(localStorage.getItem('santaraStoreSettings') || '{}');
+                                                        await generateReceiptPDF(trx, settings);
+                                                    }}
+                                                    className="mt-4 w-full py-2.5 bg-white border-2 border-emerald-500 text-emerald-600 rounded-xl font-bold hover:bg-emerald-50 transition-all flex items-center justify-center gap-2 text-xs"
+                                                >
+                                                    <Receipt size={14} /> Cetak Struk (PDF)
+                                                </button>
+                                            ) : trx.status === 'Ditolak' ? (
+                                                <div className="mt-4 text-center p-2 bg-red-50 rounded-xl text-[10px] font-bold text-red-400 uppercase tracking-widest">Pesanan Gagal</div>
+                                            ) : (
+                                                <button
+                                                    onClick={() => {
+                                                        setCurrentTrackingId(trx.id);
+                                                        setTrackingName(trx.customerName);
+                                                        setTrackingAmount(trx.totalAmount);
+                                                        setIsWaitingOpen(true);
+                                                    }}
+                                                    className="mt-4 w-full py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 text-xs shadow-lg shadow-emerald-100"
+                                                >
+                                                    <Clock size={14} /> Lacak Pesanan
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -327,6 +351,16 @@ export default function CustomerHistory() {
                 {/* Standardized Bottom Navigation */}
                 <CustomerBottomNav onOpenSettings={() => setIsSettingsOpen(true)} />
             </main>
+
+            {/* Order Tracking Modal for Active Orders */}
+            <WaitingOverlay 
+                isOpen={isWaitingOpen}
+                onClose={() => setIsWaitingOpen(false)}
+                transactionId={currentTrackingId}
+                customerName={trackingName}
+                totalAmount={trackingAmount}
+                isGlobal={true}
+            />
 
             {/* Standardized Settings Modal */}
             <SettingsModal 

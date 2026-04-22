@@ -630,6 +630,7 @@ function CustomerPortalContent() {
             startTracking(tId, customerName, totalAmount);
             
             alert(`Pesanan Berhasil!\nID: ${tId}\n\nStaf kami sedang memproses hidangan Anda.`);
+            router.push('/customer-history');
         } catch (err) {
             console.error("Error syncing transaction:", err);
             alert("Gagal mengirim pesanan ke sistem. Mohon hubungi admin (Error DB).");
