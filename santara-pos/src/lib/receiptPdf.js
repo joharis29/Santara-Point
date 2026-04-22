@@ -35,32 +35,35 @@ export const generateReceiptPDF = async (transaction, storeSettings) => {
             img.onerror = reject;
         });
 
-        // Add Logo on the left
-        doc.addImage(img, 'PNG', margin, 8, 10, 10);
+        // Add Centered Logo
+        const logoSize = 10;
+        const logoX = (pageWidth / 2) - (logoSize / 2);
+        doc.addImage(img, 'PNG', logoX, 8, logoSize, logoSize);
     } catch (err) {
         console.warn('Could not load logo for PDF:', err);
     }
 
-    // Text Branding (Shifted right of logo)
+    // Text Branding (Centered)
+    currentY = 23;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
     doc.setTextColor(16, 185, 129); // Emerald-500
-    doc.text(storeSettings.storeName || 'Santara Point', 18, 14);
+    doc.text(storeSettings.storeName || 'Santara Point', pageWidth / 2, currentY, { align: 'center' });
     
-    currentY = 18;
+    currentY += 5;
     doc.setFontSize(8);
     doc.setTextColor(100);
     doc.setFont('helvetica', 'italic');
-    doc.text(storeSettings.storeTagline || 'Hidangan Lezat, Penuh Keberkahan.', 18, currentY);
+    doc.text(storeSettings.storeTagline || 'Hidangan Lezat, Penuh Keberkahan.', pageWidth / 2, currentY, { align: 'center' });
 
     currentY += 6;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
     const addressLines = doc.splitTextToSize(storeSettings.address || 'Jl. Raya Santara No. 123, Bandung', pageWidth - 10);
-    doc.text(addressLines, margin, currentY);
+    doc.text(addressLines, pageWidth / 2, currentY, { align: 'center' });
     
     currentY += (addressLines.length * 3) + 2;
-    doc.text(`WA: ${storeSettings.whatsapp || '6285846802177'} | Email: ${storeSettings.email || 'santarapoint@gmail.com'}`, margin, currentY);
+    doc.text(`WA: ${storeSettings.whatsapp || '6285846802177'} | Email: ${storeSettings.email || 'santarapoint@gmail.com'}`, pageWidth / 2, currentY, { align: 'center' });
 
     // Divider
     currentY += 4;
