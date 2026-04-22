@@ -47,7 +47,7 @@ const AdminSidebar = ({ isOpen, setIsOpen, onOpenSettings }) => {
         <aside className={`fixed lg:static inset-y-0 left-0 w-64 bg-emerald-900 text-white flex flex-col shadow-2xl z-[100] transition-transform duration-300 transform ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
             <div className="p-6 flex items-center justify-between border-b border-emerald-800 bg-emerald-950/20">
                 <div className="flex items-center gap-3">
-                    <button onClick={() => router.push('/homepage')} className="bg-white p-1.5 rounded-lg flex items-center justify-center hover:scale-110 transition-transform cursor-pointer">
+                    <button onClick={() => router.push('/')} className="bg-white p-1.5 rounded-lg flex items-center justify-center hover:scale-110 transition-transform cursor-pointer">
                         <img src="/santara-logo.png" alt="Santara" className="w-6 h-6 object-contain" />
                     </button>
                     <span className="font-black tracking-tighter text-xl italic uppercase">SANTARA OPS</span>
