@@ -1,0 +1,10 @@
+﻿                <p className="font-bold">Â© 2024 <span className="text-emerald-600">Santara Point</span>. Dikembangkan dengan prinsip Amanah & Keberkahan.</p>
+                <div className="flex gap-8 font-black uppercase tracking-widest text-[9px]">
+                    <span className="hover:text-emerald-500 cursor-pointer transition">Syarat & Ketentuan</span>
+                    <span className="hover:text-emerald-500 cursor-pointer transition">Kebijakan Privasi</span>
+                </div>
+            </footer>
+        </div>
+    );
+}
+}
