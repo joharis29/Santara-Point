@@ -681,9 +681,13 @@ function CustomerPortalContent() {
         <div className="flex h-screen bg-white font-sans text-slate-900 overflow-hidden">
             {/* Sidebar (Desktop) */}
             <aside className="hidden md:flex w-24 bg-slate-900 flex-col items-center py-8 gap-8 shrink-0">
-                <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                    <Store className="text-white" size={24} strokeWidth={3} />
-                </div>
+                <button 
+                    onClick={() => router.push('/')}
+                    className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 hover:scale-110 active:scale-95 transition-all group"
+                    title="Ke Halaman Utama"
+                >
+                    <img src="/santara-logo.png" alt="Logo" className="w-7 h-7 object-contain brightness-0 invert" />
+                </button>
                 <nav className="flex-1 flex flex-col gap-4">
                     <button 
                         onClick={() => setActiveCategory('Semua')}

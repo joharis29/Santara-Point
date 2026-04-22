@@ -42,9 +42,7 @@ const CustomerHeader = ({
                     </button>
                 )}
                 <div className="flex items-center gap-3">
-                    <div className="bg-emerald-600 p-1.5 rounded-xl shadow-lg shadow-emerald-200">
-                        <img src="/santara-logo.png" alt="Logo" className="w-5 h-5 lg:w-6 lg:h-6 object-contain brightness-0 invert" />
-                    </div>
+
                     <div>
                         <h2 className="text-lg lg:text-xl font-black text-slate-800 tracking-tighter leading-tight">
                             {title || 'Santara Point'}
