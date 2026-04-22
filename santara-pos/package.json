@@ -9,20 +9,20 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.0",
-    "jspdf": "^2.5.1",
-    "jspdf-autotable": "^3.8.2",
-    "lucide-react": "^0.454.0",
-    "next": "15.0.3",
-    "nodemailer": "^6.9.15",
-    "react": "19.0.0-rc-66855b96-20241106",
-    "react-dom": "19.0.0-rc-66855b96-20241106"
+    "@supabase/supabase-js": "^2.46.1",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4",
+    "lucide-react": "^0.468.0",
+    "next": "15.1.0",
+    "nodemailer": "^6.9.16",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.0.0-alpha.25",
-    "postcss": "^8.4.31",
-    "tailwindcss": "^4.0.0-alpha.25",
-    "eslint": "^9.14.0",
-    "eslint-config-next": "15.0.3"
+    "@tailwindcss/postcss": "^4.0.0-beta.4",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^4.0.0-beta.4",
+    "eslint": "^9.16.0",
+    "eslint-config-next": "15.1.0"
   }
 }
