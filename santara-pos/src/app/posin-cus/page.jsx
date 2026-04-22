@@ -508,6 +508,7 @@ function CustomerPortalContent() {
     const [paymentMethod, setPaymentMethod] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [sortBy, setSortBy] = useState('default');
+    const [orderType, setOrderType] = useState('Ambil di Resto');
     // Global Order Tracking
     const { startTracking } = useOrderTracking();
 
@@ -523,9 +524,10 @@ function CustomerPortalContent() {
 
     // --- Perhitungan Total (Inclusive Pajak 10%) ---
     const menuTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const deliveryFee = orderType === 'Delivery' ? 5000 : 0;
     const subtotal = storeSettings.isPajakActive ? menuTotal / 1.10 : menuTotal;
     const pajakValue = storeSettings.isPajakActive ? Math.round(menuTotal - subtotal) : 0;
-    const totalAmount = Math.round(menuTotal);
+    const totalAmount = Math.round(menuTotal + deliveryFee);
 
     const filteredProducts = products.filter(p =>
         (activeCategory === 'Semua' || p.category === activeCategory) &&
@@ -578,16 +580,16 @@ function CustomerPortalContent() {
     const processTransactionData = async () => {
         const tId = 'TRX-' + Math.floor(Math.random() * 1000000);
 
-        // Data for LocalStorage (keep camelCase for internal consistency if needed, 
-        // or just use the same as DB)
+        // Data for LocalStorage
         const localTransaction = {
             id: tId,
             timestamp: new Date().toISOString(),
             customerName: customerName || 'Pelanggan Online',
             customerPhone: customerPhone || 'N/A',
-            deliveryAddress: customerAddress || 'Dine-in / Ambil di Toko',
+            deliveryAddress: orderType === 'Delivery' ? (customerAddress || 'Alamat tidak diisi') : 'Ambil di Resto',
             queueNumber: 'P-' + Math.floor(Math.random() * 100),
-            orderType: customerAddress ? 'Delivery' : 'Dine-in',
+            orderType: orderType,
+            deliveryFee: deliveryFee,
             keterangan: orderNote,
             paymentMethod,
             source: 'Cus',
@@ -597,15 +599,16 @@ function CustomerPortalContent() {
             items: cart.map(({ name, quantity, price }) => ({ name, quantity, price }))
         };
 
-        // Data for Supabase (Must match Snake Case column names)
+        // Data for Supabase
         const dbTransaction = {
             id: tId,
             timestamp: new Date().toISOString(),
             customer_name: customerName || 'Pelanggan Online',
             customer_phone: customerPhone || 'N/A',
-            delivery_address: customerAddress || 'Dine-in / Ambil di Toko',
+            delivery_address: orderType === 'Delivery' ? (customerAddress || 'Alamat tidak diisi') : 'Ambil di Resto',
             queue_number: 'P-' + Math.floor(Math.random() * 100),
-            order_type: customerAddress ? 'Delivery' : 'Dine-in',
+            order_type: orderType,
+            delivery_fee: deliveryFee,
             keterangan: orderNote,
             payment_method: paymentMethod,
             source: 'Cus',
@@ -648,8 +651,14 @@ function CustomerPortalContent() {
         }
 
         if (cart.length === 0) return alert('Keranjang masih kosong!');
-        if (!customerName || !customerAddress || !customerPhone || !paymentMethod) {
-            return alert('Mohon lengkapi Data Diri Pemesan (Termasuk Alamat) dan Metode Pembayaran!');
+        
+        // Validation logic
+        if (!customerName || !customerPhone || !paymentMethod) {
+            return alert('Mohon lengkapi Nama, Nomor WhatsApp, dan Metode Pembayaran!');
+        }
+        
+        if (orderType === 'Delivery' && !customerAddress) {
+            return alert('Mohon pilih/isi Alamat Pengiriman untuk pesanan Delivery!');
         }
 
         setIsProcessing(true);
@@ -879,34 +888,46 @@ function CustomerPortalContent() {
                         <div className="space-y-4 bg-white p-5 rounded-[24px] border border-slate-100 shadow-sm mt-auto">
                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Data Diri Pemesan</h3>
                             <div className="grid grid-cols-1 gap-3">
+                                <select
+                                    value={orderType}
+                                    onChange={(e) => setOrderType(e.target.value)}
+                                    className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium appearance-none"
+                                >
+                                    <option value="Ambil di Resto">Ambil di Resto</option>
+                                    <option value="Delivery">Delivery</option>
+                                </select>
+
                                 <input type="text" placeholder="Nama Lengkap" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium" />
-                                <div className="space-y-2">
-                                    <div className="flex gap-2">
-                                        <select
-                                            value={customerAddress}
-                                            onChange={(e) => setCustomerAddress(e.target.value)}
-                                            className="flex-1 text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium appearance-none"
-                                        >
-                                            <option value="" disabled>Pilih Alamat Pengiriman</option>
-                                            {userProfile.addresses.map(addr => (
-                                                <option key={addr.id} value={addr.details}>{addr.label}: {addr.details}</option>
-                                            ))}
-                                        </select>
-                                        <button
-                                            onClick={() => {
-                                                setIsSettingsOpen(true);
-                                                setActiveSettingsTab('profil');
-                                            }}
-                                            className="px-4 py-3 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl hover:bg-emerald-100 transition-all flex items-center justify-center shrink-0"
-                                            title="Tambah Alamat"
-                                        >
-                                            <Plus size={18} />
-                                        </button>
+                                
+                                {orderType === 'Delivery' && (
+                                    <div className="space-y-2">
+                                        <div className="flex gap-2">
+                                            <select
+                                                value={customerAddress}
+                                                onChange={(e) => setCustomerAddress(e.target.value)}
+                                                className="flex-1 text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium appearance-none"
+                                            >
+                                                <option value="" disabled>Pilih Alamat Pengiriman</option>
+                                                {userProfile.addresses.map(addr => (
+                                                    <option key={addr.id} value={addr.details}>{addr.label}: {addr.details}</option>
+                                                ))}
+                                            </select>
+                                            <button
+                                                onClick={() => {
+                                                    setIsSettingsOpen(true);
+                                                    setActiveSettingsTab('profil');
+                                                }}
+                                                className="px-4 py-3 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl hover:bg-emerald-100 transition-all flex items-center justify-center shrink-0"
+                                                title="Tambah Alamat"
+                                            >
+                                                <Plus size={18} />
+                                            </button>
+                                        </div>
+                                        {userProfile.addresses.length === 0 && (
+                                            <p className="text-[10px] text-amber-600 font-bold">* Belum ada alamat. Silakan tambah alamat baru.</p>
+                                        )}
                                     </div>
-                                    {userProfile.addresses.length === 0 && (
-                                        <p className="text-[10px] text-amber-600 font-bold">* Belum ada alamat. Silakan tambah alamat baru.</p>
-                                    )}
-                                </div>
+                                )}
                                 <textarea
                                     placeholder="Keterangan / Catatan Pesanan (Optional)..."
                                     value={orderNote}
@@ -924,6 +945,13 @@ function CustomerPortalContent() {
                                 <span>Subtotal</span>
                                 <span>Rp {subtotal.toLocaleString('id-ID', { maximumFractionDigits: 0 })}</span>
                             </div>
+
+                            {orderType === 'Delivery' && (
+                                <div className="flex justify-between text-slate-500 text-xs font-medium">
+                                    <span>Biaya Pengiriman</span>
+                                    <span>Rp {deliveryFee.toLocaleString('id-ID')}</span>
+                                </div>
+                            )}
 
                             {/* Toggles & Breakdown Pajak */}
                             {storeSettings.isPajakActive && (
@@ -1162,34 +1190,46 @@ function CustomerPortalContent() {
                                     <div className="pt-6 space-y-4">
                                         <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Data Pemesan</h3>
+                                            <select
+                                                value={orderType}
+                                                onChange={(e) => setOrderType(e.target.value)}
+                                                className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold appearance-none mb-1"
+                                            >
+                                                <option value="Ambil di Resto">Ambil di Resto</option>
+                                                <option value="Delivery">Delivery</option>
+                                            </select>
+
                                             <input type="text" placeholder="Nama Lengkap" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
-                                            <div className="space-y-2">
-                                                <div className="flex gap-2">
-                                                    <select
-                                                        value={customerAddress}
-                                                        onChange={(e) => setCustomerAddress(e.target.value)}
-                                                        className="flex-1 text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold appearance-none"
-                                                    >
-                                                        <option value="" disabled>Pilih Alamat Pengiriman</option>
-                                                        {userProfile.addresses.map(addr => (
-                                                            <option key={addr.id} value={addr.details}>{addr.label}: {addr.details}</option>
-                                                        ))}
-                                                    </select>
-                                                    <button
-                                                        onClick={() => {
-                                                            setIsCartModalOpen(false);
-                                                            setIsSettingsOpen(true);
-                                                            setActiveSettingsTab('profil');
-                                                        }}
-                                                        className="px-4 py-3 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl flex items-center justify-center"
-                                                    >
-                                                        <Plus size={18} />
-                                                    </button>
+                                            
+                                            {orderType === 'Delivery' && (
+                                                <div className="space-y-2">
+                                                    <div className="flex gap-2">
+                                                        <select
+                                                            value={customerAddress}
+                                                            onChange={(e) => setCustomerAddress(e.target.value)}
+                                                            className="flex-1 text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold appearance-none"
+                                                        >
+                                                            <option value="" disabled>Pilih Alamat Pengiriman</option>
+                                                            {userProfile.addresses.map(addr => (
+                                                                <option key={addr.id} value={addr.details}>{addr.label}: {addr.details}</option>
+                                                            ))}
+                                                        </select>
+                                                        <button
+                                                            onClick={() => {
+                                                                setIsCartModalOpen(false);
+                                                                setIsSettingsOpen(true);
+                                                                setActiveSettingsTab('profil');
+                                                            }}
+                                                            className="px-4 py-3 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl flex items-center justify-center"
+                                                        >
+                                                            <Plus size={18} />
+                                                        </button>
+                                                    </div>
+                                                    {userProfile.addresses.length === 0 && (
+                                                        <p className="text-[10px] text-amber-600 font-bold">* Silakan tambah alamat lebih dulu.</p>
+                                                    )}
                                                 </div>
-                                                {userProfile.addresses.length === 0 && (
-                                                    <p className="text-[10px] text-amber-600 font-bold">* Silakan tambah alamat lebih dulu.</p>
-                                                )}
-                                            </div>
+                                            )}
                                             <textarea
                                                 placeholder="Keterangan / Catatan (Optional)..."
                                                 value={orderNote}
@@ -1205,14 +1245,24 @@ function CustomerPortalContent() {
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic mb-1">Total Pembayaran</span>
                                                     <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rp {totalAmount.toLocaleString('id-ID')}</span>
                                                 </div>
-                                                {storeSettings.isPajakActive && (
-                                                    <div className="flex flex-col items-end">
-                                                        <div className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm">
-                                                            Pajak (10%)
+                                                <div className="flex flex-col items-end gap-1">
+                                                    {orderType === 'Delivery' && (
+                                                        <div className="flex flex-col items-end">
+                                                            <div className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-sm">
+                                                                Delivery Fee
+                                                            </div>
+                                                            <span className="text-[11px] font-bold text-blue-400/80 mt-1">Rp {deliveryFee.toLocaleString('id-ID')}</span>
                                                         </div>
-                                                        <span className="text-[11px] font-bold text-emerald-400/80 mt-1">Rp {pajakValue.toLocaleString('id-ID')}</span>
-                                                    </div>
-                                                )}
+                                                    )}
+                                                    {storeSettings.isPajakActive && (
+                                                        <div className="flex flex-col items-end">
+                                                            <div className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm">
+                                                                Pajak (10%)
+                                                            </div>
+                                                            <span className="text-[11px] font-bold text-emerald-400/80 mt-1">Rp {pajakValue.toLocaleString('id-ID')}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                             <div className="space-y-3 pb-4">
                                                 <select
