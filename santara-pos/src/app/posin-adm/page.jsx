@@ -207,8 +207,23 @@ function AdminPortalContent() {
 
         const storedProducts = localStorage.getItem('santaraProducts');
         if (storedProducts) {
-            try { setProducts(JSON.parse(storedProducts)); } catch (e) { }
+            try {
+                const localData = JSON.parse(storedProducts);
+                // Sinkronisasi: Master source (INITIAL_PRODUCTS) menimpa data di localStorage untuk harga, nama, dll.
+                const syncedProducts = INITIAL_PRODUCTS.map(p => {
+                    const localMatch = localData.find(lp => lp.id === p.id);
+                    return {
+                        ...p,
+                        stock: localMatch ? localMatch.stock : p.stock
+                    };
+                });
+                setProducts(syncedProducts);
+                localStorage.setItem('santaraProducts', JSON.stringify(syncedProducts));
+            } catch (e) {
+                setProducts(INITIAL_PRODUCTS);
+            }
         } else {
+            setProducts(INITIAL_PRODUCTS);
             localStorage.setItem('santaraProducts', JSON.stringify(INITIAL_PRODUCTS));
         }
 

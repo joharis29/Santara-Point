@@ -197,8 +197,25 @@ function CashierPortalContent() {
 
         const storedProducts = localStorage.getItem('santaraProducts');
         if (storedProducts) {
-            setProducts(JSON.parse(storedProducts));
+            try {
+                const localData = JSON.parse(storedProducts);
+                // Sinkronisasi: Master source (PRODUCTS) menimpa data di localStorage untuk harga, nama, dll.
+                // Kita hanya mempertahankan 'stock' jika ada perubahan manual di sistem (opsional).
+                const syncedProducts = PRODUCTS.map(p => {
+                    const localMatch = localData.find(lp => lp.id === p.id);
+                    return {
+                        ...p,
+                        // Jika ada data stok di local, gunakan itu, jika tidak gunakan master.
+                        stock: localMatch ? localMatch.stock : p.stock
+                    };
+                });
+                setProducts(syncedProducts);
+                localStorage.setItem('santaraProducts', JSON.stringify(syncedProducts));
+            } catch (e) {
+                setProducts(PRODUCTS);
+            }
         } else {
+            setProducts(PRODUCTS);
             localStorage.setItem('santaraProducts', JSON.stringify(PRODUCTS));
         }
 
