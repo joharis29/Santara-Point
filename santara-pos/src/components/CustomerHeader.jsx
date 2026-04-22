@@ -58,26 +58,6 @@ const CustomerHeader = ({
                 </div>
             </div>
 
-            {/* Center: Desktop Navigation */}
-            <nav className="hidden lg:flex items-center bg-slate-50/50 p-1 rounded-2xl border border-slate-100">
-                {[
-                    { icon: <Home size={16} />, label: "Beranda", href: "/" },
-                    { icon: <Heart size={16} />, label: "Favorit", href: "/favorites" },
-                    { icon: <Clock size={16} />, label: "Riwayat", href: "/customer-history" },
-                ].map((item, idx) => {
-                    const isActive = pathname === item.href;
-                    return (
-                        <button
-                            key={idx}
-                            onClick={() => router.push(item.href)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-xs ${isActive ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                        >
-                            {item.icon}
-                            <span>{item.label}</span>
-                        </button>
-                    );
-                })}
-            </nav>
 
             {/* Right: Search & Actions */}
             <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-end">
@@ -98,7 +78,7 @@ const CustomerHeader = ({
                     {onSettingsClick && (
                         <button 
                             onClick={onSettingsClick}
-                            className="p-2.5 bg-white border border-slate-100 rounded-xl text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all shadow-sm"
+                            className="lg:hidden p-2.5 bg-white border border-slate-100 rounded-xl text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all shadow-sm"
                             title="Pengaturan"
                         >
                             <Settings size={18} />

@@ -712,7 +712,7 @@ function CustomerPortalContent() {
                         }}
                         className="p-4 rounded-2xl text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition-all"
                     >
-                        <Menu size={24} />
+                        <Settings size={24} />
                     </button>
                 </nav>
                 <button
