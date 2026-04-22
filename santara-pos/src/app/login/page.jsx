@@ -1,38 +1,26 @@
 "use client";
-import React, { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
-// Versi Ultra-Stable untuk debugging initialization error
 export default function LoginPage() {
-    return (
-        <Suspense fallback={
-            <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyCenter: 'center', backgroundColor: '#064e3b', color: 'white' }}>
-                <p>Memuat Halaman Login...</p>
-            </div>
-        }>
-            <LoginContentBody />
-        </Suspense>
-    );
-}
-
-function LoginContentBody() {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isClient, setIsClient] = useState(false);
 
+    // Cek sisi client
     useEffect(() => {
-        // Cek parameter pesan sukses dari registrasi atau reset password
-        const msg = searchParams.get('message');
-        if (msg === 'confirmed') {
+        setIsClient(true);
+        // Cara manual cek query param tanpa Suspense
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('message') === 'confirmed') {
             alert('Selamat! Akun Anda telah terkonfirmasi. Silakan masuk.');
             router.replace('/login');
         }
-    }, [searchParams, router]);
+    }, [router]);
 
     async function handleLogin(e) {
         e.preventDefault();
@@ -56,7 +44,6 @@ function LoginContentBody() {
                 return;
             }
 
-            // Penentuan Role
             let role = 'Customer';
             if (email.toLowerCase() === 'santarapoint@gmail.com') {
                 role = 'Administrator';
@@ -69,13 +56,11 @@ function LoginContentBody() {
                 }
             }
 
-            // Simpan data ke localStorage
             const meta = user.user_metadata || {};
             localStorage.setItem('currentUserRole', role);
             localStorage.setItem('registeredEmail', email);
             localStorage.setItem('customerName', `${meta.first_name || ''} ${meta.last_name || ''}`.trim() || 'Sobat Santara');
 
-            // Redirect
             if (role === 'Administrator') router.push('/posin-adm');
             else if (role === 'Operator') router.push('/posin-cas');
             else router.push('/posin-cus');
@@ -86,6 +71,8 @@ function LoginContentBody() {
             setIsSubmitting(false);
         }
     }
+
+    if (!isClient) return null;
 
     return (
         <div style={{ 
@@ -98,7 +85,8 @@ function LoginContentBody() {
             backgroundImage: "url('/bg-food.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            position: 'relative'
+            position: 'relative',
+            fontFamily: 'sans-serif'
         }}>
             <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6, 78, 59, 0.7)', backdropFilter: 'blur(4px)' }}></div>
             
@@ -117,24 +105,24 @@ function LoginContentBody() {
                         <img src="/santara-logo.png" alt="Logo" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
                     </div>
                     <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 'bold' }}>MASUK</h1>
-                    <p style={{ fontSize: '10px', opacity: 0.7, marginTop: '5px' }}>V2.0.1 - STABLE DEPLOY</p>
+                    <p style={{ fontSize: '10px', opacity: 0.7, marginTop: '5px' }}>V2.1.0 - ULTRA STABLE</p>
                 </div>
 
                 <div style={{ padding: '30px' }}>
                     <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        <div>
+                        <div style={{ textAlign: 'left' }}>
                             <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>Email</label>
                             <input 
                                 type="email" 
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none', fontWeight: 'bold' }}
+                                style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none', fontWeight: 'bold', boxSizing: 'border-box' }}
                                 placeholder="nama@email.com"
                                 required
                             />
                         </div>
 
-                        <div>
+                        <div style={{ textAlign: 'left' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                                 <label style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>Kata Sandi</label>
                                 <button type="button" onClick={() => router.push('/forgot-password')} style={{ fontSize: '12px', color: '#059669', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 'bold' }}>Lupa Sandi?</button>
@@ -144,7 +132,7 @@ function LoginContentBody() {
                                     type={showPassword ? "text" : "password"} 
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none', fontWeight: 'bold' }}
+                                    style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none', fontWeight: 'bold', boxSizing: 'border-box' }}
                                     placeholder="••••••••"
                                     required
                                 />
@@ -181,6 +169,10 @@ function LoginContentBody() {
 
                     <div style={{ marginTop: '25px', textAlign: 'center', fontSize: '14px', color: '#6b7280' }}>
                         Belum punya akun? <button onClick={() => router.push('/register')} style={{ color: '#059669', fontWeight: 'bold', border: 'none', background: 'none', cursor: 'pointer' }}>Daftar Disini</button>
+                    </div>
+
+                    <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                        <button onClick={() => router.push('/')} style={{ fontSize: '12px', color: '#9ca3af', border: 'none', background: 'none', cursor: 'pointer' }}>Kembali ke Beranda</button>
                     </div>
                 </div>
             </div>
