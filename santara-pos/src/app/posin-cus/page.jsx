@@ -589,14 +589,16 @@ function CustomerPortalContent() {
             deliveryAddress: orderType === 'Delivery' ? (customerAddress || 'Alamat tidak diisi') : 'Ambil di Resto',
             queueNumber: 'P-' + Math.floor(Math.random() * 100),
             orderType: orderType,
-            deliveryFee: deliveryFee,
             keterangan: orderNote,
             paymentMethod,
             source: 'Cus',
             totalAmount,
             pajak: pajakValue,
             status: 'Menunggu',
-            items: cart.map(({ name, quantity, price }) => ({ name, quantity, price }))
+            items: [
+                ...cart.map(({ name, quantity, price }) => ({ name, quantity, price })),
+                ...(deliveryFee > 0 ? [{ name: 'Biaya Pengiriman', quantity: 1, price: deliveryFee }] : [])
+            ]
         };
 
         // Data for Supabase
@@ -608,14 +610,16 @@ function CustomerPortalContent() {
             delivery_address: orderType === 'Delivery' ? (customerAddress || 'Alamat tidak diisi') : 'Ambil di Resto',
             queue_number: 'P-' + Math.floor(Math.random() * 100),
             order_type: orderType,
-            delivery_fee: deliveryFee,
             keterangan: orderNote,
             payment_method: paymentMethod,
             source: 'Cus',
             total_amount: totalAmount,
             pajak: pajakValue,
             status: 'Menunggu',
-            items: cart.map(({ name, quantity, price }) => ({ name, quantity, price }))
+            items: [
+                ...cart.map(({ name, quantity, price }) => ({ name, quantity, price })),
+                ...(deliveryFee > 0 ? [{ name: 'Biaya Pengiriman', quantity: 1, price: deliveryFee }] : [])
+            ]
         };
 
         try {
