@@ -52,7 +52,12 @@ export default function App() {
         checkUser();
 
         // 2. Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                router.push('/reset-password');
+                return;
+            }
+
             setUser(session?.user ?? null);
             if (session?.user) {
                 const meta = session.user.user_metadata || {};
