@@ -479,8 +479,6 @@ function FavoritesContent() {
                     onSettingsClick={() => setIsSettingsOpen(true)}
                 />
 
-                {/* Content Area with Right Sidebar */}
-                <div className="flex-1 flex overflow-hidden">
                     {/* Left: Products List */}
                     <div className="flex-1 flex flex-col overflow-hidden pt-6 pb-20 md:pb-0">
                         <div className="px-6 md:px-10 mb-6 overflow-x-auto">
@@ -544,108 +542,6 @@ function FavoritesContent() {
 
                     <CustomerBottomNav onOpenSettings={() => setIsSettingsOpen(true)} />
                 </div>
-
-                {/* Right Side: Order Summary */}
-            <aside className="hidden md:flex w-[320px] lg:w-[420px] shrink-0 bg-slate-50 p-4 lg:p-6 flex-col">
-                <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 flex-1 flex flex-col overflow-hidden">
-                    <div className="p-6 border-b border-slate-100 flex items-center gap-3">
-                        <div className="text-emerald-600">
-                            <ShoppingBag size={24} />
-                        </div>
-                        <h2 className="text-[17px] font-bold text-slate-800">
-                            Ringkasan Pesanan
-                        </h2>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto p-4 lg:p-6 bg-slate-50/30 flex flex-col gap-6">
-                        {cart.length === 0 ? (
-                            <div className="h-40 flex flex-col items-center justify-center text-slate-300 gap-4 opacity-70">
-                                <ShoppingBag size={48} strokeWidth={1.5} />
-                                <p className="font-medium text-sm">Keranjang kosong</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {cart.map(item => (
-                                    <div key={item.id} className="flex items-center gap-4 bg-white p-3 rounded-xl shadow-sm border border-slate-100">
-                                        <img src={item.img} className="w-16 h-16 rounded-xl object-cover" />
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-sm text-slate-800 line-clamp-1">{item.name}</h4>
-                                            <p className="text-xs text-emerald-600 font-bold mt-1">Rp {item.price.toLocaleString('en-US')}</p>
-                                            <div className="flex items-center gap-2 mt-2">
-                                                <button onClick={() => updateQty(item.id, -1)} className="w-6 h-6 flex items-center justify-center bg-slate-100 rounded text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
-                                                    <Minus size={12} />
-                                                </button>
-                                                <span className="text-xs font-bold text-slate-800 w-4 text-center">{item.quantity}</span>
-                                                <button onClick={() => addToCart(item)} className="w-6 h-6 flex items-center justify-center bg-slate-100 rounded text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
-                                                    <Plus size={12} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <button onClick={() => updateQty(item.id, -item.quantity)} className="text-slate-300 hover:text-red-500 transition-colors self-start p-1">
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Customer Details Form */}
-                        <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-100 shadow-sm mt-auto">
-                            <h3 className="text-xs font-bold text-slate-800 uppercase mb-2">Data Pemesan</h3>
-                            <input type="text" placeholder="Nama Lengkap" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
-                            <input type="email" placeholder="Alamat Email (Wajib)" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} className="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
-                            <input type="tel" placeholder="Nomor WhatsApp" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
-                        </div>
-                    </div>
-
-                    <div className="p-4 lg:p-6 bg-white border-t border-slate-100">
-                        <div className="mb-4 space-y-2">
-                            <div className="flex justify-between text-slate-500 text-xs font-medium">
-                                <span>Total Pesanan</span>
-                                <span>Rp {subtotal.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
-                            </div>
-
-                            <div className="flex justify-between items-center py-2 px-3 rounded-lg border border-emerald-100 bg-emerald-50/50 flex-wrap gap-2 transition-all">
-                                <div className="flex items-center gap-2">
-                                    <div className="text-emerald-500 flex items-center justify-center w-4 h-4 rounded-full bg-white shadow-sm shrink-0">
-                                        <Info size={10} />
-                                    </div>
-                                    <span className="text-xs font-medium text-emerald-600">Pajak Daerah (10%)</span>
-                                </div>
-                                <span className="text-xs font-bold text-emerald-600">Rp {pajakValue.toLocaleString('en-US')}</span>
-                            </div>
-                        </div>
-
-                        <div className="flex justify-between items-center mb-4">
-                            <span className="text-sm font-bold text-slate-800 uppercase tracking-wide">TOTAL AKHIR</span>
-                            <span className="text-2xl font-black text-emerald-600 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</span>
-                        </div>
-
-                        <div className="flex flex-col gap-3">
-                            <select
-                                value={paymentMethod}
-                                onChange={(e) => setPaymentMethod(e.target.value)}
-                                className="w-full text-sm px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer text-slate-600 font-medium"
-                            >
-                                <option value="" disabled>Pilih Metode Pembayaran</option>
-                                <option value="COD">COD</option>
-                                <option value="Gopay">Gopay</option>
-                                <option value="Dana">Dana</option>
-                                <option value="Transfer Bank">Transfer Bank</option>
-                            </select>
-
-                            <button
-                                onClick={handleCheckout}
-                                disabled={cart.length === 0 || isProcessing}
-                                className={`w-full py-3 rounded-xl font-bold text-base transition flex items-center justify-center gap-2 ${cart.length === 0 || isProcessing ? 'bg-slate-200 text-slate-500 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200'}`}
-                            >
-                                {isProcessing ? 'Memproses...' : <>Bayar Sekarang <ChevronRight size={18} /></>}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-        </div>
 
             {/* Injected Waiting Tracker Overlay */}
             <WaitingOverlay
@@ -784,7 +680,7 @@ function FavoritesContent() {
 
             {/* Mobile Cart Modal Overlay */}
             {isCartModalOpen && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xl z-[60] lg:hidden animate-in fade-in duration-300">
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xl z-[60] animate-in fade-in duration-300">
                     <div className="absolute inset-x-0 bottom-0 top-10 bg-white rounded-t-[3rem] shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-20 duration-500">
                         <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-white/50 backdrop-blur-md sticky top-0 z-10">
                             <div className="flex items-center gap-3">
