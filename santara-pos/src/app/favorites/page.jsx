@@ -471,7 +471,6 @@ function FavoritesContent() {
             <main className="flex-1 flex flex-col overflow-hidden relative">
                 <CustomerHeader 
                     title={storeSettings.storeName}
-                    subtitle="Menu Favorit Berkah Anda"
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
                     onSettingsClick={() => setIsSettingsOpen(true)}

@@ -240,7 +240,6 @@ export default function CustomerHistory() {
                 {/* Standardized Header */}
                 <CustomerHeader 
                     title="Santara Point"
-                    subtitle="Riwayat Pesanan Berkah Anda"
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
                     cartCount={0}
