@@ -306,10 +306,12 @@ export default function App() {
                             key={index}
                             className="group bg-black/40 border border-white/5 backdrop-blur-3xl p-4 rounded-[2rem] hover:bg-white/5 hover:border-emerald-500/30 transition-all duration-500 shadow-2xl"
                         >
-                            <div className="mb-2 p-2 bg-emerald-500/10 rounded-2xl w-fit group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all">
-                                {feature.icon}
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="p-2 bg-emerald-500/10 rounded-2xl w-fit group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all">
+                                    {feature.icon}
+                                </div>
+                                <h4 className="text-white font-black text-[10px] lg:text-xs tracking-tight uppercase tracking-widest">{feature.title}</h4>
                             </div>
-                            <h4 className="text-white font-black text-[10px] lg:text-xs mb-1 tracking-tight uppercase tracking-widest">{feature.title}</h4>
                             <p className="text-gray-500 text-[9px] lg:text-[10px] leading-relaxed font-bold">{feature.desc}</p>
                         </div>
                     ))}
