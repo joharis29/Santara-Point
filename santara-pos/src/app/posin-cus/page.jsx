@@ -571,7 +571,7 @@ function CustomerPortalContent() {
 
     const processTransactionData = async () => {
         const tId = 'TRX-' + Math.floor(Math.random() * 1000000);
-        
+
         // Data for LocalStorage (keep camelCase for internal consistency if needed, 
         // or just use the same as DB)
         const localTransaction = {
@@ -619,10 +619,10 @@ function CustomerPortalContent() {
             // Also keep in localStorage for local history
             const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
             localStorage.setItem('santaraTransactionHistory', JSON.stringify([localTransaction, ...existingHistory]));
-            
+
             // Persist active ID for tracking overlay
             localStorage.setItem('santaraActiveTxId', tId);
-            
+
             setCurrentTxId(tId);
             setIsWaitingOpen(true);
             setCart([]);
@@ -681,7 +681,7 @@ function CustomerPortalContent() {
         <div className="flex h-screen bg-white font-sans text-slate-900 overflow-hidden">
             {/* Sidebar (Desktop) */}
             <aside className="hidden md:flex w-24 bg-slate-900 flex-col items-center py-8 gap-8 shrink-0">
-                <button 
+                <button
                     onClick={() => router.push('/')}
                     className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/10 hover:scale-110 active:scale-95 transition-all group border border-slate-100"
                     title="Ke Halaman Utama"
@@ -689,27 +689,27 @@ function CustomerPortalContent() {
                     <img src="/santara-logo.png" alt="Logo" className="w-7 h-7 object-contain" />
                 </button>
                 <nav className="flex-1 flex flex-col gap-4">
-                    <button 
+                    <button
                         onClick={() => setActiveCategory('Semua')}
                         className={`p-4 rounded-2xl transition-all ${activeCategory === 'Semua' ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/20' : 'text-slate-500 hover:bg-slate-800 hover:text-slate-300'}`}
                     >
                         <ShoppingBag size={24} />
                     </button>
-                    <button 
+                    <button
                         onClick={() => router.push('/favorites')}
                         className="p-4 rounded-2xl text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition-all"
                         title="Favorit Saya"
                     >
                         <Heart size={24} />
                     </button>
-                    <button 
+                    <button
                         onClick={() => router.push('/customer-history')}
                         className="p-4 rounded-2xl text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition-all"
                         title="Riwayat Pesanan"
                     >
                         <Clock size={24} />
                     </button>
-                    <button 
+                    <button
                         onClick={() => {
                             setActiveSettingsTab('profil');
                             setIsSettingsOpen(true);
@@ -735,9 +735,8 @@ function CustomerPortalContent() {
 
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col overflow-hidden">
-                <CustomerHeader 
+                <CustomerHeader
                     title={storeSettings.storeName}
-                    subtitle="Pilih Menu Berkah Anda"
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
                     cartCount={cart.length}
@@ -1006,7 +1005,7 @@ function CustomerPortalContent() {
                         </div>
                         <h3 className="text-xl font-black text-slate-800 mb-2">Konfirmasi Pesanan</h3>
                         <div className="bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-100 mb-4 inline-block">
-                             <p className="text-sm font-black text-emerald-700">Total Tagihan: Rp {totalAmount.toLocaleString('id-ID')}</p>
+                            <p className="text-sm font-black text-emerald-700">Total Tagihan: Rp {totalAmount.toLocaleString('id-ID')}</p>
                         </div>
                         <p className="text-sm text-slate-500 mb-4">Silakan konfirmasi pesanan Anda dengan menekan tombol dibawah ini: </p>
 
@@ -1040,7 +1039,7 @@ function CustomerPortalContent() {
                         </button>
                         <h3 className="text-xl font-black text-slate-800 mb-2 mt-4">Transfer Bank</h3>
                         <div className="bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-100 mb-4 inline-block">
-                             <p className="text-sm font-black text-emerald-700">Total Tagihan: Rp {totalAmount.toLocaleString('id-ID')}</p>
+                            <p className="text-sm font-black text-emerald-700">Total Tagihan: Rp {totalAmount.toLocaleString('id-ID')}</p>
                         </div>
                         <p className="text-sm text-slate-500 mb-6">Silakan transfer sesuai nominal total di atas ke salah satu rekening berikut:</p>
 
@@ -1242,7 +1241,7 @@ function CustomerPortalContent() {
             )}
 
             {/* Standardized Settings Modal */}
-            <SettingsModal 
+            <SettingsModal
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
                 activeTab={activeSettingsTab}

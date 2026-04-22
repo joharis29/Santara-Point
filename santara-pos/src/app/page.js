@@ -16,6 +16,7 @@ import {
   X
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
+import BackgroundSlider from '@/components/BackgroundSlider';
 
 /**
  * SANTARA POINT - PREMIUM HOMEPAGE
@@ -117,16 +118,17 @@ export default function App() {
     return (
         <div className="relative h-screen w-full flex flex-col font-sans overflow-hidden selection:bg-emerald-200 selection:text-emerald-900">
 
-            {/* 1. Background Layer (Kompilasi Makanan) */}
-            <div
-                className="absolute inset-0 z-0 bg-cover bg-center"
-                style={{
-                    backgroundImage: `url('/santara-bg-clean-hd.png')`
-                }}
-            >
-                {/* Dark Gradient Overlay untuk Keterbacaan Teks */}
-                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/40"></div>
-            </div>
+            {/* 1. Background Layer (Kompilasi Makanan - Moving Slider) */}
+            <BackgroundSlider 
+                images={[
+                    '/santara-bg-clean-hd.png',
+                    '/santara-slide-2.png',
+                    '/santara-slide-3.png',
+                    '/santara-slide-4.png',
+                    '/santara-slide-5.png'
+                ]} 
+                interval={7000}
+            />
 
             {/* 2. Navigation Bar */}
             <nav className="relative z-20 flex justify-between items-center px-6 lg:px-16 py-3 border-b border-white/5 backdrop-blur-md flex-none">
