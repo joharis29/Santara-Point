@@ -18,8 +18,8 @@ import {
 import { supabase } from '@/lib/supabaseClient';
 
 /**
- * SANTARA POINT - PREMIUM HOMEPAGE
- * Visual: Fullscreen Food Background with Dark Overlay
+ * SANTARA POINT - PREMIUM HOMEPAGE (FINAL VERSION)
+ * Visual: High-Impact Glassmorphism & Precise Hierarchy
  */
 
 export default function App() {
@@ -67,17 +67,17 @@ export default function App() {
     };
   }, []);
 
-    // Fungsi placeholder untuk navigasi
     const handleAction = (type) => {
         const role = localStorage.getItem('currentUserRole');
+        const email = localStorage.getItem('registeredEmail');
 
         if (type === 'login') {
             router.push('/login');
         } else if (type === 'register') {
             router.push('/register');
         } else if (type === 'order') {
-            // Role-Aware Redirection
-            if (role === 'Administrator') {
+            // Absolute Role Routing
+            if (role === 'Administrator' || (email && email.toLowerCase() === 'santarapoint@gmail.com')) {
                 router.push('/posin-adm');
             } else if (role === 'Operator') {
                 router.push('/posin-cas');
@@ -85,7 +85,7 @@ export default function App() {
                 router.push('/posin-cus');
             }
         } else if (type === 'profile') {
-            if (role === 'Administrator') {
+            if (role === 'Administrator' || (email && email.toLowerCase() === 'santarapoint@gmail.com')) {
                 router.push('/posin-adm');
             } else {
                 router.push('/posin-cus?settings=true');
@@ -94,8 +94,6 @@ export default function App() {
             router.push('/kontak');
         } else if (type === 'dokumentasi') {
             router.push('/dokumentasi');
-        } else {
-            console.log(`Navigating to: ${type}`);
         }
     };
 
@@ -105,6 +103,7 @@ export default function App() {
             localStorage.removeItem('currentUserRole');
             localStorage.removeItem('currentUserContact');
             localStorage.removeItem('customerName');
+            localStorage.removeItem('registeredEmail');
             setUser(null);
             router.push('/login');
         } catch (err) {
@@ -113,37 +112,37 @@ export default function App() {
     };
 
     return (
-        <div className="relative min-h-screen w-full flex flex-col font-sans overflow-x-hidden selection:bg-emerald-200 selection:text-emerald-900">
+        <div className="relative min-h-screen w-full flex flex-col font-sans overflow-x-hidden selection:bg-emerald-200 selection:text-emerald-900 bg-black">
 
-            {/* 1. Background Layer (Kompilasi Makanan) */}
+            {/* 1. Background Layer */}
             <div
                 className="absolute inset-0 z-0 bg-cover bg-center"
                 style={{
-                    backgroundImage: `url('/santara-bg-clean-hd.png')`
+                  backgroundImage: `url('/santara-bg-clean-hd.png')`
                 }}
             >
-                {/* Dark Gradient Overlay untuk Keterbacaan Teks */}
-                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/40"></div>
+                {/* Deeper Gradient for Premium Contrast */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 to-black/40"></div>
             </div>
 
-            {/* 2. Navigation Bar */}
-            <nav className="relative z-20 flex justify-between items-center px-6 lg:px-16 py-4 border-b border-white/5 backdrop-blur-md flex-none">
-                <div className="flex items-center gap-3 lg:gap-4 group cursor-pointer" onClick={() => router.push('/')}>
-                    <div className="bg-white p-1 rounded-2xl shadow-xl shadow-black/20 group-hover:scale-110 transition-transform duration-500">
-                        <img src="/santara-logo.png" alt="Santara Point Logo" className="w-9 h-9 lg:w-11 lg:h-11 object-contain rounded-xl" />
+            {/* 2. Navigation Bar (Optimized Header) */}
+            <nav className="relative z-20 flex justify-between items-center px-6 lg:px-16 py-6 border-b border-white/5 backdrop-blur-xl flex-none bg-black/10">
+                <div className="flex items-center gap-4 group cursor-pointer" onClick={() => router.push('/')}>
+                    <div className="bg-white p-1 rounded-[1.2rem] shadow-2xl shadow-emerald-500/10 group-hover:scale-105 transition-transform duration-500">
+                        <img src="/santara-logo.png" alt="Santara Point Logo" className="w-10 h-10 lg:w-12 lg:h-12 object-contain" />
                     </div>
                     <div className="flex flex-col">
-                        <h1 className="text-xl lg:text-2xl font-black text-white tracking-tighter leading-none">
+                        <h1 className="text-xl lg:text-3xl font-black text-white tracking-tighter leading-none">
                             Santara<span className="text-emerald-500">Point</span>
                         </h1>
-                        <span className="text-[9px] text-emerald-400/80 font-black uppercase tracking-[0.3em] mt-1 hidden sm:block">Syariah POS Online</span>
+                        <span className="text-[10px] text-emerald-400 font-black uppercase tracking-[0.4em] mt-1.5 hidden sm:block">Syariah POS Online</span>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3 lg:gap-6">
-                    <div className="hidden lg:flex items-center gap-6 mr-4 border-r border-white/10 pr-6">
-                        <button onClick={() => handleAction('dokumentasi')} className="text-gray-400 hover:text-white font-bold text-xs transition-colors uppercase tracking-widest">Dokumentasi</button>
-                        <button onClick={() => handleAction('kontak')} className="text-gray-400 hover:text-white font-bold text-xs transition-colors uppercase tracking-widest">Kontak</button>
+                <div className="flex items-center gap-4 lg:gap-8">
+                    <div className="hidden lg:flex items-center gap-8 mr-6 border-r border-white/10 pr-8">
+                        <button onClick={() => handleAction('dokumentasi')} className="text-gray-400 hover:text-white font-black text-[13px] transition-colors uppercase tracking-[0.1em]">Dokumentasi</button>
+                        <button onClick={() => handleAction('kontak')} className="text-gray-400 hover:text-white font-black text-[13px] transition-colors uppercase tracking-[0.1em]">Kontak</button>
                     </div>
 
                     {!loading && (
@@ -151,28 +150,28 @@ export default function App() {
                             <div className="flex items-center gap-3">
                                 <button
                                     onClick={() => handleAction('profile')}
-                                    className="hidden sm:flex bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-2xl font-black text-xs shadow-xl shadow-emerald-900/40 transition-all active:scale-95 items-center gap-2 uppercase tracking-widest"
+                                    className="hidden sm:flex bg-emerald-600 hover:bg-emerald-500 text-white px-7 py-3 rounded-2xl font-black text-xs shadow-2xl shadow-emerald-900/40 transition-all active:scale-95 items-center gap-2 uppercase tracking-widest"
                                 >
-                                    <User size={16} /> Profil
+                                    <User size={18} /> Profil
                                 </button>
                                 <button
                                     onClick={handleLogout}
-                                    className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/30 px-4 py-2.5 rounded-2xl font-black text-xs transition-all active:scale-95 flex items-center gap-2 uppercase tracking-widest"
+                                    className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/30 px-5 py-3 rounded-2xl font-black text-xs transition-all active:scale-95 flex items-center gap-2 uppercase tracking-widest"
                                 >
-                                    <LogOut size={16} /> <span className="hidden lg:inline">Keluar</span>
+                                    <LogOut size={18} /> <span className="hidden lg:inline">Keluar</span>
                                 </button>
                             </div>
                         ) : (
                             <>
                                 <button
                                     onClick={() => handleAction('login')}
-                                    className="hidden sm:flex items-center gap-2 text-white font-black hover:text-emerald-400 transition text-xs uppercase tracking-widest"
+                                    className="hidden sm:flex items-center gap-2 text-white font-black hover:text-emerald-400 transition text-[13px] uppercase tracking-widest"
                                 >
                                     Login Admin
                                 </button>
                                 <button
                                     onClick={() => handleAction('register')}
-                                    className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
+                                    className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3.5 rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] shadow-2xl shadow-emerald-900/40 transition-all active:scale-95"
                                 >
                                     Daftar Sekarang
                                 </button>
@@ -180,98 +179,98 @@ export default function App() {
                         )
                     )}
 
-                    {/* Mobile Menu Toggle */}
+                    {/* Mobile Toggle */}
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className="md:hidden text-white p-3 bg-white/5 rounded-2xl border border-white/10 transition-all"
+                        className="md:hidden text-white p-3.5 bg-white/5 rounded-2xl border border-white/10 transition-all shadow-xl"
                     >
-                        {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                        {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
                     </button>
                 </div>
             </nav>
 
-            {/* 3. Hero Section Content */}
-            <main className="relative z-10 px-6 lg:px-16 py-8 lg:py-12 flex-1 flex flex-col justify-center min-h-0">
-                <div className="max-w-4xl">
-                    {/* Badge Syariah */}
-                    <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-4 py-1.5 rounded-full text-emerald-400 text-[10px] lg:text-xs font-black mb-6 backdrop-blur-xl animate-fade-in uppercase tracking-[0.2em] shadow-lg shadow-emerald-950/20">
-                        <ShieldCheck size={14} className="animate-pulse" /> POS Full Online Berbasis Syariah
+            {/* 3. Hero Section (Matched to Gambar 2) */}
+            <main className="relative z-10 px-6 lg:px-16 py-12 lg:py-20 flex-1 flex flex-col justify-center min-h-0">
+                <div className="max-w-5xl">
+                    <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-5 py-2.5 rounded-full text-emerald-400 text-[11px] lg:text-xs font-black mb-8 backdrop-blur-3xl animate-fade-in uppercase tracking-[0.25em] shadow-2xl shadow-emerald-950/40">
+                        <ShieldCheck size={16} className="animate-pulse" /> POS Full Online Berbasis Syariah
                     </div>
 
-                    <h2 className="text-[clamp(2.5rem,8vw,5.5rem)] font-black text-white mb-6 leading-[0.95] tracking-[-0.04em]">
+                    <h2 className="text-[clamp(2.5rem,10vw,6.5rem)] font-black text-white mb-8 leading-[0.92] tracking-tighter">
                         Hidangan Lezat, <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-300">
                             Penuh Keberkahan.
                         </span>
                     </h2>
 
-                    <p className="text-gray-400 text-sm lg:text-base mb-10 leading-relaxed max-w-xl font-bold italic opacity-80">
+                    <p className="text-gray-400 text-sm lg:text-xl mb-12 leading-relaxed max-w-2xl font-bold italic opacity-90 border-l-4 border-emerald-500/30 pl-6">
                         Nikmati kemudahan memesan menu pilihan Anda secara online. Sistem yang transparan, amanah, dan membawa keberkahan dalam setiap transaksi.
                     </p>
 
-                    <div className="flex flex-wrap gap-4">
+                    <div className="flex flex-wrap items-center gap-6">
                         <button
                             onClick={() => handleAction('order')}
-                            className="bg-white text-emerald-950 hover:bg-emerald-50 px-10 py-4 lg:px-12 lg:py-5 rounded-[2rem] font-black text-sm lg:text-lg flex items-center gap-3 transition-all shadow-2xl shadow-black/40 hover:-translate-y-1 active:scale-95 uppercase tracking-widest border-b-4 border-emerald-100"
+                            className="w-full sm:w-auto bg-white text-emerald-950 hover:bg-emerald-50 px-12 py-5 lg:px-14 lg:py-6 rounded-[2.5rem] font-black text-base lg:text-xl flex items-center justify-center gap-4 transition-all shadow-2xl shadow-black/60 hover:-translate-y-2 active:scale-95 uppercase tracking-[0.2em] border-b-4 border-emerald-100"
                         >
-                            <ShoppingCart size={22} /> Pesan Sekarang
+                            <ShoppingCart size={24} /> PESAN SEKARANG
                         </button>
                         
-                        <div className="hidden sm:flex items-center gap-3 ml-4">
+                        <div className="hidden sm:flex items-center gap-4 ml-4 px-6 py-3 bg-white/5 backdrop-blur-md rounded-full border border-white/5">
                             <div className="flex -space-x-3">
-                                {[1, 2, 3].map(i => (
-                                    <div key={i} className="w-10 h-10 rounded-full border-2 border-emerald-900 overflow-hidden shadow-lg bg-slate-800">
-                                        <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="User" />
+                                {[11, 12, 13].map(i => (
+                                    <div key={i} className="w-11 h-11 rounded-full border-2 border-emerald-900 overflow-hidden shadow-2xl bg-slate-800">
+                                        <img src={`https://i.pravatar.cc/100?img=${i}`} alt="User" />
                                     </div>
                                 ))}
                             </div>
                             <div className="text-left">
-                                <p className="text-white font-black text-xs">5,000+ Pelanggan</p>
-                                <p className="text-emerald-500 font-bold text-[10px] uppercase">Telah Bergabung</p>
+                                <p className="text-white font-black text-sm tracking-tight">5,000+ Pelanggan</p>
+                                <p className="text-emerald-500 font-bold text-[10px] uppercase tracking-widest">TELAH BERGABUNG</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* 4. Features Section (Bottom Grid) - Minimalist Refinement */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mt-16 pb-4">
+                {/* 4. Modular Features */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mt-20 pb-6">
                     {[
                         {
-                            icon: <MessageCircle className="text-emerald-400" size={22} />,
+                            icon: <MessageCircle className="text-emerald-400" size={26} />,
                             title: "Zakat & Infaq 2,5%",
-                            desc: "Setiap pesanan otomatis menyisihkan dana kepedulian. Hidangan lezat, pahala mengalir."
+                            desc: "Setiap pesanan otomatis menyisihkan dana kepedulian. Hidangan lezat, pahala mengalir deras."
                         },
                         {
-                            icon: <ShieldCheck className="text-emerald-400" size={22} />,
+                            icon: <ShieldCheck className="text-emerald-400" size={26} />,
                             title: "Amanah & Transparan",
-                            desc: "Penyaluran dana amal tercatat secara otomatis di sistem dan dapat dipantau real-time."
+                            desc: "Penyaluran dana amal tercatat otomatis di sistem dan dapat dipantau langsung di nota."
                         },
                         {
-                            icon: <ShoppingBag className="text-emerald-400" size={22} />,
+                            icon: <ShoppingBag className="text-emerald-400" size={26} />,
                             title: "Akad Muamalah",
-                            desc: "Transaksi diproses sesuai prinsip syariah. Jual beli yang tenang dan penuh berkah."
+                            desc: "Transaksi diproses sesuai prinsip syariah. Jual beli yang tenang, aman, dan barokah."
                         }
                     ].map((feature, index) => (
                         <div
                             key={index}
-                            className="group bg-black/40 border border-white/5 backdrop-blur-3xl p-6 rounded-[2rem] hover:bg-white/5 hover:border-emerald-500/30 transition-all duration-500 shadow-2xl"
+                            className="group bg-black/40 border border-white/5 backdrop-blur-3xl p-8 rounded-[2.5rem] hover:bg-white/5 hover:border-emerald-500/30 transition-all duration-500 shadow-2xl relative overflow-hidden"
                         >
-                            <div className="mb-4 p-3 bg-emerald-500/10 rounded-2xl w-fit group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all">
+                             <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/5 rounded-full blur-3xl group-hover:bg-emerald-500/10 transition-all"></div>
+                            <div className="mb-5 p-4 bg-emerald-500/10 rounded-2xl w-fit group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all duration-500 shadow-xl shadow-black/20">
                                 {feature.icon}
                             </div>
-                            <h4 className="text-white font-black text-base mb-2 tracking-tight uppercase tracking-widest text-xs">{feature.title}</h4>
-                            <p className="text-gray-500 text-xs leading-relaxed font-bold">{feature.desc}</p>
+                            <h4 className="text-white font-black text-sm xl:text-base mb-3 tracking-widest uppercase">{feature.title}</h4>
+                            <p className="text-gray-500 text-xs xl:text-sm leading-relaxed font-bold opacity-80 group-hover:opacity-100 transition-opacity">{feature.desc}</p>
                         </div>
                     ))}
                 </div>
             </main>
 
-            {/* 5. Footer Refinement */}
-            <footer className="relative z-10 px-6 lg:px-16 py-4 flex-none flex flex-col sm:flex-row justify-between items-center text-gray-500 text-[10px] border-t border-white/5 bg-black/60 shadow-2xl backdrop-blur-md gap-4">
-                <p className="font-bold">© 2024 <span className="text-emerald-600">Santara Point</span>. Dikembangkan dengan prinsip Amanah & Keberkahan.</p>
-                <div className="flex gap-8 font-black uppercase tracking-widest text-[9px]">
-                    <span className="hover:text-emerald-500 cursor-pointer transition">Syarat & Ketentuan</span>
-                    <span className="hover:text-emerald-500 cursor-pointer transition">Kebijakan Privasi</span>
+            {/* 5. Refined Footer */}
+            <footer className="relative z-10 px-6 lg:px-16 py-6 flex-none flex flex-col sm:flex-row justify-between items-center text-gray-500 text-[11px] border-t border-white/5 bg-black/80 shadow-2xl backdrop-blur-xl gap-6">
+                <p className="font-extrabold tracking-tight">© 2024 <span className="text-emerald-500">Santara Point</span>. Dikembangkan dengan prinsip Amanah & Keberkahan Syariah.</p>
+                <div className="flex gap-10 font-black uppercase tracking-[0.2em] text-[10px]">
+                    <span className="hover:text-emerald-400 cursor-pointer transition-colors">Syarat & Ketentuan</span>
+                    <span className="hover:text-emerald-400 cursor-pointer transition-colors">Kebijakan Privasi</span>
                 </div>
             </footer>
         </div>
