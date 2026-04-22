@@ -644,6 +644,7 @@ function FavoritesContent() {
                     </div>
                 </div>
             </aside>
+        </div>
 
             {/* Injected Waiting Tracker Overlay */}
             <WaitingOverlay
@@ -863,9 +864,7 @@ function FavoritesContent() {
                     </div>
                 </div>
             )}
-
-
-    </main>
+        </main>
 
     {/* Standardized Settings Modal (Customer) */}
     <SettingsModal 
