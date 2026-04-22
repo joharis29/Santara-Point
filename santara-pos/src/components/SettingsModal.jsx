@@ -51,60 +51,60 @@ const SettingsModal = ({
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
             <div className="bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row h-[80vh] md:h-auto max-h-[90vh]">
                 {/* Sidebar Modal */}
-                <div className="w-full md:w-64 bg-slate-50 p-6 flex flex-col gap-2 border-r border-slate-100">
-                    <div className="mb-6 px-2 text-emerald-600 block">
-                        <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
-                            <Settings size={24} />
+                <div className="w-full md:w-60 bg-slate-50 p-5 flex flex-col gap-1 border-r border-slate-100 overflow-y-auto no-scrollbar">
+                    <div className="mb-4 px-2 text-emerald-600 block shrink-0">
+                        <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center mb-3">
+                            <Settings size={20} />
                         </div>
-                        <h3 className="text-xl font-black text-slate-800">Pengaturan</h3>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">Santara Settings</p>
+                        <h3 className="text-lg font-black text-slate-800">Pengaturan</h3>
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mt-0.5">Santara Settings</p>
                     </div>
                     
                     <button
                         onClick={() => setActiveTab('profil')}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${activeTab === 'profil' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
+                        className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-bold transition-all ${activeTab === 'profil' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
                     >
-                        <User size={20} />
+                        <User size={18} />
                         Profil Saya
                     </button>
                     <button
                         onClick={() => setActiveTab('bahasa')}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${activeTab === 'bahasa' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
+                        className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-bold transition-all ${activeTab === 'bahasa' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
                     >
-                        <Languages size={20} />
+                        <Languages size={18} />
                         Bahasa
                     </button>
                     <button
                         onClick={() => setActiveTab('tema')}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${activeTab === 'tema' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
+                        className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-bold transition-all ${activeTab === 'tema' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
                     >
-                        <Palette size={20} />
+                        <Palette size={18} />
                         Tema
                     </button>
 
                     {isAdmin && (
                         <>
-                            <div className="h-px bg-slate-200 my-2 mx-4" />
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-4 mb-1">Manajemen Toko</p>
+                            <div className="h-px bg-slate-200 my-2 mx-3" />
+                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest px-3 mb-1">Manajemen Toko</p>
                             <button
                                 onClick={() => setActiveTab('info-toko')}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${activeTab === 'info-toko' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
+                                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-bold transition-all ${activeTab === 'info-toko' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
                             >
-                                <Building2 size={20} />
+                                <Building2 size={18} />
                                 Info Toko
                             </button>
                             <button
                                 onClick={() => setActiveTab('pajak')}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${activeTab === 'pajak' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
+                                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-bold transition-all ${activeTab === 'pajak' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
                             >
-                                <Calculator size={20} />
+                                <Calculator size={18} />
                                 Pajak
                             </button>
                             <button
                                 onClick={() => setActiveTab('pengguna')}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${activeTab === 'pengguna' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
+                                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-bold transition-all ${activeTab === 'pengguna' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}
                             >
-                                <Users size={20} />
+                                <Users size={18} />
                                 Pengguna
                             </button>
                         </>
@@ -112,10 +112,10 @@ const SettingsModal = ({
                     
                     <button
                         onClick={onClose}
-                        className="mt-auto flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-slate-400 hover:text-red-500 transition-all border border-transparent hover:border-red-100 mb-2"
+                        className="mt-8 flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-bold text-slate-400 hover:text-red-500 transition-all border border-transparent hover:border-red-100 mb-2 shrink-0"
                     >
-                        <X size={20} />
-                        Tutup
+                        <X size={18} />
+                        Keluar / Tutup
                     </button>
                 </div>
 
@@ -124,8 +124,8 @@ const SettingsModal = ({
                     {activeTab === 'profil' && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                             <div>
-                                <h4 className="text-2xl font-black text-slate-800 tracking-tight">Profil Saya</h4>
-                                <p className="text-slate-400 text-sm font-medium mt-1">Kelola informasi data diri Anda.</p>
+                                <h4 className="text-xl font-black text-slate-800 tracking-tight">Profil Saya</h4>
+                                <p className="text-slate-400 text-[12px] font-medium mt-0.5">Kelola informasi data diri Anda.</p>
                             </div>
                             <form onSubmit={handleSaveProfile} className="space-y-5">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
