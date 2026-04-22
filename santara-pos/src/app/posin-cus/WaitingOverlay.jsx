@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Clock, ChefHat, CheckCircle2, ChevronRight, Receipt, XCircle, Download } from 'lucide-react';
+import { Clock, ChefHat, CheckCircle2, ChevronRight, Receipt, XCircle, Download, X } from 'lucide-react';
 import { generateReceiptPDF } from '@/lib/receiptPdf';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -88,6 +88,14 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                 <div className="overflow-y-auto flex-1 flex flex-col">
                     {/* Header Profile */}
                     <div className="bg-slate-50 p-6 border-b border-slate-100 flex flex-col items-center justify-center text-center sticky top-0 z-10 backdrop-blur-md bg-white/80">
+                        {/* Close/Minimize Button */}
+                        <button 
+                            onClick={onClose}
+                            className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 rounded-full transition-all"
+                        >
+                            <X size={18} />
+                        </button>
+                        
                         <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-3 shadow-inner">
                             <Receipt size={32} />
                         </div>

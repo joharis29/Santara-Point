@@ -507,6 +507,7 @@ function CustomerPortalContent() {
     const [orderNote, setOrderNote] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [sortBy, setSortBy] = useState('default');
     // Global Order Tracking
     const { startTracking } = useOrderTracking();
 
