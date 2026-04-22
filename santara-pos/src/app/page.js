@@ -127,7 +127,7 @@ export default function App() {
             </div>
 
             {/* 2. Navigation Bar */}
-            <nav className="relative z-20 flex justify-between items-center px-6 lg:px-16 py-4 border-b border-white/5 backdrop-blur-md flex-none">
+            <nav className="relative z-20 flex justify-between items-center px-6 lg:px-16 py-3 border-b border-white/5 backdrop-blur-md flex-none">
                 <div className="flex items-center gap-3 lg:gap-4 group cursor-pointer" onClick={() => router.push('/')}>
                     <div className="bg-white p-1 rounded-2xl shadow-xl shadow-black/20 group-hover:scale-110 transition-transform duration-500">
                         <img src="/santara-logo.png" alt="Santara Point Logo" className="w-9 h-9 lg:w-11 lg:h-11 object-contain rounded-xl" />
@@ -191,30 +191,30 @@ export default function App() {
             </nav>
 
             {/* 3. Hero Section Content */}
-            <main className="relative z-10 px-6 lg:px-16 py-4 lg:py-8 flex-1 flex flex-col justify-center min-h-0">
+            <main className="relative z-10 px-6 lg:px-16 py-2 lg:py-4 flex-1 flex flex-col justify-center min-h-0">
                 <div className="max-w-4xl">
                     {/* Badge Syariah */}
-                    <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-4 py-1.5 rounded-full text-emerald-400 text-[10px] lg:text-xs font-black mb-6 backdrop-blur-xl animate-fade-in uppercase tracking-[0.2em] shadow-lg shadow-emerald-950/20">
+                    <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-4 py-1.5 rounded-full text-emerald-400 text-[10px] lg:text-xs font-black mb-3 backdrop-blur-xl animate-fade-in uppercase tracking-[0.2em] shadow-lg shadow-emerald-950/20">
                         <ShieldCheck size={14} className="animate-pulse" /> POS Full Online Berbasis Syariah
                     </div>
 
-                    <h2 className="text-[clamp(2.5rem,8vw,5.5rem)] font-black text-white mb-6 leading-[0.95] tracking-[-0.04em]">
+                    <h2 className="text-[clamp(1.8rem,6vw,4.2rem)] font-black text-white mb-4 leading-[0.95] tracking-[-0.04em]">
                         Hidangan Lezat, <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-300">
                             Penuh Keberkahan.
                         </span>
                     </h2>
 
-                    <p className="text-gray-400 text-sm lg:text-base mb-6 leading-relaxed max-w-xl font-bold italic opacity-80">
+                    <p className="text-gray-400 text-xs lg:text-sm mb-4 leading-relaxed max-w-xl font-bold italic opacity-80">
                         Nikmati kemudahan memesan menu pilihan Anda secara online. Sistem yang transparan, amanah, dan membawa keberkahan dalam setiap transaksi.
                     </p>
 
                     <div className="flex flex-wrap gap-4">
                         <button
                             onClick={() => handleAction('order')}
-                            className="bg-white text-emerald-950 hover:bg-emerald-50 px-10 py-4 lg:px-12 lg:py-5 rounded-[2rem] font-black text-sm lg:text-lg flex items-center gap-3 transition-all shadow-2xl shadow-black/40 hover:-translate-y-1 active:scale-95 uppercase tracking-widest border-b-4 border-emerald-100"
+                            className="bg-white text-emerald-950 hover:bg-emerald-50 px-8 py-3 lg:px-10 lg:py-4 rounded-[2rem] font-black text-xs lg:text-base flex items-center gap-3 transition-all shadow-2xl shadow-black/40 hover:-translate-y-1 active:scale-95 uppercase tracking-widest border-b-4 border-emerald-100"
                         >
-                            <ShoppingCart size={22} /> Pesan Sekarang
+                            <ShoppingCart size={20} /> Pesan Sekarang
                         </button>
                         
 
@@ -222,40 +222,40 @@ export default function App() {
                 </div>
 
                 {/* 4. Features Section (Bottom Grid) - Minimalist Refinement */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mt-8 pb-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4 mt-4 pb-2">
                     {[
                         {
-                            icon: <MessageCircle className="text-emerald-400" size={22} />,
+                            icon: <MessageCircle className="text-emerald-400" size={18} />,
                             title: "Zakat & Infaq 2,5%",
                             desc: "Setiap pesanan otomatis menyisihkan dana kepedulian. Hidangan lezat, pahala mengalir."
                         },
                         {
-                            icon: <ShieldCheck className="text-emerald-400" size={22} />,
+                            icon: <ShieldCheck className="text-emerald-400" size={18} />,
                             title: "Amanah & Transparan",
                             desc: "Penyaluran dana amal tercatat secara otomatis di sistem dan dapat dipantau real-time."
                         },
                         {
-                            icon: <ShoppingBag className="text-emerald-400" size={22} />,
+                            icon: <ShoppingBag className="text-emerald-400" size={18} />,
                             title: "Akad Muamalah",
                             desc: "Transaksi diproses sesuai prinsip syariah. Jual beli yang tenang dan penuh berkah."
                         }
                     ].map((feature, index) => (
                         <div
                             key={index}
-                            className="group bg-black/40 border border-white/5 backdrop-blur-3xl p-6 rounded-[2rem] hover:bg-white/5 hover:border-emerald-500/30 transition-all duration-500 shadow-2xl"
+                            className="group bg-black/40 border border-white/5 backdrop-blur-3xl p-4 rounded-[2rem] hover:bg-white/5 hover:border-emerald-500/30 transition-all duration-500 shadow-2xl"
                         >
-                            <div className="mb-4 p-3 bg-emerald-500/10 rounded-2xl w-fit group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all">
+                            <div className="mb-2 p-2 bg-emerald-500/10 rounded-2xl w-fit group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all">
                                 {feature.icon}
                             </div>
-                            <h4 className="text-white font-black text-base mb-2 tracking-tight uppercase tracking-widest text-xs">{feature.title}</h4>
-                            <p className="text-gray-500 text-xs leading-relaxed font-bold">{feature.desc}</p>
+                            <h4 className="text-white font-black text-[10px] lg:text-xs mb-1 tracking-tight uppercase tracking-widest">{feature.title}</h4>
+                            <p className="text-gray-500 text-[9px] lg:text-[10px] leading-relaxed font-bold">{feature.desc}</p>
                         </div>
                     ))}
                 </div>
             </main>
 
             {/* 5. Footer Refinement */}
-            <footer className="relative z-10 px-6 lg:px-16 py-4 flex-none flex flex-col sm:flex-row justify-between items-center text-gray-500 text-[10px] border-t border-white/5 bg-black/60 shadow-2xl backdrop-blur-md gap-4">
+            <footer className="relative z-10 px-6 lg:px-16 py-2 flex-none flex flex-col sm:flex-row justify-between items-center text-gray-500 text-[9px] border-t border-white/5 bg-black/60 shadow-2xl backdrop-blur-md gap-4">
                 <p className="font-bold">© 2024 <span className="text-emerald-600">Santara Point</span>. Dikembangkan dengan prinsip Amanah & Keberkahan.</p>
                 <div className="flex gap-8 font-black uppercase tracking-widest text-[9px]">
                     <span className="hover:text-emerald-500 cursor-pointer transition">Syarat & Ketentuan</span>
