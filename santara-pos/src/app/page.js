@@ -140,7 +140,7 @@ export default function App() {
                         <h1 className="text-lg lg:text-2xl font-black text-white tracking-tighter leading-none">
                             Santara<span className="text-emerald-500">Point</span>
                         </h1>
-                        <span className="text-[8px] lg:text-[9px] text-emerald-400/80 font-black uppercase tracking-[0.3em] mt-1 hidden sm:block">Syariah POS Online</span>
+                        <span className="text-[6.5px] lg:text-[9px] text-emerald-400/80 font-black uppercase tracking-[0.2em] mt-1.5 block">POS Full Online Berbasis Syariah</span>
                     </div>
                 </div>
 
