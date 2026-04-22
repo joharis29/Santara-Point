@@ -49,7 +49,16 @@ const SettingsModal = ({
 
     return (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-            <div className="bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row h-[80vh] md:h-auto max-h-[90vh]">
+            <div className="bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row h-[80vh] md:h-auto max-h-[90vh] relative">
+                {/* Close Button Top Right */}
+                <button 
+                    onClick={onClose}
+                    className="absolute top-6 right-6 p-2 bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-full transition-all z-50 group"
+                    title="Tutup Pengaturan"
+                >
+                    <X size={20} className="group-hover:rotate-90 transition-transform duration-300" />
+                </button>
+
                 {/* Sidebar Modal */}
                 <div className="w-full md:w-60 bg-slate-50 p-5 flex flex-col gap-1 border-r border-slate-100 overflow-y-auto no-scrollbar">
                     <div className="mb-4 px-2 text-emerald-600 block shrink-0">
@@ -109,14 +118,6 @@ const SettingsModal = ({
                             </button>
                         </>
                     )}
-                    
-                    <button
-                        onClick={onClose}
-                        className="mt-8 flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-bold text-slate-400 hover:text-red-500 transition-all border border-transparent hover:border-red-100 mb-2 shrink-0"
-                    >
-                        <X size={18} />
-                        Keluar / Tutup
-                    </button>
                 </div>
 
                 {/* Content Modal */}
