@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { generateReceiptPDF } from '@/lib/receiptPdf';
 import WaitingOverlay from '../posin-cus/WaitingOverlay';
 import {
@@ -122,8 +122,9 @@ const PRODUCTS = [
 
 const categories = ['Semua', 'Makanan', 'Minuman', 'Snack', 'Frozen Food'];
 
-export default function App() {
+function CashierPortalContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [cart, setCart] = useState([]);
     const [products, setProducts] = useState(PRODUCTS);
     const [searchTerm, setSearchTerm] = useState('');
@@ -219,7 +220,16 @@ export default function App() {
             setCurrentTxId(activeTxId);
             setIsWaitingOpen(true);
         }
-    }, [router]);
+
+        // Check for settings query param
+        if (searchParams.get('settings') === 'true') {
+            setIsSettingsOpen(true);
+            const tab = searchParams.get('tab');
+            if (tab === 'profile') {
+                setActiveSettingsTab('profil');
+            }
+        }
+    }, [router, searchParams]);
 
     const handleSaveProfile = async (e) => {
         e.preventDefault();
@@ -800,5 +810,13 @@ export default function App() {
                 updateAddress={updateAddress}
             />
         </div>
+    );
+}
+
+export default function App() {
+    return (
+        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div></div>}>
+            <CashierPortalContent />
+        </Suspense>
     );
 }

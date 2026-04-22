@@ -86,9 +86,11 @@ export default function App() {
             }
         } else if (type === 'profile') {
             if (role === 'Administrator') {
-                router.push('/posin-adm');
+                router.push('/posin-adm?settings=true&tab=profile');
+            } else if (role === 'Operator') {
+                router.push('/posin-cas?settings=true&tab=profile');
             } else {
-                router.push('/posin-cus?settings=true');
+                router.push('/posin-cus?settings=true&tab=profile');
             }
         } else if (type === 'kontak') {
             router.push('/kontak');

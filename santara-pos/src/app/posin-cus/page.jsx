@@ -333,7 +333,10 @@ function CustomerPortalContent() {
         // Check for settings query param
         if (searchParams.get('settings') === 'true') {
             setIsSettingsOpen(true);
-            setActiveSettingsTab('profil');
+            const tab = searchParams.get('tab');
+            if (tab === 'profile') {
+                setActiveSettingsTab('profil');
+            }
         }
     }, [router]);
 
