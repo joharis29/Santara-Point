@@ -806,7 +806,7 @@ function CustomerPortalContent() {
                                                     Rp {(Math.round(product.price / (1 - (product.discountPercent / 100)))).toLocaleString()}
                                                 </span>
                                             )}
-                                            <p className="text-emerald-600 font-black text-base italic">Rp {product.price.toLocaleString('en-US')}</p>
+                                            <p className="text-emerald-600 font-black text-base italic">Rp {product.price.toLocaleString('id-ID')}</p>
                                         </div>
                                     </div>
                                     <div className="mt-3 flex items-center justify-between text-[10px] font-bold text-slate-400">
@@ -846,7 +846,7 @@ function CustomerPortalContent() {
                                     <div key={item.id} className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:border-emerald-200 transition-all">
                                         <div className="flex-1">
                                             <h4 className="font-bold text-[13px] text-slate-800 leading-tight">{item.name}</h4>
-                                            <p className="text-[11px] text-emerald-600 font-bold mt-1">Rp {item.price.toLocaleString('en-US')}</p>
+                                            <p className="text-[11px] text-emerald-600 font-bold mt-1">Rp {item.price.toLocaleString('id-ID')}</p>
                                         </div>
                                         <div className="flex items-center gap-4">
                                             <div className="flex items-center gap-2.5 bg-slate-50 p-1 rounded-lg border border-slate-100">
@@ -927,7 +927,7 @@ function CustomerPortalContent() {
                                             </div>
                                             <span className="text-xs font-medium text-emerald-600">Pajak Daerah (10%)</span>
                                         </div>
-                                        <span className="text-xs font-bold text-emerald-600">Rp {pajakValue.toLocaleString('en-US')}</span>
+                                        <span className="text-xs font-bold text-emerald-600">Rp {pajakValue.toLocaleString('id-ID')}</span>
                                     </div>
                                 </div>
                             )}
@@ -935,7 +935,7 @@ function CustomerPortalContent() {
 
                         <div className="flex justify-between items-center mb-4">
                             <span className="text-sm font-bold text-slate-800 uppercase tracking-wide">TOTAL AKHIR</span>
-                            <span className="text-2xl font-black text-emerald-600 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</span>
+                            <span className="text-2xl font-black text-emerald-600 tracking-tighter">Rp {totalAmount.toLocaleString('id-ID')}</span>
                         </div>
 
                         <div className="flex flex-col gap-3">
@@ -1008,7 +1008,7 @@ function CustomerPortalContent() {
                         <p className="text-sm text-slate-500 mb-4">Silakan konfirmasi pesanan Anda dengan menekan tombol dibawah ini: </p>
 
                         <a
-                            href={`https://wa.me/${storeSettings.whatsapp}?text=Halo%20${encodeURIComponent(storeSettings.storeName)}%2C%20saya%20${encodeURIComponent(customerName)}%20ingin%20mengonfirmasi%20pesanan%20COD%20saya%20sebesar%20Rp%20${totalAmount.toLocaleString('en-US')}.`}
+                            href={`https://wa.me/${storeSettings.whatsapp}?text=Halo%20${encodeURIComponent(storeSettings.storeName)}%2C%20saya%20${encodeURIComponent(customerName)}%20ingin%20mengonfirmasi%20pesanan%20COD%20saya%20sebesar%20Rp%20${totalAmount.toLocaleString('id-ID')}.`}
                             target="_blank"
                             rel="noreferrer"
                             className="bg-slate-50 border border-slate-200 text-emerald-600 font-bold px-4 py-3 rounded-xl mb-6 flex items-center gap-2 hover:bg-emerald-50 transition w-full justify-center"
@@ -1132,7 +1132,7 @@ function CustomerPortalContent() {
                                         <div key={item.id} className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-100">
                                             <div className="flex-1">
                                                 <h4 className="font-bold text-sm text-slate-800">{item.name}</h4>
-                                                <p className="text-xs text-emerald-600 font-black mt-0.5">Rp {item.price.toLocaleString('en-US')}</p>
+                                                <p className="text-xs text-emerald-600 font-black mt-0.5">Rp {item.price.toLocaleString('id-ID')}</p>
                                             </div>
                                             <div className="flex items-center gap-4">
                                                 <div className="flex items-center gap-2.5 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
@@ -1195,14 +1195,14 @@ function CustomerPortalContent() {
                                             <div className="flex justify-between items-center bg-white/10 p-3 rounded-xl border border-white/10">
                                                 <div className="flex flex-col">
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic mb-1">Total Pembayaran</span>
-                                                    <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</span>
+                                                    <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rp {totalAmount.toLocaleString('id-ID')}</span>
                                                 </div>
                                                 {storeSettings.isPajakActive && (
                                                     <div className="flex flex-col items-end">
                                                         <div className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm">
                                                             Pajak (10%)
                                                         </div>
-                                                        <span className="text-[11px] font-bold text-emerald-400/80 mt-1">Rp {pajakValue.toLocaleString('en-US')}</span>
+                                                        <span className="text-[11px] font-bold text-emerald-400/80 mt-1">Rp {pajakValue.toLocaleString('id-ID')}</span>
                                                     </div>
                                                 )}
                                             </div>

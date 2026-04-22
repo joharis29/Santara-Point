@@ -521,7 +521,7 @@ function FavoritesContent() {
                                                 <div className="flex justify-between items-start mb-1">
                                                     <h4 className="font-bold text-slate-800 text-[11px] lg:text-sm line-clamp-2 leading-tight">{product.name}</h4>
                                                 </div>
-                                                <p className="text-emerald-600 font-black text-sm lg:text-base italic">Rp {product.price.toLocaleString('en-US')}</p>
+                                                <p className="text-emerald-600 font-black text-sm lg:text-base italic">Rp {product.price.toLocaleString('id-ID')}</p>
                                             </div>
                                             <div className="mt-2 lg:mt-3 flex items-center justify-between text-[8px] lg:text-[10px] font-bold text-slate-400">
                                                 <span className="truncate max-w-[50px]">{product.category}</span>
@@ -591,7 +591,7 @@ function FavoritesContent() {
                             <p className="text-sm text-slate-500 mb-4">Silakan konfirmasi pesanan Anda dengan menekan tombol dibawah ini: </p>
 
                             <a
-                                href={`https://wa.me/${storeSettings.whatsapp}?text=Halo%20${encodeURIComponent(storeSettings.storeName)}%2C%20saya%20${encodeURIComponent(customerName)}%20ingin%20mengonfirmasi%20pesanan%20COD%20saya%20sebesar%20Rp%20${totalAmount.toLocaleString('en-US')}.`}
+                                href={`https://wa.me/${storeSettings.whatsapp}?text=Halo%20${encodeURIComponent(storeSettings.storeName)}%2C%20saya%20${encodeURIComponent(customerName)}%20ingin%20mengonfirmasi%20pesanan%20COD%20saya%20sebesar%20Rp%20${totalAmount.toLocaleString('id-ID')}.`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="bg-slate-50 border border-slate-200 text-emerald-600 font-bold px-4 py-3 rounded-xl mb-6 flex items-center gap-2 hover:bg-emerald-50 transition w-full justify-center"
@@ -702,7 +702,7 @@ function FavoritesContent() {
                                         <img src={item.img} className="w-20 h-20 rounded-2xl object-cover shadow-md" />
                                         <div className="flex-1">
                                             <h4 className="font-black text-slate-800 mb-1">{item.name}</h4>
-                                            <p className="text-emerald-600 font-black text-sm mb-3">Rp {item.price.toLocaleString('en-US')}</p>
+                                            <p className="text-emerald-600 font-black text-sm mb-3">Rp {item.price.toLocaleString('id-ID')}</p>
                                             <div className="flex items-center gap-4">
                                                 <button onClick={() => updateQty(item.id, -1)} className="w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm text-slate-500 border border-slate-100">
                                                     <Minus size={14} />
@@ -743,7 +743,7 @@ function FavoritesContent() {
                                 <div className="flex justify-between items-center mb-6">
                                     <div>
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Pembayaran</p>
-                                        <p className="text-2xl font-black text-emerald-600 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</p>
+                                        <p className="text-2xl font-black text-emerald-600 tracking-tighter">Rp {totalAmount.toLocaleString('id-ID')}</p>
                                     </div>
                                 </div>
                                 <button
