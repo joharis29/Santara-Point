@@ -480,7 +480,7 @@ function AdminPortalContent() {
                                 <div className="px-1 lg:px-2 flex-1 flex flex-col justify-between">
                                     <div>
                                         <h4 className="font-bold text-slate-800 text-[11px] lg:text-sm line-clamp-2 leading-tight mb-1">{product.name}</h4>
-                                        <p className="text-emerald-700 font-black text-xs lg:text-base italic">Rp {product.price.toLocaleString('en-US')}</p>
+                                        <p className="text-emerald-700 font-black text-xs lg:text-base italic">Rp {product.price.toLocaleString('id-ID')}</p>
                                     </div>
                                 </div>
                             </div>
@@ -519,7 +519,7 @@ function AdminPortalContent() {
                                 <div key={item.id} className="flex items-center justify-between bg-slate-50 p-3.5 rounded-2xl border border-slate-100 hover:border-emerald-200 transition-all">
                                     <div className="flex-1">
                                         <h5 className="font-bold text-[13px] text-slate-800 leading-tight">{item.name}</h5>
-                                        <p className="text-[10px] text-emerald-600 font-black mt-0.5">Rp {(item.price * item.quantity).toLocaleString('en-US')}</p>
+                                        <p className="text-[10px] text-emerald-600 font-black mt-0.5">Rp {(item.price * item.quantity).toLocaleString('id-ID')}</p>
                                     </div>
                                     <div className="flex items-center gap-4">
                                         <div className="flex items-center gap-2.5 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
@@ -583,7 +583,7 @@ function AdminPortalContent() {
                     <div className="space-y-3 mb-5">
                         <div className="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
                             <span>Subtotal</span>
-                            <span className="text-slate-800">Rp {subtotal.toLocaleString('en-US')}</span>
+                            <span className="text-slate-800">Rp {subtotal.toLocaleString('id-ID')}</span>
                         </div>
                         {storeSettings.isPajakActive && (
                             <div className="flex items-center justify-between p-3 rounded-xl border bg-emerald-600 border-emerald-600 text-white shadow-lg">
@@ -591,13 +591,13 @@ function AdminPortalContent() {
                                     <Calculator size={14} />
                                     <span className="text-[10px] font-black uppercase">Pajak Daerah (10%)</span>
                                 </div>
-                                <span className="text-xs font-black">Rp {pajakValue.toLocaleString('en-US')}</span>
+                                <span className="text-xs font-black">Rp {pajakValue.toLocaleString('id-ID')}</span>
                             </div>
                         )}
                     </div>
                     <div className="flex justify-between items-center mb-5">
                         <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Tagihan</span>
-                        <span className="text-2xl font-black text-emerald-700 tracking-tight">Rp {totalAmount.toLocaleString('en-US')}</span>
+                        <span className="text-2xl font-black text-emerald-700 tracking-tight">Rp {totalAmount.toLocaleString('id-ID')}</span>
                     </div>
                     <div className="flex flex-col gap-2">
                         <select
@@ -657,7 +657,7 @@ function AdminPortalContent() {
                                         <div key={item.id} className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border">
                                             <div className="flex-1">
                                                 <h5 className="font-bold text-sm">{item.name}</h5>
-                                                <p className="text-xs font-black text-emerald-600">Rp {(item.price * item.quantity).toLocaleString('en-US')}</p>
+                                                <p className="text-xs font-black text-emerald-600">Rp {(item.price * item.quantity).toLocaleString('id-ID')}</p>
                                             </div>
                                             <div className="flex items-center gap-3">
                                                 <div className="flex items-center gap-3 bg-white p-1 rounded-lg border">
@@ -682,7 +682,7 @@ function AdminPortalContent() {
                         <div className="p-6 bg-slate-50 border-t border-slate-100">
                             <div className="flex justify-between items-center mb-6">
                                 <span className="font-black text-slate-400 uppercase text-[10px]">Total Bayar</span>
-                                <span className="text-2xl font-black text-emerald-700">Rp {totalAmount.toLocaleString('en-US')}</span>
+                                <span className="text-2xl font-black text-emerald-700">Rp {totalAmount.toLocaleString('id-ID')}</span>
                             </div>
                             <button onClick={handleCheckout} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-emerald-100">Proses Pembayaran</button>
                         </div>

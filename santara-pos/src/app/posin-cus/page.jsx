@@ -295,7 +295,7 @@ function CustomerPortalContent() {
                 // Merge with master data to ensure new properties like discountPercent are present
                 const merged = PRODUCTS.map(masterItem => {
                     const storedItem = parsed.find(p => p.id === masterItem.id);
-                    return storedItem ? { ...masterItem, ...storedItem } : masterItem;
+                    return storedItem ? { ...storedItem, ...masterItem } : masterItem;
                 });
                 setProducts(merged);
             } catch (e) {
@@ -549,6 +549,10 @@ function CustomerPortalContent() {
     };
 
     const confirmAddToCart = (product, topping = null) => {
+        const discountedPrice = product.discountPercent > 0 
+            ? Math.round(product.price * (1 - (product.discountPercent / 100))) 
+            : product.price;
+
         const finalId = topping && topping !== 'Tanpa Toping' ? `${product.id}-${topping}` : product.id;
         const finalName = topping && topping !== 'Tanpa Toping' ? `${product.name} (${topping})` : product.name;
 
@@ -556,7 +560,7 @@ function CustomerPortalContent() {
         if (exist) {
             setCart(cart.map(x => x.id === finalId ? { ...x, quantity: x.quantity + 1 } : x));
         } else {
-            setCart([...cart, { ...product, id: finalId, name: finalName, quantity: 1, originalId: product.id }]);
+            setCart([...cart, { ...product, id: finalId, name: finalName, price: discountedPrice, quantity: 1, originalId: product.id }]);
         }
         setToppingModalProduct(null);
     };
@@ -803,10 +807,14 @@ function CustomerPortalContent() {
                                         <div className="flex flex-col">
                                             {product.discountPercent > 0 && (
                                                 <span className="text-[10px] font-bold line-through text-slate-400">
-                                                    Rp {(Math.round(product.price / (1 - (product.discountPercent / 100)))).toLocaleString()}
+                                                    Rp {product.price.toLocaleString('id-ID')}
                                                 </span>
                                             )}
-                                            <p className="text-emerald-600 font-black text-base italic">Rp {product.price.toLocaleString('id-ID')}</p>
+                                            <p className="text-emerald-600 font-black text-base italic">
+                                                Rp {(product.discountPercent > 0 
+                                                    ? Math.round(product.price * (1 - (product.discountPercent / 100))) 
+                                                    : product.price).toLocaleString('id-ID')}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="mt-3 flex items-center justify-between text-[10px] font-bold text-slate-400">
@@ -914,7 +922,7 @@ function CustomerPortalContent() {
                         <div className="mb-4 space-y-2">
                             <div className="flex justify-between text-slate-500 text-xs font-medium">
                                 <span>Subtotal</span>
-                                <span>Rp {subtotal.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+                                <span>Rp {subtotal.toLocaleString('id-ID', { maximumFractionDigits: 0 })}</span>
                             </div>
 
                             {/* Toggles & Breakdown Pajak */}

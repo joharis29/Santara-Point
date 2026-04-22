@@ -249,10 +249,20 @@ function FavoritesContent() {
         const storedProducts = localStorage.getItem('santaraProducts');
         if (storedProducts) {
             try {
-                setProducts(JSON.parse(storedProducts));
+                const parsed = JSON.parse(storedProducts);
+                const merged = PRODUCTS.map(masterItem => {
+                    const storedItem = parsed.find(p => p.id === masterItem.id);
+                    // Master data (PRODUCTS) always wins for core properties (like price) to ensure consistency
+                    return storedItem ? { ...storedItem, ...masterItem } : masterItem;
+                });
+                setProducts(merged);
             } catch (e) {
                 console.error("Error parsing products", e);
+                setProducts(PRODUCTS);
             }
+        } else {
+            localStorage.setItem('santaraProducts', JSON.stringify(PRODUCTS));
+            setProducts(PRODUCTS);
         }
 
         const storedSettings = localStorage.getItem('santaraStoreSettings');
@@ -339,6 +349,10 @@ function FavoritesContent() {
     };
 
     const confirmAddToCart = (product, topping = null) => {
+        const discountedPrice = product.discountPercent > 0 
+            ? Math.round(product.price * (1 - (product.discountPercent / 100))) 
+            : product.price;
+
         const finalId = topping && topping !== 'Tanpa Toping' ? `${product.id}-${topping}` : product.id;
         const finalName = topping && topping !== 'Tanpa Toping' ? `${product.name} (${topping})` : product.name;
 
@@ -346,7 +360,7 @@ function FavoritesContent() {
         if (exist) {
             setCart(cart.map(x => x.id === finalId ? { ...x, quantity: x.quantity + 1 } : x));
         } else {
-            setCart([...cart, { ...product, id: finalId, name: finalName, quantity: 1, originalId: product.id }]);
+            setCart([...cart, { ...product, id: finalId, name: finalName, price: discountedPrice, quantity: 1, originalId: product.id }]);
         }
         setToppingModalProduct(null);
     };
@@ -516,13 +530,24 @@ function FavoritesContent() {
                                             </button>
                                             <ProductImageSlider product={product} />
                                         </div>
-                                        <div className="px-1 lg:px-2 flex-1 flex flex-col justify-between">
-                                            <div>
-                                                <div className="flex justify-between items-start mb-1">
-                                                    <h4 className="font-bold text-slate-800 text-[11px] lg:text-sm line-clamp-2 leading-tight">{product.name}</h4>
+                                            <div className="px-1 lg:px-2 flex-1 flex flex-col justify-between">
+                                                <div>
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <h4 className="font-bold text-slate-800 text-[11px] lg:text-sm line-clamp-2 leading-tight">{product.name}</h4>
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        {product.discountPercent > 0 && (
+                                                            <span className="text-[10px] font-bold line-through text-slate-400">
+                                                                Rp {product.price.toLocaleString('id-ID')}
+                                                            </span>
+                                                        )}
+                                                        <p className="text-emerald-600 font-black text-sm lg:text-base italic">
+                                                            Rp {(product.discountPercent > 0 
+                                                                ? Math.round(product.price * (1 - (product.discountPercent / 100))) 
+                                                                : product.price).toLocaleString('id-ID')}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <p className="text-emerald-600 font-black text-sm lg:text-base italic">Rp {product.price.toLocaleString('id-ID')}</p>
-                                            </div>
                                             <div className="mt-2 lg:mt-3 flex items-center justify-between text-[8px] lg:text-[10px] font-bold text-slate-400">
                                                 <span className="truncate max-w-[50px]">{product.category}</span>
                                                 <span className={`font-black uppercase tracking-tighter ${product.stock > 10 ? 'text-emerald-400' : product.stock > 0 ? 'text-amber-500' : 'text-slate-400'}`}>

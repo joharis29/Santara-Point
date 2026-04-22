@@ -484,7 +484,7 @@ function CashierPortalContent() {
                                             {product.discountPercent > 0 && (
                                                 <span className="text-[10px] font-bold line-through text-slate-400">Rp {product.originalPrice?.toLocaleString()}</span>
                                             )}
-                                            <p className="text-emerald-600 font-black text-base italic">Rp {product.price.toLocaleString('en-US')}</p>
+                                            <p className="text-emerald-600 font-black text-base italic">Rp {product.price.toLocaleString('id-ID')}</p>
                                         </div>
                                     </div>
                                     <div className="mt-3 flex items-center justify-between text-[10px] font-bold text-slate-400">
@@ -525,7 +525,7 @@ function CashierPortalContent() {
                                 <div key={item.id} className="flex items-center justify-between bg-slate-50 p-3.5 rounded-2xl border border-slate-100 hover:border-emerald-200 transition-all">
                                     <div className="flex-1">
                                         <h5 className="font-bold text-[13px] text-slate-800 leading-tight">{item.name}</h5>
-                                        <p className="text-[10px] text-emerald-600 font-black mt-0.5">Rp {(item.price * item.quantity).toLocaleString('en-US')}</p>
+                                        <p className="text-[10px] text-emerald-600 font-black mt-0.5">Rp {(item.price * item.quantity).toLocaleString('id-ID')}</p>
                                     </div>
                                     <div className="flex items-center gap-4">
                                         <div className="flex items-center gap-2.5 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
@@ -589,7 +589,7 @@ function CashierPortalContent() {
                     <div className="space-y-3 mb-5">
                         <div className="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
                             <span>Subtotal</span>
-                            <span className="text-slate-800">Rp {subtotal.toLocaleString('en-US')}</span>
+                            <span className="text-slate-800">Rp {subtotal.toLocaleString('id-ID')}</span>
                         </div>
 
                         {/* Kalkulator Pajak Daerah */}
@@ -602,7 +602,7 @@ function CashierPortalContent() {
                                             <span className="text-[10px] font-black uppercase leading-none">Pajak Daerah (10%)</span>
                                         </div>
                                     </div>
-                                    <span className="text-xs font-black">Rp {pajakValue.toLocaleString('en-US')}</span>
+                                    <span className="text-xs font-black">Rp {pajakValue.toLocaleString('id-ID')}</span>
                                 </div>
                             </div>
                         )}
@@ -610,7 +610,7 @@ function CashierPortalContent() {
 
                     <div className="flex justify-between items-center mb-5">
                         <span className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Total Tagihan</span>
-                        <span className="text-2xl font-black text-emerald-700 tracking-tight">Rp {totalAmount.toLocaleString('en-US')}</span>
+                        <span className="text-2xl font-black text-emerald-700 tracking-tight">Rp {totalAmount.toLocaleString('id-ID')}</span>
                     </div>
 
                     <div className="flex flex-col gap-2">
@@ -679,7 +679,7 @@ function CashierPortalContent() {
                                         <div key={item.id} className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
                                             <div className="flex-1">
                                                 <h4 className="font-bold text-sm text-slate-800">{item.name}</h4>
-                                                <p className="text-xs text-emerald-600 font-black mt-0.5">Rp {(item.price * item.quantity).toLocaleString('en-US')}</p>
+                                                <p className="text-xs text-emerald-600 font-black mt-0.5">Rp {(item.price * item.quantity).toLocaleString('id-ID')}</p>
                                             </div>
                                             <div className="flex items-center gap-4">
                                                 <div className="flex items-center gap-2.5 bg-slate-50 p-1 rounded-xl border border-slate-200 shadow-sm">
@@ -723,7 +723,7 @@ function CashierPortalContent() {
                                             <div className="flex justify-between items-center mb-6">
                                                 <div className="flex flex-col">
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic mb-1">Total Tunai</span>
-                                                    <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rp {totalAmount.toLocaleString('en-US')}</span>
+                                                    <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rp {totalAmount.toLocaleString('id-ID')}</span>
                                                 </div>
                                              <div className="flex flex-col items-end gap-1">
                                                 {storeSettings.isPajakActive && (
