@@ -191,6 +191,15 @@ function AdminPortalContent() {
     const [isCartModalOpen, setIsCartModalOpen] = useState(false);
     const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
 
+    // --- State Perubahan Data (Inputs) ---
+    const [newEmailInput, setNewEmailInput] = useState('');
+    const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
+    const [newWhatsappInput, setNewWhatsappInput] = useState('');
+    const [isUpdatingWhatsapp, setIsUpdatingWhatsapp] = useState(false);
+    const [newPasswordInput, setNewPasswordInput] = useState('');
+    const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
+    const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
     React.useEffect(() => {
         // Security Check
         const userRole = localStorage.getItem('currentUserRole');
@@ -272,17 +281,80 @@ function AdminPortalContent() {
 
     const handleSaveProfile = async (e) => {
         e.preventDefault();
+        const fullName = `${userProfile.firstName} ${userProfile.lastName}`.trim();
+
         try {
             const { error } = await supabase.auth.updateUser({
                 data: {
                     first_name: userProfile.firstName,
-                    last_name: userProfile.lastName
+                    last_name: userProfile.lastName,
+                    whatsapp: userProfile.whatsapp,
+                    addresses: userProfile.addresses
                 }
             });
             if (error) throw error;
             alert('Profil berhasil diperbarui!');
         } catch (err) {
             alert(err.message);
+        }
+    };
+
+    const handleConfirmEmailChange = async (e) => {
+        e.preventDefault();
+        if (!newEmailInput || !newEmailInput.includes('@')) return alert('Email tidak valid.');
+
+        setIsUpdatingEmail(true);
+        try {
+            const { error } = await supabase.auth.updateUser({ email: newEmailInput });
+            if (error) throw error;
+            alert('Permintaan perubahan email dikirim! Cek email BARU Anda.');
+            setIsChangeEmailOpen(false);
+            setNewEmailInput('');
+        } catch (err) {
+            alert("Gagal: " + err.message);
+        } finally {
+            setIsUpdatingEmail(false);
+        }
+    };
+
+    const handleConfirmWhatsappChange = async (e) => {
+        e.preventDefault();
+        if (!newWhatsappInput || newWhatsappInput.length < 10) return alert('Nomor WhatsApp tidak valid.');
+
+        setIsUpdatingWhatsapp(true);
+        try {
+            const { error } = await supabase.auth.updateUser({
+                data: { whatsapp: newWhatsappInput }
+            });
+            if (error) throw error;
+            setUserProfile(prev => ({ ...prev, whatsapp: newWhatsappInput }));
+            alert('WhatsApp berhasil diperbarui.');
+            setIsChangeWhatsappOpen(false);
+            setNewWhatsappInput('');
+        } catch (err) {
+            alert("Gagal: " + err.message);
+        } finally {
+            setIsUpdatingWhatsapp(false);
+        }
+    };
+
+    const handleConfirmPasswordChange = async (e) => {
+        e.preventDefault();
+        if (newPasswordInput.length < 6) return alert('Sandi minimal 6 karakter.');
+        if (newPasswordInput !== confirmPasswordInput) return alert('Konfirmasi sandi tidak cocok.');
+
+        setIsUpdatingPassword(true);
+        try {
+            const { error } = await supabase.auth.updateUser({ password: newPasswordInput });
+            if (error) throw error;
+            alert('Kata sandi berhasil diperbarui.');
+            setIsChangePasswordOpen(false);
+            setNewPasswordInput('');
+            setConfirmPasswordInput('');
+        } catch (err) {
+            alert("Gagal: " + err.message);
+        } finally {
+            setIsUpdatingPassword(false);
         }
     };
 
@@ -731,9 +803,101 @@ function AdminPortalContent() {
                 removeAddress={removeAddress}
                 updateAddress={updateAddress}
             />
+            <ChangeEmailModal
+                isOpen={isChangeEmailOpen}
+                onClose={() => setIsChangeEmailOpen(false)}
+                oldEmail={userProfile.email}
+                newEmail={newEmailInput}
+                setNewEmail={setNewEmailInput}
+                onConfirm={handleConfirmEmailChange}
+                isProcessing={isUpdatingEmail}
+            />
+            <ChangeWhatsappModal
+                isOpen={isChangeWhatsappOpen}
+                onClose={() => setIsChangeWhatsappOpen(false)}
+                oldWhatsapp={userProfile.whatsapp}
+                newWhatsapp={newWhatsappInput}
+                setNewWhatsapp={setNewWhatsappInput}
+                onConfirm={handleConfirmWhatsappChange}
+                isProcessing={isUpdatingWhatsapp}
+            />
+            <ChangePasswordModal
+                isOpen={isChangePasswordOpen}
+                onClose={() => setIsChangePasswordOpen(false)}
+                newPassword={newPasswordInput}
+                setNewPassword={setNewPasswordInput}
+                confirmPassword={confirmPasswordInput}
+                setConfirmPassword={setConfirmPasswordInput}
+                onConfirm={handleConfirmPasswordChange}
+                isProcessing={isUpdatingPassword}
+            />
         </div>
     );
 }
+
+// Modal Ganti Email
+const ChangeEmailModal = ({ isOpen, onClose, oldEmail, newEmail, setNewEmail, onConfirm, isProcessing }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+            <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 space-y-6">
+                <h4 className="text-2xl font-black text-slate-800">Ganti Email</h4>
+                <form onSubmit={onConfirm} className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Email Baru</label>
+                        <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} required className="w-full px-5 py-3 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
+                    </div>
+                    <div className="flex gap-3">
+                        <button type="button" onClick={onClose} className="flex-1 py-4 bg-slate-100 rounded-2xl font-black">Batal</button>
+                        <button type="submit" disabled={isProcessing} className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-black disabled:opacity-50">Konfirmasi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+// Modal Ganti WhatsApp
+const ChangeWhatsappModal = ({ isOpen, onClose, oldWhatsapp, newWhatsapp, setNewWhatsapp, onConfirm, isProcessing }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+            <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 space-y-6">
+                <h4 className="text-2xl font-black text-slate-800">Ganti WhatsApp</h4>
+                <form onSubmit={onConfirm} className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Nomor Baru</label>
+                        <input type="tel" value={newWhatsapp} onChange={(e) => setNewWhatsapp(e.target.value)} required className="w-full px-5 py-3 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
+                    </div>
+                    <div className="flex gap-3">
+                        <button type="button" onClick={onClose} className="flex-1 py-4 bg-slate-100 rounded-2xl font-black">Batal</button>
+                        <button type="submit" disabled={isProcessing} className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-black disabled:opacity-50">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+// Modal Ganti Password
+const ChangePasswordModal = ({ isOpen, onClose, newPassword, setNewPassword, confirmPassword, setConfirmPassword, onConfirm, isProcessing }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+            <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 space-y-6">
+                <h4 className="text-2xl font-black text-slate-800">Ganti Sandi</h4>
+                <form onSubmit={onConfirm} className="space-y-4">
+                    <input type="password" placeholder="Sandi Baru" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required className="w-full px-5 py-3 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
+                    <input type="password" placeholder="Konfirmasi Sandi" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="w-full px-5 py-3 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
+                    <div className="flex gap-3">
+                        <button type="button" onClick={onClose} className="flex-1 py-4 bg-slate-100 rounded-2xl font-black">Batal</button>
+                        <button type="submit" disabled={isProcessing} className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-black disabled:opacity-50">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
 
 export default function App() {
     return (

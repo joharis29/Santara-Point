@@ -3,17 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  ShoppingBag,
-  ShieldCheck,
-  MessageCircle,
-  Store,
-  User,
-  ShoppingCart,
-  ChevronRight,
-  ArrowRight,
-  LogOut,
-  Menu,
-  X
+    ShoppingBag,
+    ShieldCheck,
+    MessageCircle,
+    Store,
+    User,
+    ShoppingCart,
+    ChevronRight,
+    ArrowRight,
+    LogOut,
+    Menu,
+    X
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import BackgroundSlider from '@/components/BackgroundSlider';
@@ -24,49 +24,49 @@ import BackgroundSlider from '@/components/BackgroundSlider';
  */
 
 export default function App() {
-  const router = useRouter();
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [customerName, setCustomerName] = useState('Sobat Santara');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const router = useRouter();
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [customerName, setCustomerName] = useState('Sobat Santara');
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    // 1. Check initial session
-    const checkUser = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          const meta = session.user.user_metadata || {};
-          if (meta.first_name || meta.last_name) {
-            setCustomerName(`${meta.first_name || ''} ${meta.last_name || ''}`.trim());
-          }
-        }
-      } catch (err) {
-        console.error("Auth check error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    useEffect(() => {
+        // 1. Check initial session
+        const checkUser = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                setUser(session?.user ?? null);
+                if (session?.user) {
+                    const meta = session.user.user_metadata || {};
+                    if (meta.first_name || meta.last_name) {
+                        setCustomerName(`${meta.first_name || ''} ${meta.last_name || ''}`.trim());
+                    }
+                }
+            } catch (err) {
+                console.error("Auth check error:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    checkUser();
+        checkUser();
 
-    // 2. Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const meta = session.user.user_metadata || {};
-        if (meta.first_name || meta.last_name) {
-          setCustomerName(`${meta.first_name || ''} ${meta.last_name || ''}`.trim());
-        }
-      }
-      setLoading(false);
-    });
+        // 2. Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+            if (session?.user) {
+                const meta = session.user.user_metadata || {};
+                if (meta.first_name || meta.last_name) {
+                    setCustomerName(`${meta.first_name || ''} ${meta.last_name || ''}`.trim());
+                }
+            }
+            setLoading(false);
+        });
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, []);
 
     // Fungsi placeholder untuk navigasi
     const handleAction = (type) => {
@@ -119,14 +119,14 @@ export default function App() {
         <div className="relative h-screen w-full flex flex-col font-sans overflow-hidden selection:bg-emerald-200 selection:text-emerald-900">
 
             {/* 1. Background Layer (Kompilasi Makanan - Moving Slider) */}
-            <BackgroundSlider 
+            <BackgroundSlider
                 images={[
                     '/santara-bg-clean-hd.png',
                     '/santara-slide-2.png',
                     '/santara-slide-3.png',
                     '/santara-slide-4.png',
                     '/santara-slide-5.png'
-                ]} 
+                ]}
                 interval={7000}
             />
 
@@ -208,7 +208,7 @@ export default function App() {
                             <X size={24} />
                         </button>
                     </div>
-                    
+
                     <div className="flex flex-col gap-6 mb-12">
                         <button onClick={() => { handleAction('dokumentasi'); setIsMobileMenuOpen(false); }} className="text-2xl font-black text-slate-400 hover:text-white transition-colors text-left">DOKUMENTASI</button>
                         <button onClick={() => { handleAction('kontak'); setIsMobileMenuOpen(false); }} className="text-2xl font-black text-slate-400 hover:text-white transition-colors text-left">KONTAK</button>
@@ -278,7 +278,7 @@ export default function App() {
                         >
                             <ShoppingCart size={20} /> Pesan Sekarang
                         </button>
-                        
+
 
                     </div>
                 </div>
@@ -288,18 +288,18 @@ export default function App() {
                     {[
                         {
                             icon: <MessageCircle className="text-emerald-400" size={18} />,
-                            title: "Zakat & Infaq 2,5%",
-                            desc: "Setiap pesanan otomatis menyisihkan dana kepedulian. Hidangan lezat, pahala mengalir."
+                            title: "Program Berbagi",
+                            desc: "Nikmati Hidangan lezat sembari terus mengalirkan kebaikan tanpa harus menunggu perhitungan akhir tahun"
                         },
                         {
                             icon: <ShieldCheck className="text-emerald-400" size={18} />,
-                            title: "Amanah & Transparan",
-                            desc: "Penyaluran dana amal tercatat secara otomatis di sistem dan dapat dipantau real-time."
+                            title: "Tata Kelola Yang Amanah",
+                            desc: "Penyaluran dana sosial tercatat rapi dan terintegrasi dengan laporan keuangan"
                         },
                         {
                             icon: <ShoppingBag className="text-emerald-400" size={18} />,
-                            title: "Akad Muamalah",
-                            desc: "Transaksi diproses sesuai prinsip syariah. Jual beli yang tenang dan penuh berkah."
+                            title: "Akad Jual Beli Jelas",
+                            desc: "Rincian harga pokok, pajak daerah, hingga porsi donasi dipisahkan secara transparan disetiap nota"
                         }
                     ].map((feature, index) => (
                         <div
