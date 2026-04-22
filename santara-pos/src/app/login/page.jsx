@@ -10,23 +10,38 @@ import {
   EyeOff
 } from 'lucide-react';
 
-const DEFAULT_SETTINGS = {
-    storeName: 'Santara Point',
-    storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
-    whatsapp: '6285846802177',
-    email: 'santarapoint@gmail.com',
-    address: 'Jl. Raya Santara No. 123, Bandung',
-    footerText: '© 2024 Santara Point. Berkah setiap saat.'
-};
+// Komponen Utama
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-emerald-950">
+                <div className="animate-pulse flex flex-col items-center gap-4">
+                    <img src="/santara-logo.png" alt="Loading" className="w-16 h-16 opacity-50" />
+                    <p className="text-emerald-100 font-bold tracking-widest text-xs uppercase">Memuat Santara...</p>
+                </div>
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
+    );
+}
 
-// --- Sub-Komponen Konten Login ---
-const LoginContent = () => {
+// Komponen Konten (Hoisted)
+function LoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
+    const [storeSettings, setStoreSettings] = useState({
+        storeName: 'Santara Point',
+        storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
+        whatsapp: '6285846802177',
+        email: 'santarapoint@gmail.com',
+        address: 'Jl. Raya Santara No. 123, Bandung',
+        footerText: '© 2024 Santara Point. Berkah setiap saat.'
+    });
 
     useEffect(() => {
         if (searchParams.get('message') === 'confirmed') {
@@ -39,14 +54,15 @@ const LoginContent = () => {
         const stored = localStorage.getItem('santaraStoreSettings');
         if (stored) {
             try {
-                setStoreSettings(JSON.parse(stored));
+                const parsed = JSON.parse(stored);
+                setStoreSettings(prev => ({ ...prev, ...parsed }));
             } catch (e) {
                 console.error("Error parsing settings", e);
             }
         }
     }, []);
 
-    const handleSubmit = async (e) => {
+    async function handleSubmit(e) {
         e.preventDefault();
 
         if (!email || !password) {
@@ -113,7 +129,7 @@ const LoginContent = () => {
             console.error("Kesalahan sistem:", err);
             alert("Terjadi kesalahan sistem, mohon coba lagi nanti.");
         }
-    };
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-cover bg-center bg-no-repeat relative" style={{ backgroundImage: "url('/bg-food.png')" }}>
@@ -133,7 +149,7 @@ const LoginContent = () => {
                     </div>
                     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Email</label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                                 <input
@@ -176,7 +192,7 @@ const LoginContent = () => {
                                 </button>
                             </div>
                         </div>
-                        <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition duration-200">
+                        <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition duration-200">
                             Masuk Sekarang
                         </button>
                     </form>
@@ -196,20 +212,5 @@ const LoginContent = () => {
                 </div>
             </div>
         </div>
-    );
-};
-
-export default function LoginPage() {
-    return (
-        <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center bg-emerald-950">
-                <div className="animate-pulse flex flex-col items-center gap-4">
-                    <img src="/santara-logo.png" alt="Loading" className="w-16 h-16 opacity-50" />
-                    <p className="text-emerald-100 font-bold tracking-widest text-xs uppercase">Memuat Santara...</p>
-                </div>
-            </div>
-        }>
-            <LoginContent />
-        </Suspense>
     );
 }
