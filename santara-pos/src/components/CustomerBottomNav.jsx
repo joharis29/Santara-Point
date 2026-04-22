@@ -15,7 +15,7 @@ const CustomerBottomNav = ({ onOpenSettings }) => {
     const pathname = usePathname();
 
     const navItems = [
-        { icon: <Home size={20} />, label: "Beranda", href: "/" },
+        { icon: <Home size={20} />, label: "Beranda", href: "/homepage" },
         { icon: <ShoppingBag size={20} />, label: "Menu", href: "/posin-cus" },
         { icon: <Heart size={20} />, label: "Favorit", href: "/favorites" },
         { icon: <Clock size={20} />, label: "Riwayat", href: "/customer-history" },

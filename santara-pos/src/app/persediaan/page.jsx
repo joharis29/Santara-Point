@@ -370,7 +370,7 @@ export default function PersediaanPage() {
                         <ShoppingBag size={20} />
                         <span className="text-[10px] font-bold uppercase tracking-tight">Beli</span>
                     </button>
-                    <button onClick={() => router.push('/')} className="flex flex-col items-center gap-1 text-slate-400">
+                    <button onClick={() => router.push('/homepage')} className="flex flex-col items-center gap-1 text-slate-400">
                         <Home size={20} />
                         <span className="text-[10px] font-bold uppercase tracking-tight">Home</span>
                     </button>

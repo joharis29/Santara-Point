@@ -68,7 +68,7 @@ const CashierSidebar = ({ isOpen, setIsOpen, onOpenSettings }) => {
             <div className="p-6 flex items-center justify-between border-b border-slate-800 bg-slate-950/20">
                 <div className="flex items-center gap-3">
                     <button 
-                        onClick={() => router.push('/')} 
+                        onClick={() => router.push('/homepage')} 
                         className="bg-emerald-500 p-2 rounded-xl flex items-center justify-center hover:scale-110 transition-transform cursor-pointer shadow-lg shadow-emerald-500/20"
                     >
                         <Store className="text-white" size={20} />
@@ -108,7 +108,7 @@ const CashierSidebar = ({ isOpen, setIsOpen, onOpenSettings }) => {
 
             <div className="p-4 border-t border-slate-800 space-y-2">
                 <button 
-                    onClick={() => router.push('/')} 
+                    onClick={() => router.push('/homepage')} 
                     className="w-full flex items-center gap-4 p-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all font-bold text-sm"
                 >
                     <Home size={20} />

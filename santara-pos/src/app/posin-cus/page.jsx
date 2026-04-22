@@ -717,7 +717,7 @@ function CustomerPortalContent() {
                 <header className="px-6 py-8 md:px-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div className="flex items-center gap-4">
                         <button 
-                            onClick={() => router.push('/')}
+                            onClick={() => router.push('/homepage')}
                             className="p-2.5 hover:bg-slate-100 rounded-2xl transition-all text-slate-600 border border-slate-100 shadow-sm md:shadow-none md:border-none"
                             title="Kembali ke Beranda"
                         >

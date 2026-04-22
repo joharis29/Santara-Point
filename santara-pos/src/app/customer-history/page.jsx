@@ -204,7 +204,7 @@ export default function CustomerHistory() {
         <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden relative">
             {/* Standardized Sidebar (Desktop) */}
             <aside className="hidden lg:flex w-24 bg-white border-r border-slate-100 flex-col items-center py-10 gap-12">
-                <button onClick={() => router.push('/')} className="hover:scale-105 transition-transform" title="Ke Beranda">
+                <button onClick={() => router.push('/homepage')} className="hover:scale-105 transition-transform" title="Ke Beranda">
                     <img src="/santara-logo.png" alt="Santara Logo" className="w-10 h-10 object-contain" />
                 </button>
                 <nav className="flex-1 flex flex-col gap-8">
