@@ -351,11 +351,11 @@ function AdminPortalContent() {
             orderType: orderType,
             keterangan: orderNote,
             paymentMethod: paymentMethod,
-            source: 'Adm', 
+            source: 'Owner', 
             cashierName: 'Administrator',
             totalAmount: totalAmount,
             pajak: pajakValue,
-            status: 'Selesai',
+            status: 'Menunggu',
             items: cart.map(item => ({
                 name: item.name,
                 price: item.price,

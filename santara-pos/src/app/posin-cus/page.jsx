@@ -692,6 +692,20 @@ function CustomerPortalContent() {
                         <TrendingUp size={24} />
                     </button>
                     <button 
+                        onClick={() => router.push('/favorites')}
+                        className="p-4 rounded-2xl text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition-all"
+                        title="Favorit Saya"
+                    >
+                        <Heart size={24} />
+                    </button>
+                    <button 
+                        onClick={() => router.push('/customer-history')}
+                        className="p-4 rounded-2xl text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition-all"
+                        title="Riwayat Pesanan"
+                    >
+                        <Clock size={24} />
+                    </button>
+                    <button 
                         onClick={() => {
                             setActiveSettingsTab('profil');
                             setIsSettingsOpen(true);

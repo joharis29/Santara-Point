@@ -8,7 +8,10 @@ import {
     ShieldCheck, 
     ShoppingCart,
     MapPin,
-    Settings
+    Settings,
+    Heart,
+    Clock,
+    Home
 } from 'lucide-react';
 
 const CustomerHeader = ({ 
@@ -52,6 +55,24 @@ const CustomerHeader = ({
             </div>
 
             <div className="flex items-center gap-3 w-full md:w-auto">
+                {/* Desktop Navigation Links */}
+                <div className="hidden lg:flex items-center gap-1 mr-4">
+                    {[
+                        { icon: <Home size={18} />, label: "Beranda", href: "/" },
+                        { icon: <Heart size={18} />, label: "Favorit", href: "/favorites" },
+                        { icon: <Clock size={18} />, label: "Riwayat", href: "/customer-history" },
+                    ].map((item, idx) => (
+                        <button
+                            key={idx}
+                            onClick={() => router.push(item.href)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 transition-all font-bold text-sm"
+                        >
+                            {item.icon}
+                            <span>{item.label}</span>
+                        </button>
+                    ))}
+                </div>
+
                 {showSearch && setSearchTerm !== undefined && (
                     <div className="relative flex-1 md:w-80 lg:w-96 group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" size={18} />
