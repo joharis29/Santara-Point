@@ -683,10 +683,10 @@ function CustomerPortalContent() {
             <aside className="hidden md:flex w-24 bg-slate-900 flex-col items-center py-8 gap-8 shrink-0">
                 <button 
                     onClick={() => router.push('/')}
-                    className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 hover:scale-110 active:scale-95 transition-all group"
+                    className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/10 hover:scale-110 active:scale-95 transition-all group border border-slate-100"
                     title="Ke Halaman Utama"
                 >
-                    <img src="/santara-logo.png" alt="Logo" className="w-7 h-7 object-contain brightness-0 invert" />
+                    <img src="/santara-logo.png" alt="Logo" className="w-7 h-7 object-contain" />
                 </button>
                 <nav className="flex-1 flex flex-col gap-4">
                     <button 

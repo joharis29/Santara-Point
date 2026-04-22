@@ -42,7 +42,13 @@ const CustomerHeader = ({
                     </button>
                 )}
                 <div className="flex items-center gap-3">
-
+                    <button 
+                        onClick={() => router.push('/')}
+                        className="bg-white p-1.5 rounded-xl shadow-sm border border-slate-100 hover:scale-110 active:scale-95 transition-all"
+                        title="Ke Halaman Utama"
+                    >
+                        <img src="/santara-logo.png" alt="Logo" className="w-6 h-6 object-contain" />
+                    </button>
                     <div>
                         <h2 className="text-lg lg:text-xl font-black text-slate-800 tracking-tighter leading-tight">
                             {title || 'Santara Point'}
