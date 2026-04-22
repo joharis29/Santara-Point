@@ -123,6 +123,9 @@ function HistoryContent() {
         };
 
         loadTransactions();
+        
+        // Auto-refresh every 30 seconds for history
+        const pollInterval = setInterval(loadTransactions, 30000);
 
         const payments = JSON.parse(localStorage.getItem('santaraPurchasePayments') || '[]');
         setPurchasePayments(payments);
@@ -131,7 +134,8 @@ function HistoryContent() {
         if (storedSettings) setStoreSettings(JSON.parse(storedSettings));
 
         const fetchUserProfile = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data } = await supabase.auth.getUser();
+            const user = data?.user;
             if (user) {
                 const meta = user.user_metadata || {};
                 setUserProfile({
@@ -145,6 +149,8 @@ function HistoryContent() {
             }
         };
         fetchUserProfile();
+
+        return () => clearInterval(pollInterval);
     }, []);
 
     const handleSaveProfile = async (e) => {

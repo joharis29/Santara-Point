@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { 
     Search, 
     ArrowLeft, 
@@ -27,6 +27,7 @@ const CustomerHeader = ({
     customerAddress
 }) => {
     const router = useRouter();
+    const pathname = usePathname();
 
     return (
         <header className="bg-white/95 backdrop-blur-xl border-b border-slate-100 px-6 py-3 lg:py-4 flex flex-col lg:flex-row justify-between items-center gap-4 sticky top-0 z-40 shadow-sm">
@@ -64,7 +65,7 @@ const CustomerHeader = ({
                     { icon: <Heart size={16} />, label: "Favorit", href: "/favorites" },
                     { icon: <Clock size={16} />, label: "Riwayat", href: "/customer-history" },
                 ].map((item, idx) => {
-                    const isActive = typeof window !== 'undefined' && window.location.pathname === item.href;
+                    const isActive = pathname === item.href;
                     return (
                         <button
                             key={idx}

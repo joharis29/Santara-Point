@@ -201,47 +201,66 @@ function FavoritesContent() {
 
     useEffect(() => {
         const fetchUserData = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const meta = user.user_metadata || {};
-                const fName = meta.first_name || '';
-                const lName = meta.last_name || '';
-                const fullName = `${fName} ${lName}`.trim() || 'Sobat Santara';
+            try {
+                const { data } = await supabase.auth.getUser();
+                const user = data?.user;
+                if (user) {
+                    const meta = user.user_metadata || {};
+                    const fName = meta.first_name || '';
+                    const lName = meta.last_name || '';
+                    const fullName = `${fName} ${lName}`.trim() || 'Sobat Santara';
 
-                setCustomerName(fullName);
-                setIsLoggedIn(true);
-                setCustomerEmail(user.email || '');
-                setCustomerPhone(meta.whatsapp || '');
-
-                setUserProfile({
-                    firstName: fName,
-                    lastName: lName,
-                    email: user.email || '',
-                    whatsapp: meta.whatsapp || '',
-                    password: '••••••••',
-                    addresses: meta.addresses || []
-                });
-            } else {
-                const storedName = localStorage.getItem('customerName');
-                if (storedName) {
-                    setCustomerName(storedName);
+                    setCustomerName(fullName);
                     setIsLoggedIn(true);
+                    setCustomerEmail(user.email || '');
+                    setCustomerPhone(meta.whatsapp || '');
+
+                    setUserProfile({
+                        firstName: fName,
+                        lastName: lName,
+                        email: user.email || '',
+                        whatsapp: meta.whatsapp || '',
+                        password: '••••••••',
+                        addresses: meta.addresses || []
+                    });
+                } else {
+                    const storedName = localStorage.getItem('customerName');
+                    if (storedName) {
+                        setCustomerName(storedName);
+                        setIsLoggedIn(true);
+                    }
                 }
+            } catch (err) {
+                console.error("Error fetching user data:", err);
             }
         };
 
         fetchUserData();
-        const storedFavs = JSON.parse(localStorage.getItem('santaraFavorites') || '[]');
-        setFavorites(storedFavs);
+        
+        try {
+            const storedFavs = JSON.parse(localStorage.getItem('santaraFavorites') || '[]');
+            setFavorites(Array.isArray(storedFavs) ? storedFavs : []);
+        } catch (e) {
+            console.error("Error parsing favorites", e);
+            setFavorites([]);
+        }
 
         const storedProducts = localStorage.getItem('santaraProducts');
         if (storedProducts) {
-            setProducts(JSON.parse(storedProducts));
+            try {
+                setProducts(JSON.parse(storedProducts));
+            } catch (e) {
+                console.error("Error parsing products", e);
+            }
         }
 
         const storedSettings = localStorage.getItem('santaraStoreSettings');
         if (storedSettings) {
-            setStoreSettings(JSON.parse(storedSettings));
+            try {
+                setStoreSettings(JSON.parse(storedSettings));
+            } catch (e) {
+                console.error("Error parsing settings", e);
+            }
         }
 
         const activeTxId = localStorage.getItem('santaraActiveTxId');
@@ -625,7 +644,6 @@ function FavoritesContent() {
                     </div>
                 </div>
             </aside>
-        </div>
 
             {/* Injected Waiting Tracker Overlay */}
             <WaitingOverlay

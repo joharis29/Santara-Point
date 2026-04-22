@@ -108,6 +108,9 @@ function WaitingListContent() {
 
     useEffect(() => {
         loadData();
+        
+        // Auto-refresh every 15 seconds as fallback for Realtime
+        const pollInterval = setInterval(loadData, 15000);
 
         const channel = supabase
             .channel('transaction-updates')
@@ -118,7 +121,9 @@ function WaitingListContent() {
             .subscribe();
 
         if (searchParams) {
-            setIsAdmin(searchParams.get('role') === 'admin');
+            if (searchParams.get('role') === 'admin') {
+                setIsAdmin(true);
+            }
         }
 
         const storedSettings = localStorage.getItem('santaraStoreSettings');
@@ -127,7 +132,8 @@ function WaitingListContent() {
         if (storedShift) setActiveShift(storedShift);
 
         const fetchUserProfile = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data } = await supabase.auth.getUser();
+            const user = data?.user;
             if (user) {
                 const meta = user.user_metadata || {};
                 setUserProfile({
@@ -138,12 +144,18 @@ function WaitingListContent() {
                     password: '••••••••',
                     addresses: meta.addresses || []
                 });
+
+                // Fallback role check if searchParams is missing
+                if (meta.role === 'Administrator') {
+                    setIsAdmin(true);
+                }
             }
         };
         fetchUserProfile();
 
         return () => {
             supabase.removeChannel(channel);
+            clearInterval(pollInterval);
         };
     }, []);
 

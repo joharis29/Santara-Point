@@ -731,36 +731,15 @@ function CustomerPortalContent() {
 
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col overflow-hidden">
-                <header className="px-6 py-8 md:px-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div className="flex items-center gap-4">
-                        <button 
-                            onClick={() => router.push('/')}
-                            className="p-2.5 hover:bg-slate-100 rounded-2xl transition-all text-slate-600 border border-slate-100 shadow-sm md:shadow-none md:border-none"
-                            title="Kembali ke Beranda"
-                        >
-                            <ArrowLeft size={24} strokeWidth={3} />
-                        </button>
-                        <div>
-                            <h1 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Pilih Menu Favorit</h1>
-                            <div className="flex items-center gap-2 mt-1 md:mt-2">
-                                <span className="bg-emerald-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg shadow-emerald-100">
-                                    <ShieldCheck size={12} /> Syariah Verified
-                                </span>
-                                <span className="text-slate-400 text-xs font-bold">Halo, {(customerName || '').trim().split(' ')[0] || 'Tamu'}!</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="relative w-full md:w-80">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Cari rasa yang berkah..."
-                            className="w-full pl-12 pr-4 py-3 bg-slate-100 border-none rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm font-medium"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </header>
+                <CustomerHeader 
+                    title={storeSettings.storeName}
+                    subtitle="Pilih Menu Berkah Anda"
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    cartCount={cart.length}
+                    onCartClick={() => setIsCartModalOpen(true)}
+                    onSettingsClick={() => setIsSettingsOpen(true)}
+                />
 
                 <div className="px-6 md:px-10 mb-8 flex items-center justify-between gap-4 overflow-x-auto">
                     <div className="flex gap-3 pb-2">
