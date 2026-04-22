@@ -230,6 +230,18 @@ function CustomerPortalContent() {
 
     React.useEffect(() => {
         const fetchUserData = async () => {
+            // Role-Based Safety Check: Redirect Admins/Operators to their designated portals
+            const currentRole = localStorage.getItem('currentUserRole');
+            const currentUserEmail = localStorage.getItem('registeredEmail');
+
+            if (currentRole === 'Administrator' || (currentUserEmail && currentUserEmail.toLowerCase() === 'santarapoint@gmail.com')) {
+                router.push('/posin-adm');
+                return;
+            } else if (currentRole === 'Operator') {
+                router.push('/posin-cas');
+                return;
+            }
+
             const { data: { user }, error } = await supabase.auth.getUser();
             if (user) {
                 const meta = user.user_metadata || {};

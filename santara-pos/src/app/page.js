@@ -67,216 +67,214 @@ export default function App() {
     };
   }, []);
 
-  // Fungsi placeholder untuk navigasi
-  const handleAction = (type) => {
-    if (type === 'login') {
-      router.push('/login');
-    } else if (type === 'register') {
-      router.push('/register');
-    } else if (type === 'order') {
-      router.push('/posin-cus');
-    } else if (type === 'profile') {
-      router.push('/posin-cus?settings=true');
-    } else if (type === 'kontak') {
-      router.push('/kontak');
-    } else if (type === 'dokumentasi') {
-      router.push('/dokumentasi');
-    } else {
-      console.log(`Navigating to: ${type}`);
-    }
-  };
-  
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      localStorage.removeItem('currentUserRole');
-      localStorage.removeItem('currentUserContact');
-      localStorage.removeItem('customerName');
-      setUser(null);
-      router.push('/login');
-    } catch (err) {
-      console.error("Logout error:", err);
-    }
-  };
+    // Fungsi placeholder untuk navigasi
+    const handleAction = (type) => {
+        const role = localStorage.getItem('currentUserRole');
 
-  return (
-    <div className="relative min-h-screen w-full flex flex-col font-sans overflow-x-hidden selection:bg-emerald-200 selection:text-emerald-900">
-
-      {/* 1. Background Layer (Kompilasi Makanan) */}
-      <div
-        className="absolute inset-0 z-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url('/santara-bg-clean-hd.png')`
-        }}
-      >
-        {/* Dark Gradient Overlay untuk Keterbacaan Teks */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/30"></div>
-      </div>
-
-      {/* 2. Navigation Bar */}
-      <nav className="relative z-20 flex justify-between items-center px-4 lg:px-12 py-3 border-b border-white/10 backdrop-blur-sm flex-none">
-        <div className="flex items-center gap-2 lg:gap-3">
-          <img src="/santara-logo.png" alt="Santara Point Logo" className="w-8 h-8 lg:w-10 lg:h-10 object-contain bg-white rounded-full p-0.5 shadow-lg shadow-black/20" />
-          <h1 className="text-lg lg:text-xl font-black text-white tracking-tighter">
-            Santara<span className="text-emerald-500">Point</span>
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-2 lg:gap-4">
-          <button
-            onClick={() => handleAction('dokumentasi')}
-            className="hidden md:block text-gray-300 hover:text-white px-2 py-1.5 font-bold text-xs lg:text-sm transition-colors"
-          >
-            Dokumentasi
-          </button>
-          <button
-            onClick={() => handleAction('kontak')}
-            className="hidden sm:block bg-white/10 hover:bg-white/20 border border-white/20 text-white px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm backdrop-blur-md transition-all active:scale-95"
-          >
-            Kontak Kami
-          </button>
-
-          {!loading && (
-            user ? (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleAction('profile')}
-                  className="hidden sm:flex bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 lg:px-6 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95 items-center gap-2"
-                >
-                  <User size={18} /> Profil
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-500/80 hover:bg-red-600 text-white p-2 lg:px-4 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm shadow-lg transition-all active:scale-95 flex items-center gap-2"
-                  title="Keluar"
-                >
-                  <LogOut size={18} /> <span className="hidden lg:inline">Keluar</span>
-                </button>
-              </div>
-            ) : (
-              <>
-                <button
-                  onClick={() => handleAction('login')}
-                  className="hidden md:flex items-center gap-2 text-white font-semibold hover:text-emerald-400 transition ease-in-out text-sm mr-1"
-                >
-                  <User size={16} /> Masuk
-                </button>
-                <button
-                  onClick={() => handleAction('register')}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 lg:px-6 lg:py-2.5 rounded-full font-bold text-xs lg:text-sm shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
-                >
-                  Daftar
-                </button>
-              </>
-            )
-          )}
-
-          {/* Mobile Menu Toggle */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-all"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-
-        {/* Mobile Dropdown Menu */}
-        {isMobileMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-emerald-950/95 backdrop-blur-xl border-b border-white/10 flex flex-col p-6 gap-4 z-[100] md:hidden animate-fade-in-down shadow-2xl">
-            <button onClick={() => { handleAction('dokumentasi'); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 text-white font-bold text-sm p-3 hover:bg-white/5 rounded-xl transition-all">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Dokumentasi Layanan
-            </button>
-            <button onClick={() => { handleAction('kontak'); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 text-white font-bold text-sm p-3 hover:bg-white/5 rounded-xl transition-all">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Kontak Kami
-            </button>
-            {user ? (
-              <>
-                <button onClick={() => { handleAction('profile'); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 text-emerald-400 font-bold text-sm p-3 bg-white/5 rounded-xl transition-all">
-                  <User size={18} /> Profil Saya
-                </button>
-                <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 text-red-400 font-bold text-sm p-3 bg-red-500/10 rounded-xl transition-all">
-                  <LogOut size={18} /> Keluar / Logout
-                </button>
-              </>
-            ) : (
-              <button onClick={() => { handleAction('login'); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 text-emerald-400 font-bold text-sm p-3 bg-white/5 rounded-xl transition-all">
-                <User size={18} /> Masuk Akun
-              </button>
-            )}
-          </div>
-        )}
-      </nav>
-
-      {/* 3. Hero Section Content */}
-      <main className="relative z-10 px-4 lg:px-12 py-2 lg:py-4 flex-1 flex flex-col justify-around min-h-0">
-        <div className="max-w-2xl mt-4">
-          {/* Badge Syariah */}
-          <div className="inline-flex items-center gap-1.5 bg-emerald-600/20 border border-emerald-500/40 px-3 py-1 rounded-full text-emerald-300 text-[10px] lg:text-xs font-bold mb-3 backdrop-blur-xl animate-fade-in">
-            <ShieldCheck size={14} /> POS Full Online Berbasis Syariah
-          </div>
-
-          <h2 className="text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-3 leading-[1.1] tracking-tight">
-            Hidangan Lezat, <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">
-              Penuh Keberkahan.
-            </span>
-          </h2>
-
-          <p className="text-gray-300 text-xs lg:text-sm mb-5 leading-relaxed max-w-lg font-medium">
-            Nikmati kemudahan memesan menu pilihan Anda secara online. Sistem yang mudah dan cepat serta ada keberkahan dalam setiap transaksinya.
-          </p>
-
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => handleAction('order')}
-              className="bg-white text-emerald-900 hover:bg-emerald-50 px-6 py-2.5 lg:px-8 lg:py-3 rounded-xl font-black text-sm lg:text-base flex items-center gap-2 transition-all shadow-xl hover:-translate-y-1 active:scale-95"
-            >
-              <ShoppingCart size={20} /> Pesan Sekarang
-            </button>
-          </div>
-        </div>
-
-        {/* 4. Features Section (Bottom Grid) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-5 mt-4 pb-2">
-          {[
-            {
-              icon: <MessageCircle className="text-emerald-400" size={20} />,
-              title: "Belanja Sambil Beramal",
-              desc: "Setiap pesanan termasuk dana kepedulian 2,5%. Nikmati hidangan lezat sekaligus tebarkan manfaat bagi yang membutuhkan."
-            },
-            {
-              icon: <ShieldCheck className="text-emerald-400" size={20} />,
-              title: "Penyaluran Transparan",
-              desc: "Sistem otomatis memisahkan 2,5% pesanan untuk disalurkan rutin kepada mustahiq. Nota digital merinci secara transparan."
-            },
-            {
-              icon: <ShoppingBag className="text-emerald-400" size={20} />,
-              title: "Akad Syariah Jelas",
-              desc: "Transaksi diproses dengan prinsip muamalah yang benar. Kami memastikan harga dan tujuan dana amal terkelola amanah."
+        if (type === 'login') {
+            router.push('/login');
+        } else if (type === 'register') {
+            router.push('/register');
+        } else if (type === 'order') {
+            // Role-Aware Redirection
+            if (role === 'Administrator') {
+                router.push('/posin-adm');
+            } else if (role === 'Operator') {
+                router.push('/posin-cas');
+            } else {
+                router.push('/posin-cus');
             }
-          ].map((feature, index) => (
-            <div
-              key={index}
-              className="group bg-white/5 border border-white/10 backdrop-blur-2xl p-4 lg:p-5 rounded-2xl hover:bg-white/10 hover:border-emerald-500/50 transition-all duration-300 shadow-xl"
-            >
-              <div className="mb-3 p-2 bg-emerald-500/10 rounded-lg w-fit group-hover:scale-110 transition-transform">
-                {feature.icon}
-              </div>
-              <h4 className="text-white font-extrabold text-sm xl:text-base mb-1.5 tracking-tight">{feature.title}</h4>
-              <p className="text-gray-400 text-[10px] xl:text-xs leading-relaxed">{feature.desc}</p>
-            </div>
-          ))}
-        </div>
-      </main>
+        } else if (type === 'profile') {
+            if (role === 'Administrator') {
+                router.push('/posin-adm');
+            } else {
+                router.push('/posin-cus?settings=true');
+            }
+        } else if (type === 'kontak') {
+            router.push('/kontak');
+        } else if (type === 'dokumentasi') {
+            router.push('/dokumentasi');
+        } else {
+            console.log(`Navigating to: ${type}`);
+        }
+    };
 
-      {/* 5. Footer Kecil (Branding Bawah) */}
-      <footer className="relative z-10 px-4 lg:px-12 py-3 flex-none flex justify-between items-center text-gray-500 text-[10px] lg:text-xs border-t border-white/5 bg-black/40">
-        <p>© 2024 Santara Point. Dikembangkan dengan prinsip Amanah.</p>
-        <div className="flex gap-4">
-          <span className="hover:text-white cursor-pointer transition">Syarat & Ketentuan</span>
-          <span className="hover:text-white cursor-pointer transition">Kebijakan Privasi</span>
+    const handleLogout = async () => {
+        try {
+            await supabase.auth.signOut();
+            localStorage.removeItem('currentUserRole');
+            localStorage.removeItem('currentUserContact');
+            localStorage.removeItem('customerName');
+            setUser(null);
+            router.push('/login');
+        } catch (err) {
+            console.error("Logout error:", err);
+        }
+    };
+
+    return (
+        <div className="relative min-h-screen w-full flex flex-col font-sans overflow-x-hidden selection:bg-emerald-200 selection:text-emerald-900">
+
+            {/* 1. Background Layer (Kompilasi Makanan) */}
+            <div
+                className="absolute inset-0 z-0 bg-cover bg-center"
+                style={{
+                    backgroundImage: `url('/santara-bg-clean-hd.png')`
+                }}
+            >
+                {/* Dark Gradient Overlay untuk Keterbacaan Teks */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/40"></div>
+            </div>
+
+            {/* 2. Navigation Bar */}
+            <nav className="relative z-20 flex justify-between items-center px-6 lg:px-16 py-4 border-b border-white/5 backdrop-blur-md flex-none">
+                <div className="flex items-center gap-3 lg:gap-4 group cursor-pointer" onClick={() => router.push('/')}>
+                    <div className="bg-white p-1 rounded-2xl shadow-xl shadow-black/20 group-hover:scale-110 transition-transform duration-500">
+                        <img src="/santara-logo.png" alt="Santara Point Logo" className="w-9 h-9 lg:w-11 lg:h-11 object-contain rounded-xl" />
+                    </div>
+                    <div className="flex flex-col">
+                        <h1 className="text-xl lg:text-2xl font-black text-white tracking-tighter leading-none">
+                            Santara<span className="text-emerald-500">Point</span>
+                        </h1>
+                        <span className="text-[9px] text-emerald-400/80 font-black uppercase tracking-[0.3em] mt-1 hidden sm:block">Syariah POS Online</span>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3 lg:gap-6">
+                    <div className="hidden lg:flex items-center gap-6 mr-4 border-r border-white/10 pr-6">
+                        <button onClick={() => handleAction('dokumentasi')} className="text-gray-400 hover:text-white font-bold text-xs transition-colors uppercase tracking-widest">Dokumentasi</button>
+                        <button onClick={() => handleAction('kontak')} className="text-gray-400 hover:text-white font-bold text-xs transition-colors uppercase tracking-widest">Kontak</button>
+                    </div>
+
+                    {!loading && (
+                        user ? (
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => handleAction('profile')}
+                                    className="hidden sm:flex bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-2xl font-black text-xs shadow-xl shadow-emerald-900/40 transition-all active:scale-95 items-center gap-2 uppercase tracking-widest"
+                                >
+                                    <User size={16} /> Profil
+                                </button>
+                                <button
+                                    onClick={handleLogout}
+                                    className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/30 px-4 py-2.5 rounded-2xl font-black text-xs transition-all active:scale-95 flex items-center gap-2 uppercase tracking-widest"
+                                >
+                                    <LogOut size={16} /> <span className="hidden lg:inline">Keluar</span>
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => handleAction('login')}
+                                    className="hidden sm:flex items-center gap-2 text-white font-black hover:text-emerald-400 transition text-xs uppercase tracking-widest"
+                                >
+                                    Login Admin
+                                </button>
+                                <button
+                                    onClick={() => handleAction('register')}
+                                    className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
+                                >
+                                    Daftar Sekarang
+                                </button>
+                            </>
+                        )
+                    )}
+
+                    {/* Mobile Menu Toggle */}
+                    <button
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        className="md:hidden text-white p-3 bg-white/5 rounded-2xl border border-white/10 transition-all"
+                    >
+                        {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                    </button>
+                </div>
+            </nav>
+
+            {/* 3. Hero Section Content */}
+            <main className="relative z-10 px-6 lg:px-16 py-8 lg:py-12 flex-1 flex flex-col justify-center min-h-0">
+                <div className="max-w-4xl">
+                    {/* Badge Syariah */}
+                    <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-4 py-1.5 rounded-full text-emerald-400 text-[10px] lg:text-xs font-black mb-6 backdrop-blur-xl animate-fade-in uppercase tracking-[0.2em] shadow-lg shadow-emerald-950/20">
+                        <ShieldCheck size={14} className="animate-pulse" /> POS Full Online Berbasis Syariah
+                    </div>
+
+                    <h2 className="text-[clamp(2.5rem,8vw,5.5rem)] font-black text-white mb-6 leading-[0.95] tracking-[-0.04em]">
+                        Hidangan Lezat, <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-300">
+                            Penuh Keberkahan.
+                        </span>
+                    </h2>
+
+                    <p className="text-gray-400 text-sm lg:text-base mb-10 leading-relaxed max-w-xl font-bold italic opacity-80">
+                        Nikmati kemudahan memesan menu pilihan Anda secara online. Sistem yang transparan, amanah, dan membawa keberkahan dalam setiap transaksi.
+                    </p>
+
+                    <div className="flex flex-wrap gap-4">
+                        <button
+                            onClick={() => handleAction('order')}
+                            className="bg-white text-emerald-950 hover:bg-emerald-50 px-10 py-4 lg:px-12 lg:py-5 rounded-[2rem] font-black text-sm lg:text-lg flex items-center gap-3 transition-all shadow-2xl shadow-black/40 hover:-translate-y-1 active:scale-95 uppercase tracking-widest border-b-4 border-emerald-100"
+                        >
+                            <ShoppingCart size={22} /> Pesan Sekarang
+                        </button>
+                        
+                        <div className="hidden sm:flex items-center gap-3 ml-4">
+                            <div className="flex -space-x-3">
+                                {[1, 2, 3].map(i => (
+                                    <div key={i} className="w-10 h-10 rounded-full border-2 border-emerald-900 overflow-hidden shadow-lg bg-slate-800">
+                                        <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="User" />
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="text-left">
+                                <p className="text-white font-black text-xs">5,000+ Pelanggan</p>
+                                <p className="text-emerald-500 font-bold text-[10px] uppercase">Telah Bergabung</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 4. Features Section (Bottom Grid) - Minimalist Refinement */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mt-16 pb-4">
+                    {[
+                        {
+                            icon: <MessageCircle className="text-emerald-400" size={22} />,
+                            title: "Zakat & Infaq 2,5%",
+                            desc: "Setiap pesanan otomatis menyisihkan dana kepedulian. Hidangan lezat, pahala mengalir."
+                        },
+                        {
+                            icon: <ShieldCheck className="text-emerald-400" size={22} />,
+                            title: "Amanah & Transparan",
+                            desc: "Penyaluran dana amal tercatat secara otomatis di sistem dan dapat dipantau real-time."
+                        },
+                        {
+                            icon: <ShoppingBag className="text-emerald-400" size={22} />,
+                            title: "Akad Muamalah",
+                            desc: "Transaksi diproses sesuai prinsip syariah. Jual beli yang tenang dan penuh berkah."
+                        }
+                    ].map((feature, index) => (
+                        <div
+                            key={index}
+                            className="group bg-black/40 border border-white/5 backdrop-blur-3xl p-6 rounded-[2rem] hover:bg-white/5 hover:border-emerald-500/30 transition-all duration-500 shadow-2xl"
+                        >
+                            <div className="mb-4 p-3 bg-emerald-500/10 rounded-2xl w-fit group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all">
+                                {feature.icon}
+                            </div>
+                            <h4 className="text-white font-black text-base mb-2 tracking-tight uppercase tracking-widest text-xs">{feature.title}</h4>
+                            <p className="text-gray-500 text-xs leading-relaxed font-bold">{feature.desc}</p>
+                        </div>
+                    ))}
+                </div>
+            </main>
+
+            {/* 5. Footer Refinement */}
+            <footer className="relative z-10 px-6 lg:px-16 py-4 flex-none flex flex-col sm:flex-row justify-between items-center text-gray-500 text-[10px] border-t border-white/5 bg-black/60 shadow-2xl backdrop-blur-md gap-4">
+                <p className="font-bold">© 2024 <span className="text-emerald-600">Santara Point</span>. Dikembangkan dengan prinsip Amanah & Keberkahan.</p>
+                <div className="flex gap-8 font-black uppercase tracking-widest text-[9px]">
+                    <span className="hover:text-emerald-500 cursor-pointer transition">Syarat & Ketentuan</span>
+                    <span className="hover:text-emerald-500 cursor-pointer transition">Kebijakan Privasi</span>
+                </div>
+            </footer>
         </div>
-      </footer>
-    </div>
-  );
+    );
+}
 }
