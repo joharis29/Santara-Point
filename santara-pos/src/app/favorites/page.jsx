@@ -413,19 +413,54 @@ function FavoritesContent() {
     };
 
     return (
-        <div className="flex h-screen bg-white font-sans text-slate-900 overflow-hidden relative">
-            <CustomerHeader 
-                title={storeSettings.storeName}
-                subtitle="Menu Favorit Berkah Anda"
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                cartCount={cart.length}
-                onCartClick={() => setIsCartModalOpen(true)}
-                onSettingsClick={() => setIsSettingsOpen(true)}
-            />
+        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden relative">
+            {/* Standardized Sidebar (Desktop) */}
+            <aside className="hidden lg:flex w-24 bg-white border-r border-slate-100 flex-col items-center py-10 gap-12 shrink-0">
+                <button onClick={() => router.push('/')} className="hover:scale-105 transition-transform" title="Ke Beranda">
+                    <img src="/santara-logo.png" alt="Santara Logo" className="w-10 h-10 object-contain" />
+                </button>
+                <nav className="flex-1 flex flex-col gap-8">
+                    <button onClick={() => router.push('/posin-cus')} className="p-3 text-slate-300 hover:text-emerald-600 transition-colors" title="Buka Menu Utama">
+                        <ShoppingBag size={24} />
+                    </button>
+                    <button onClick={() => router.push('/customer-history')} className="p-3 text-slate-300 hover:text-emerald-600 transition-colors" title="Riwayat Pesanan">
+                        <Clock size={24} />
+                    </button>
+                    <button className="p-3 text-emerald-600 bg-emerald-50 rounded-2xl shadow-md" title="Menu Favorit">
+                        <Heart size={24} />
+                    </button>
+                    <button onClick={() => setIsSettingsOpen(true)} className="p-3 text-slate-300 hover:text-emerald-600 transition-colors" title="Pengaturan">
+                        <Settings size={24} />
+                    </button>
+                </nav>
+                <button
+                    onClick={() => {
+                        localStorage.removeItem('customerName');
+                        setIsLoggedIn(false);
+                        setCustomerName('Sobat Santara');
+                        router.push('/login');
+                    }}
+                    className="p-3 flex flex-col items-center gap-1 text-slate-300 hover:text-red-500 transition-colors"
+                >
+                    <LogOut size={24} />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Keluar</span>
+                </button>
+            </aside>
 
-            <main className="flex-1 flex flex-col overflow-hidden pt-20 pb-20 md:pb-0">
-                <div className="px-6 md:px-10 mb-8 overflow-x-auto">
+            {/* Main Content Area */}
+            <main className="flex-1 flex flex-col overflow-hidden relative">
+                <CustomerHeader 
+                    title={storeSettings.storeName}
+                    subtitle="Menu Favorit Berkah Anda"
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    cartCount={cart.length}
+                    onCartClick={() => setIsCartModalOpen(true)}
+                    onSettingsClick={() => setIsSettingsOpen(true)}
+                />
+
+                <div className="flex-1 flex flex-col overflow-hidden pt-6 pb-20 md:pb-0">
+                    <div className="px-6 md:px-10 mb-6 overflow-x-auto">
                     <div className="flex gap-3">
                         {categories.map(cat => (
                             <button
@@ -808,24 +843,25 @@ function FavoritesContent() {
                 </div>
             )}
 
-            {/* Standardized Settings Modal (Customer) */}
-            <SettingsModal 
-                isOpen={isSettingsOpen}
-                onClose={() => setIsSettingsOpen(false)}
-                isAdmin={false}
-                activeTab={activeSettingsTab}
-                setActiveTab={setActiveSettingsTab}
-                userProfile={userProfile}
-                setUserProfile={setUserProfile}
-                handleSaveProfile={handleSaveProfile}
-                storeSettings={storeSettings}
-                setIsChangeEmailOpen={setIsChangeEmailOpen}
-                setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
-                setIsChangePasswordOpen={setIsChangePasswordOpen}
-                addAddress={addAddress}
-                removeAddress={removeAddress}
-                updateAddress={updateAddress}
-            />
+                <SettingsModal 
+                    isOpen={isSettingsOpen}
+                    onClose={() => setIsSettingsOpen(false)}
+                    isAdmin={false}
+                    activeTab={activeSettingsTab}
+                    setActiveTab={setActiveSettingsTab}
+                    userProfile={userProfile}
+                    setUserProfile={setUserProfile}
+                    handleSaveProfile={handleSaveProfile}
+                    storeSettings={storeSettings}
+                    setIsChangeEmailOpen={setIsChangeEmailOpen}
+                    setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+                    setIsChangePasswordOpen={setIsChangePasswordOpen}
+                    addAddress={addAddress}
+                    removeAddress={removeAddress}
+                    updateAddress={updateAddress}
+                />
+                </div>
+            </main>
         </div>
     );
 }
