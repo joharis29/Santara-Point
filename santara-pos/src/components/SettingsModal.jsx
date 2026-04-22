@@ -190,6 +190,25 @@ const SettingsModal = ({
                                     />
                                 </div>
 
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center ml-1">
+                                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Kata Sandi</label>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsChangePasswordOpen(true)}
+                                            className="text-[10px] font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-widest transition-colors bg-emerald-50 px-2 py-1 rounded-md"
+                                        >
+                                            Ganti
+                                        </button>
+                                    </div>
+                                    <input
+                                        type="password"
+                                        value="••••••••"
+                                        readOnly
+                                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-400 cursor-not-allowed italic"
+                                    />
+                                </div>
+
                                 {/* Address Section */}
                                 <div className="pt-8 border-t border-slate-100 space-y-5">
                                     <div className="flex items-center justify-between px-1">
