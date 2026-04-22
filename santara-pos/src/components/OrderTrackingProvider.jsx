@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import WaitingOverlay from '@/app/posin-cus/WaitingOverlay';
 import { Clock, ChevronRight } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 const OrderTrackingContext = createContext();
 
@@ -13,14 +14,37 @@ export const OrderTrackingProvider = ({ children }) => {
     const [isMinimized, setIsMinimized] = useState(false);
     const [txData, setTxData] = useState({ customerName: '', totalAmount: 0 });
 
+    // Listen to Auth State - Clear tracking on logout
+    useEffect(() => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_OUT') {
+                setActiveTxId(null);
+                setIsOverlayOpen(false);
+                setIsMinimized(false);
+                localStorage.removeItem('santaraActiveTxId');
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
     // Sync with localStorage
     useEffect(() => {
-        const storedId = localStorage.getItem('santaraActiveTxId');
-        if (storedId) {
-            setActiveTxId(storedId);
-            // If there's an active transaction, we might want to show the minimized bar by default
-            setIsMinimized(true);
-        }
+        const checkAuthAndSync = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            const storedId = localStorage.getItem('santaraActiveTxId');
+            
+            if (session && storedId) {
+                setActiveTxId(storedId);
+                setIsMinimized(true);
+            } else if (!session) {
+                // If no session, make sure tracking is cleared
+                setActiveTxId(null);
+                setIsMinimized(false);
+            }
+        };
+
+        checkAuthAndSync();
 
         // Listen for changes (e.g., from other pages or same page)
         const handleStorage = () => {
