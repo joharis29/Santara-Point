@@ -10,7 +10,14 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
     const [status, setStatus] = useState('KONFIRMASI');
     const [waitSeconds, setWaitSeconds] = useState(0);
     const [displayAmount, setDisplayAmount] = useState(totalAmount || 0);
+    const [displayCustomerName, setDisplayCustomerName] = useState(customerName || '');
     const [dbItems, setDbItems] = useState([]);
+
+    // Sync with props
+    useEffect(() => {
+        if (totalAmount) setDisplayAmount(totalAmount);
+        if (customerName) setDisplayCustomerName(customerName);
+    }, [totalAmount, customerName]);
 
     // Stopwatch Visual
     useEffect(() => {
@@ -33,7 +40,7 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                 // Priority 1: Supabase for cross-device sync
                 const { data, error } = await supabase
                     .from('transactions')
-                    .select('status, total_amount, items')
+                    .select('status, total_amount, items, customer_name')
                     .eq('id', transactionId)
                     .single();
 
@@ -47,6 +54,7 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
 
                     if (data.total_amount) setDisplayAmount(data.total_amount);
                     if (data.items) setDbItems(data.items);
+                    if (data.customer_name) setDisplayCustomerName(data.customer_name);
                 }
             } catch (err) {
                 // Fallback to localstorage
@@ -84,7 +92,7 @@ export default function WaitingOverlay({ isOpen, onClose, customerName, totalAmo
                             <Receipt size={32} />
                         </div>
                         <h2 className="text-xl font-black text-slate-800">Pelacakan Pesanan</h2>
-                        <p className="text-sm text-slate-500 font-medium">Bpk/Ibu {customerName}</p>
+                        <p className="text-sm text-slate-500 font-medium">Bpk/Ibu {displayCustomerName || 'Pelanggan'}</p>
                         <div className="mt-2 bg-emerald-50 px-4 py-1.5 rounded-full border border-emerald-100">
                             <p className="text-xs font-black text-emerald-700">Total Tagihan: Rp {displayAmount?.toLocaleString('id-ID')}</p>
                         </div>

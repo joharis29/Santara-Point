@@ -35,7 +35,7 @@ import {
     TrendingUp
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
-import WaitingOverlay from './WaitingOverlay';
+import { useOrderTracking } from '@/components/OrderTrackingProvider';
 import CustomerHeader from '@/components/CustomerHeader';
 import CustomerBottomNav from '@/components/CustomerBottomNav';
 import SettingsModal from '@/components/SettingsModal';
@@ -507,9 +507,10 @@ function CustomerPortalContent() {
     const [orderNote, setOrderNote] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
-    const [sortBy, setSortBy] = useState('default');
-    const [isWaitingOpen, setIsWaitingOpen] = useState(false);
-    const [currentTxId, setCurrentTxId] = useState(null);
+    // Global Order Tracking
+    const { startTracking } = useOrderTracking();
+
+    const [isCartOpen, setIsCartOpen] = useState(false);
     const [toppingModalProduct, setToppingModalProduct] = useState(null);
     const [isQrisOpen, setIsQrisOpen] = useState(false);
     const [isCodOpen, setIsCodOpen] = useState(false);
@@ -620,12 +621,14 @@ function CustomerPortalContent() {
             const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
             localStorage.setItem('santaraTransactionHistory', JSON.stringify([localTransaction, ...existingHistory]));
 
-            // Persist active ID for tracking overlay
-            localStorage.setItem('santaraActiveTxId', tId);
-
-            setCurrentTxId(tId);
-            setIsWaitingOpen(true);
+            // 11. Success - Clear local cart and start tracking
             setCart([]);
+            localStorage.removeItem('santaraCart');
+            
+            // Trigger Global Order Tracking
+            startTracking(tId, customerName, totalAmount);
+            
+            alert(`Pesanan Berhasil!\nID: ${tId}\n\nStaf kami sedang memproses hidangan Anda.`);
         } catch (err) {
             console.error("Error syncing transaction:", err);
             alert("Gagal mengirim pesanan ke sistem. Mohon hubungi admin (Error DB).");
@@ -958,14 +961,7 @@ function CustomerPortalContent() {
                 </div>
             </aside>
 
-            {/* Injected Waiting Tracker Overlay */}
-            <WaitingOverlay
-                isOpen={isWaitingOpen}
-                onClose={handleCloseWaiting}
-                customerName={customerName}
-                totalAmount={totalAmount}
-                transactionId={currentTxId}
-            />
+
 
             {isQrisOpen && (
                 <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
