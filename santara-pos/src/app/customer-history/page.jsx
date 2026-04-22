@@ -211,11 +211,11 @@ export default function CustomerHistory() {
                     <button onClick={() => router.push('/posin-cus')} className="p-3 text-slate-300 hover:text-emerald-600 transition-colors" title="Buka Menu Utama">
                         <ShoppingBag size={24} />
                     </button>
-                    <button className="p-3 text-emerald-600 bg-emerald-50 rounded-2xl shadow-md" title="Riwayat Pesanan">
-                        <Clock size={24} />
-                    </button>
                     <button onClick={() => router.push('/favorites')} className="p-3 text-slate-300 hover:text-red-500 transition-colors" title="Menu Favorit">
                         <Heart size={24} />
+                    </button>
+                    <button className="p-3 text-emerald-600 bg-emerald-50 rounded-2xl shadow-md" title="Riwayat Pesanan">
+                        <Clock size={24} />
                     </button>
                     <button onClick={() => setIsSettingsOpen(true)} className="p-3 text-slate-300 hover:text-emerald-600 transition-colors" title="Pengaturan">
                         <Settings size={24} />
