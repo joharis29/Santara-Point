@@ -132,15 +132,15 @@ export default function App() {
 
             {/* 2. Navigation Bar */}
             <nav className="relative z-20 flex justify-between items-center px-6 lg:px-16 py-3 border-b border-white/5 backdrop-blur-md flex-none">
-                <div className="flex items-center gap-3 lg:gap-4 group cursor-pointer" onClick={() => router.push('/')}>
-                    <div className="bg-white p-1 rounded-2xl shadow-xl shadow-black/20 group-hover:scale-110 transition-transform duration-500">
-                        <img src="/santara-logo.png" alt="Santara Point Logo" className="w-9 h-9 lg:w-11 lg:h-11 object-contain rounded-xl" />
+                <div className="flex items-center gap-2 lg:gap-4 group cursor-pointer" onClick={() => router.push('/')}>
+                    <div className="bg-white p-1 rounded-xl lg:rounded-2xl shadow-xl shadow-black/20 group-hover:scale-110 transition-transform duration-500">
+                        <img src="/santara-logo.png" alt="Santara Point Logo" className="w-7 h-7 lg:w-11 lg:h-11 object-contain rounded-lg lg:rounded-xl" />
                     </div>
                     <div className="flex flex-col">
-                        <h1 className="text-xl lg:text-2xl font-black text-white tracking-tighter leading-none">
+                        <h1 className="text-lg lg:text-2xl font-black text-white tracking-tighter leading-none">
                             Santara<span className="text-emerald-500">Point</span>
                         </h1>
-                        <span className="text-[9px] text-emerald-400/80 font-black uppercase tracking-[0.3em] mt-1 hidden sm:block">Syariah POS Online</span>
+                        <span className="text-[8px] lg:text-[9px] text-emerald-400/80 font-black uppercase tracking-[0.3em] mt-1 hidden sm:block">Syariah POS Online</span>
                     </div>
                 </div>
 
@@ -170,13 +170,13 @@ export default function App() {
                             <>
                                 <button
                                     onClick={() => handleAction('login')}
-                                    className="hidden sm:flex items-center gap-2 text-white font-black hover:text-emerald-400 transition text-xs uppercase tracking-widest"
+                                    className="hidden md:flex items-center gap-2 text-white font-black hover:text-emerald-400 transition text-xs uppercase tracking-widest"
                                 >
                                     Masuk
                                 </button>
                                 <button
                                     onClick={() => handleAction('register')}
-                                    className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
+                                    className="hidden md:flex bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-emerald-900/40 transition-all active:scale-95"
                                 >
                                     Daftar Sekarang
                                 </button>
@@ -193,6 +193,64 @@ export default function App() {
                     </button>
                 </div>
             </nav>
+
+            {/* Mobile Menu Overlay */}
+            {isMobileMenuOpen && (
+                <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col p-8 lg:hidden animate-in fade-in duration-300">
+                    <div className="flex justify-between items-center mb-12">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-white p-1 rounded-xl">
+                                <img src="/santara-logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+                            </div>
+                            <h2 className="text-xl font-black text-white">Santara<span className="text-emerald-500">Point</span></h2>
+                        </div>
+                        <button onClick={() => setIsMobileMenuOpen(false)} className="text-white p-2 bg-white/10 rounded-full">
+                            <X size={24} />
+                        </button>
+                    </div>
+                    
+                    <div className="flex flex-col gap-6 mb-12">
+                        <button onClick={() => { handleAction('dokumentasi'); setIsMobileMenuOpen(false); }} className="text-2xl font-black text-slate-400 hover:text-white transition-colors text-left">DOKUMENTASI</button>
+                        <button onClick={() => { handleAction('kontak'); setIsMobileMenuOpen(false); }} className="text-2xl font-black text-slate-400 hover:text-white transition-colors text-left">KONTAK</button>
+                    </div>
+
+                    <div className="mt-auto space-y-4">
+                        {!loading && (
+                            user ? (
+                                <>
+                                    <button
+                                        onClick={() => { handleAction('profile'); setIsMobileMenuOpen(false); }}
+                                        className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2"
+                                    >
+                                        <User size={18} /> Profil Saya
+                                    </button>
+                                    <button
+                                        onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
+                                        className="w-full bg-red-500/10 text-red-500 border border-red-500/20 py-4 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2"
+                                    >
+                                        <LogOut size={18} /> Keluar
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={() => { handleAction('login'); setIsMobileMenuOpen(false); }}
+                                        className="w-full bg-white/5 border border-white/10 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest"
+                                    >
+                                        Masuk
+                                    </button>
+                                    <button
+                                        onClick={() => { handleAction('register'); setIsMobileMenuOpen(false); }}
+                                        className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-emerald-900/40"
+                                    >
+                                        Daftar Sekarang
+                                    </button>
+                                </>
+                            )
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* 3. Hero Section Content */}
             <main className="relative z-10 px-6 lg:px-16 py-2 lg:py-4 flex-1 flex flex-col justify-center min-h-0">
