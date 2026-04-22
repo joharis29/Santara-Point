@@ -2,74 +2,48 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import {
-  Lock,
-  Mail,
-  ArrowLeft,
-  Eye,
-  EyeOff
-} from 'lucide-react';
 
-// Komponen Utama
+// Versi Ultra-Stable untuk debugging initialization error
 export default function LoginPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center bg-emerald-950">
-                <div className="animate-pulse flex flex-col items-center gap-4">
-                    <img src="/santara-logo.png" alt="Loading" className="w-16 h-16 opacity-50" />
-                    <p className="text-emerald-100 font-bold tracking-widest text-xs uppercase">Memuat Santara...</p>
-                </div>
+            <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyCenter: 'center', backgroundColor: '#064e3b', color: 'white' }}>
+                <p>Memuat Halaman Login...</p>
             </div>
         }>
-            <LoginContent />
+            <LoginContentBody />
         </Suspense>
     );
 }
 
-// Komponen Konten (Hoisted)
-function LoginContent() {
+function LoginContentBody() {
     const router = useRouter();
     const searchParams = useSearchParams();
     
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [storeSettings, setStoreSettings] = useState({
-        storeName: 'Santara Point',
-        storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
-        whatsapp: '6285846802177',
-        email: 'santarapoint@gmail.com',
-        address: 'Jl. Raya Santara No. 123, Bandung',
-        footerText: '© 2024 Santara Point. Berkah setiap saat.'
-    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        if (searchParams.get('message') === 'confirmed') {
-            alert('Selamat Akun Anda Terkonfirmasi');
+        // Cek parameter pesan sukses dari registrasi atau reset password
+        const msg = searchParams.get('message');
+        if (msg === 'confirmed') {
+            alert('Selamat! Akun Anda telah terkonfirmasi. Silakan masuk.');
             router.replace('/login');
         }
     }, [searchParams, router]);
 
-    useEffect(() => {
-        const stored = localStorage.getItem('santaraStoreSettings');
-        if (stored) {
-            try {
-                const parsed = JSON.parse(stored);
-                setStoreSettings(prev => ({ ...prev, ...parsed }));
-            } catch (e) {
-                console.error("Error parsing settings", e);
-            }
-        }
-    }, []);
-
-    async function handleSubmit(e) {
+    async function handleLogin(e) {
         e.preventDefault();
+        if (isSubmitting) return;
 
         if (!email || !password) {
-            alert('Tolong lengkapi data!');
+            alert('Silakan masukkan email dan kata sandi.');
             return;
         }
 
+        setIsSubmitting(true);
         try {
             const { data: { user }, error } = await supabase.auth.signInWithPassword({
                 email,
@@ -77,137 +51,135 @@ function LoginContent() {
             });
 
             if (error) {
-                if (error.message.toLowerCase().includes('email not confirmed')) {
-                    alert('Email Anda belum terverifikasi. Silakan cek kotak masuk email Anda.');
-                } else {
-                    alert(`Gagal Masuk: ${error.message}`);
-                }
+                alert(`Gagal Masuk: ${error.message}`);
+                setIsSubmitting(false);
                 return;
             }
 
+            // Penentuan Role
             let role = 'Customer';
-            let contact = user.email;
-            let finalName = 'Sobat Santara';
-
-            const meta = user.user_metadata || {};
-            if (meta.first_name || meta.last_name) {
-                finalName = `${meta.first_name || ''} ${meta.last_name || ''}`.trim();
-            }
-
-            const storedSettings = localStorage.getItem('santaraStoreSettings');
             if (email.toLowerCase() === 'santarapoint@gmail.com') {
                 role = 'Administrator';
-            } else if (storedSettings) {
-                const settings = JSON.parse(storedSettings);
-                if (settings.authorizedUsers) {
-                    const authorizedUser = settings.authorizedUsers.find(u => u.contact === email);
-                    if (authorizedUser) {
-                        role = authorizedUser.role;
-                    }
+            } else {
+                const storedSettings = localStorage.getItem('santaraStoreSettings');
+                if (storedSettings) {
+                    const settings = JSON.parse(storedSettings);
+                    const authorizedUser = settings.authorizedUsers?.find(u => u.contact === email);
+                    if (authorizedUser) role = authorizedUser.role;
                 }
             }
 
+            // Simpan data ke localStorage
+            const meta = user.user_metadata || {};
             localStorage.setItem('currentUserRole', role);
-            localStorage.setItem('currentUserContact', contact);
-            localStorage.setItem('customerName', finalName);
-            
-            if (meta.first_name) localStorage.setItem('customerFirstName', meta.first_name);
-            if (meta.last_name) localStorage.setItem('customerLastName', meta.last_name);
-            if (meta.whatsapp) localStorage.setItem('registeredWhatsapp', meta.whatsapp);
-            if (meta.address) localStorage.setItem('customerAddress', meta.address);
             localStorage.setItem('registeredEmail', email);
+            localStorage.setItem('customerName', `${meta.first_name || ''} ${meta.last_name || ''}`.trim() || 'Sobat Santara');
 
-            if (role === 'Administrator') {
-                router.push('/posin-adm');
-            } else if (role === 'Operator') {
-                router.push('/posin-cas');
-            } else {
-                router.push('/posin-cus');
-            }
+            // Redirect
+            if (role === 'Administrator') router.push('/posin-adm');
+            else if (role === 'Operator') router.push('/posin-cas');
+            else router.push('/posin-cus');
 
         } catch (err) {
-            console.error("Kesalahan sistem:", err);
-            alert("Terjadi kesalahan sistem, mohon coba lagi nanti.");
+            console.error("Login Error:", err);
+            alert("Terjadi kesalahan sistem.");
+            setIsSubmitting(false);
         }
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-cover bg-center bg-no-repeat relative" style={{ backgroundImage: "url('/bg-food.png')" }}>
-            <div className="absolute inset-0 bg-emerald-950/60 backdrop-blur-sm"></div>
-
-            <div className="relative z-10 max-w-md w-full bg-white/95 rounded-2xl shadow-2xl overflow-hidden border border-white/20">
-                <div className="bg-emerald-700 p-8 text-white text-center flex flex-col items-center">
-                    <div className="inline-flex p-1 bg-white rounded-full mb-4 shadow-lg">
-                        <img src="/santara-logo.png" alt="Santara Logo" className="w-16 h-16 object-contain rounded-full" />
+        <div style={{ 
+            minHeight: '100vh', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            padding: '20px',
+            backgroundColor: '#064e3b',
+            backgroundImage: "url('/bg-food.png')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            position: 'relative'
+        }}>
+            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6, 78, 59, 0.7)', backdropFilter: 'blur(4px)' }}></div>
+            
+            <div style={{ 
+                position: 'relative', 
+                zIndex: 10, 
+                maxWidth: '400px', 
+                width: '100%', 
+                backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                borderRadius: '20px', 
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                overflow: 'hidden'
+            }}>
+                <div style={{ backgroundColor: '#047857', padding: '40px 20px', textAlign: 'center', color: 'white' }}>
+                    <div style={{ backgroundColor: 'white', padding: '10px', borderRadius: '50%', display: 'inline-block', marginBottom: '15px' }}>
+                        <img src="/santara-logo.png" alt="Logo" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
                     </div>
-                    <h1 className="text-3xl font-bold uppercase tracking-tight">Login</h1>
-                    <p className="text-emerald-100 mt-2 italic">{storeSettings.storeName}</p>
+                    <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 'bold' }}>MASUK</h1>
                 </div>
-                <div className="p-8">
-                    <div className="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded text-emerald-800 text-sm italic">
-                        "Sesungguhnya Allah menyukai jika salah seorang dari kalian melakukan suatu pekerjaan, ia melakukannya dengan itqan (profesional/sempurna)."
-                    </div>
-                    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+
+                <div style={{ padding: '30px' }}>
+                    <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Email</label>
-                            <div className="relative">
-                                <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                                <input
-                                    type="email"
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-slate-900 font-bold"
-                                    placeholder="admin@santara.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
-                            </div>
+                            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>Email</label>
+                            <input 
+                                type="email" 
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none', fontWeight: 'bold' }}
+                                placeholder="nama@email.com"
+                                required
+                            />
                         </div>
-                        <div className="flex flex-col gap-1">
-                            <div className="flex justify-between items-center mb-1">
-                                <label className="block text-sm font-medium text-gray-700">Kata Sandi</label>
-                                <button 
-                                    type="button" 
-                                    onClick={() => router.push('/forgot-password')}
-                                    className="text-xs font-bold text-emerald-600 hover:underline"
-                                >
-                                    Lupa Kata Sandi?
-                                </button>
+
+                        <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                <label style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>Kata Sandi</label>
+                                <button type="button" onClick={() => router.push('/forgot-password')} style={{ fontSize: '12px', color: '#059669', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 'bold' }}>Lupa Sandi?</button>
                             </div>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-slate-900 font-bold"
-                                    placeholder="••••••••"
+                            <div style={{ position: 'relative' }}>
+                                <input 
+                                    type={showPassword ? "text" : "password"} 
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
+                                    style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none', fontWeight: 'bold' }}
+                                    placeholder="••••••••"
                                     required
                                 />
-                                <button
-                                    type="button"
+                                <button 
+                                    type="button" 
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-2.5 text-gray-400 hover:text-emerald-600 transition-colors"
+                                    style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'none', cursor: 'pointer', color: '#9ca3af', fontWeight: 'bold' }}
                                 >
-                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                    {showPassword ? 'HIDUP' : 'LIHAT'}
                                 </button>
                             </div>
                         </div>
-                        <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition duration-200">
-                            Masuk Sekarang
+
+                        <button 
+                            type="submit" 
+                            disabled={isSubmitting}
+                            style={{ 
+                                width: '100%', 
+                                padding: '14px', 
+                                borderRadius: '10px', 
+                                border: 'none', 
+                                backgroundColor: '#059669', 
+                                color: 'white', 
+                                fontWeight: 'bold', 
+                                fontSize: '16px', 
+                                cursor: 'pointer',
+                                marginTop: '10px',
+                                opacity: isSubmitting ? 0.7 : 1
+                            }}
+                        >
+                            {isSubmitting ? 'Memproses...' : 'Masuk Sekarang'}
                         </button>
                     </form>
-                    <div className="mt-6 text-center text-sm text-gray-600">
-                        Belum punya akun?
-                        <button type="button" onClick={() => router.push('/register')} className="ml-1 text-emerald-600 font-bold hover:underline">
-                            Daftar Pelanggan Baru
-                        </button>
-                    </div>
 
-                    <div className="mt-6 pt-6 border-t border-gray-200/50 flex justify-center">
-                        <button type="button" onClick={() => router.push('/')} className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-emerald-600 transition-colors duration-200">
-                            <ArrowLeft className="w-4 h-4 mr-2" />
-                            Kembali ke Beranda
-                        </button>
+                    <div style={{ marginTop: '25px', textAlign: 'center', fontSize: '14px', color: '#6b7280' }}>
+                        Belum punya akun? <button onClick={() => router.push('/register')} style={{ color: '#059669', fontWeight: 'bold', border: 'none', background: 'none', cursor: 'pointer' }}>Daftar Disini</button>
                     </div>
                 </div>
             </div>
