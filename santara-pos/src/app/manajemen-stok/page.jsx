@@ -140,6 +140,7 @@ export default function ManajemenStok() {
         }
         const fetchProducts = async () => {
             try {
+                // 1. Fetch from Supabase
                 const { data: dbData, error } = await supabase
                     .from('products')
                     .select('*')
@@ -147,11 +148,9 @@ export default function ManajemenStok() {
 
                 if (error) throw error;
 
-                const stored = localStorage.getItem('santaraProducts');
-                const localData = stored ? JSON.parse(stored) : [];
-
-                if (localData.length > (dbData?.length || 0)) {
-                    const toUpsert = localData.map(p => ({
+                // 2. Proactive Sync: If cloud is incomplete, restore the hardcoded full list
+                if (!dbData || dbData.length < INITIAL_PRODUCTS.length) {
+                    const initial = INITIAL_PRODUCTS.map(p => ({
                         id: p.id,
                         name: p.name,
                         price: p.price,
@@ -161,10 +160,11 @@ export default function ManajemenStok() {
                         discount_percent: p.discountPercent || 0,
                         original_price: p.originalPrice || p.price
                     }));
-                    await supabase.from('products').upsert(toUpsert, { onConflict: 'id' });
-                    setProducts(localData);
-                } else if (dbData && dbData.length > 0) {
-                    const mapped = dbData.map(p => ({
+                    await supabase.from('products').upsert(initial, { onConflict: 'id' });
+                    
+                    // Re-fetch to confirm
+                    const { data: syncedData } = await supabase.from('products').select('*').order('id', { ascending: true });
+                    const mapped = syncedData.map(p => ({
                         id: p.id,
                         name: p.name,
                         price: p.price,
@@ -177,10 +177,22 @@ export default function ManajemenStok() {
                     setProducts(mapped);
                     localStorage.setItem('santaraProducts', JSON.stringify(mapped));
                 } else {
-                    setProducts(INITIAL_PRODUCTS);
+                    // Use Supabase data as the Source of Truth
+                    const mapped = dbData.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        price: p.price,
+                        stock: p.stock,
+                        category: p.category,
+                        img: p.img,
+                        discountPercent: p.discount_percent,
+                        originalPrice: p.original_price
+                    }));
+                    setProducts(mapped);
+                    localStorage.setItem('santaraProducts', JSON.stringify(mapped));
                 }
             } catch (err) {
-                console.error("Supabase Products Fetch Error:", err);
+                console.error("Manajemen Stok Fetch/Sync Error:", err);
                 const stored = localStorage.getItem('santaraProducts');
                 if (stored) setProducts(JSON.parse(stored));
             }

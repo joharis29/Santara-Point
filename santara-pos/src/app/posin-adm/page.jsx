@@ -441,13 +441,9 @@ function AdminPortalContent() {
 
                 if (error) throw error;
 
-                // 2. Fetch from Local Storage (Recovery source)
-                const stored = localStorage.getItem('santaraProducts');
-                const localData = stored ? JSON.parse(stored) : [];
-
-                // 3. Recovery Logic: If local has more data than cloud, restore it
-                if (localData.length > (dbData?.length || 0)) {
-                    const toUpsert = localData.map(p => ({
+                // 2. Proactive Sync Logic: If cloud data is missing items from the hardcoded menu, push them
+                if (!dbData || dbData.length < INITIAL_PRODUCTS.length) {
+                    const initial = INITIAL_PRODUCTS.map(p => ({
                         id: p.id,
                         name: p.name,
                         price: p.price,
@@ -457,12 +453,11 @@ function AdminPortalContent() {
                         discount_percent: p.discountPercent || 0,
                         original_price: p.originalPrice || p.price
                     }));
-                    await supabase.from('products').upsert(toUpsert, { onConflict: 'id' });
+                    await supabase.from('products').upsert(initial, { onConflict: 'id' });
                     
-                    // Use local for immediate UI update
-                    setProducts(localData);
-                } else if (dbData && dbData.length > 0) {
-                    const mapped = dbData.map(p => ({
+                    // Re-fetch to get final state
+                    const { data: syncedData } = await supabase.from('products').select('*').order('id', { ascending: true });
+                    const mapped = syncedData.map(p => ({
                         id: p.id,
                         name: p.name,
                         price: p.price,
@@ -475,10 +470,22 @@ function AdminPortalContent() {
                     setProducts(mapped);
                     localStorage.setItem('santaraProducts', JSON.stringify(mapped));
                 } else {
-                    setProducts(INITIAL_PRODUCTS);
+                    // Use Supabase as the source of truth
+                    const mapped = dbData.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        price: p.price,
+                        stock: p.stock,
+                        category: p.category,
+                        img: p.img,
+                        discountPercent: p.discount_percent,
+                        originalPrice: p.original_price
+                    }));
+                    setProducts(mapped);
+                    localStorage.setItem('santaraProducts', JSON.stringify(mapped));
                 }
             } catch (err) {
-                console.error("Admin POS Fetch Error:", err);
+                console.error("Admin POS Fetch/Sync Error:", err);
                 const stored = localStorage.getItem('santaraProducts');
                 if (stored) setProducts(JSON.parse(stored));
                 else setProducts(INITIAL_PRODUCTS);

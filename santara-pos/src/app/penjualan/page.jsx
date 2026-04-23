@@ -172,14 +172,11 @@ export default function PenjualanPage() {
 
                 if (error) throw error;
 
-                // 2. Fetch existing local storage data (The user's truth)
-                const stored = localStorage.getItem('santaraProducts');
-                let localProducts = stored ? JSON.parse(stored) : [];
-
-                // 3. Merge Strategy: Ensure Supabase has EVERYTHING from localStorage
-                // This restores missing categories like Minuman, Snack, Frozen Food
-                if (localProducts.length > 0) {
-                    const toUpsert = localProducts.map(p => ({
+                // 2. Recovery Strategy: Compare Hardcoded List vs Cloud Data
+                // If cloud has FEWER items than our hardcoded list, we must push the missing ones
+                if (!dbData || dbData.length < INITIAL_PRODUCTS.length) {
+                    console.log("Supabase incomplete. Syncing hardcoded menu...");
+                    const initial = INITIAL_PRODUCTS.map(p => ({
                         id: p.id,
                         name: p.name,
                         price: p.price,
@@ -190,27 +187,12 @@ export default function PenjualanPage() {
                         original_price: p.originalPrice ?? p.price
                     }));
 
-                    // Sync everything from local to cloud to ensure nothing is lost
-                    await supabase.from('products').upsert(toUpsert, { onConflict: 'id' });
+                    // Upsert all to ensure Supabase is complete
+                    await supabase.from('products').upsert(initial, { onConflict: 'id' });
                     
-                    // Re-fetch to get the final merged state
-                    const { data: mergedData } = await supabase.from('products').select('*').order('id', { ascending: true });
-                    const mapped = mergedData.map(p => ({
-                        id: p.id,
-                        name: p.name,
-                        price: p.price,
-                        stock: p.stock,
-                        category: p.category,
-                        img: p.img,
-                        discountPercent: p.discount_percent,
-                        originalPrice: p.original_price
-                    }));
-                    setProducts(mapped);
-                    setEditedProducts(JSON.parse(JSON.stringify(mapped)));
-                    localStorage.setItem('santaraProducts', JSON.stringify(mapped));
-                } else if (dbData && dbData.length > 0) {
-                    // Use Supabase data if local is empty
-                    const mapped = dbData.map(p => ({
+                    // Re-fetch to confirm
+                    const { data: syncedData } = await supabase.from('products').select('*').order('id', { ascending: true });
+                    const mapped = syncedData.map(p => ({
                         id: p.id,
                         name: p.name,
                         price: p.price,
@@ -224,13 +206,23 @@ export default function PenjualanPage() {
                     setEditedProducts(JSON.parse(JSON.stringify(mapped)));
                     localStorage.setItem('santaraProducts', JSON.stringify(mapped));
                 } else {
-                    // Total fallback to INITIAL_PRODUCTS
-                    const initial = INITIAL_PRODUCTS.map(p => ({ ...p, originalPrice: p.price, discountPercent: 0 }));
-                    setProducts(initial);
-                    setEditedProducts(JSON.parse(JSON.stringify(initial)));
+                    // Use Supabase data as the source of truth
+                    const mapped = dbData.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        price: p.price,
+                        stock: p.stock,
+                        category: p.category,
+                        img: p.img,
+                        discountPercent: p.discount_percent,
+                        originalPrice: p.original_price
+                    }));
+                    setProducts(mapped);
+                    setEditedProducts(JSON.parse(JSON.stringify(mapped)));
+                    localStorage.setItem('santaraProducts', JSON.stringify(mapped));
                 }
             } catch (err) {
-                console.error("Supabase Products Fetch/Sync Error:", err);
+                console.error("Supabase Products Sync Error:", err);
                 const stored = localStorage.getItem('santaraProducts');
                 if (stored) {
                     const parsed = JSON.parse(stored);
