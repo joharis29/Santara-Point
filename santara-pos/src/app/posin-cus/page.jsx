@@ -426,7 +426,7 @@ function CustomerPortalContent() {
                 const parsed = JSON.parse(storedProducts);
                 const merged = PRODUCTS.map(masterItem => {
                     const storedItem = parsed.find(p => p.id === masterItem.id);
-                    return storedItem ? { ...storedItem, ...masterItem } : masterItem;
+                    return storedItem ? { ...masterItem, ...storedItem } : masterItem;
                 });
                 setProducts(merged);
             } catch (e) {

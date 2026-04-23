@@ -73,6 +73,7 @@ export default function PenjualanPage() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('pelanggan'); // pelanggan, faktur, penerimaan, retur, harga
     const [products, setProducts] = useState(INITIAL_PRODUCTS);
+    const [editedProducts, setEditedProducts] = useState([]); // Buffer for pricing changes
     const [transactions, setTransactions] = useState([]);
     const [customers, setCustomers] = useState([]);
     const [returns, setReturns] = useState([]);
@@ -144,6 +145,7 @@ export default function PenjualanPage() {
                 discountPercent: p.discountPercent ?? 0
             }));
             setProducts(migrated);
+            setEditedProducts(JSON.parse(JSON.stringify(migrated)));
         } else {
             const initial = INITIAL_PRODUCTS.map(p => ({ 
                 ...p, 
@@ -151,6 +153,7 @@ export default function PenjualanPage() {
                 discountPercent: 0 
             }));
             setProducts(initial);
+            setEditedProducts(JSON.parse(JSON.stringify(initial)));
             localStorage.setItem('santaraProducts', JSON.stringify(initial));
         }
 
@@ -329,40 +332,34 @@ export default function PenjualanPage() {
     };
 
     const handleUpdateOriginalPrice = (id, val) => {
-        const originalPrice = parseInt(val) || 0;
-        const updated = products.map(p => {
-            if (p.id === id) {
-                const price = Math.round(originalPrice * (1 - (p.discountPercent || 0) / 100));
-                return { ...p, originalPrice, price };
-            }
-            return p;
-        });
-        saveProducts(updated);
+        const newPrice = parseInt(val) || 0;
+        setEditedProducts(prev => prev.map(p => 
+            p.id === id ? { ...p, price: newPrice, originalPrice: newPrice } : p
+        ));
     };
 
     const handleUpdateDiscountPercent = (id, val) => {
         const discountPercent = parseFloat(val) || 0;
-        const updated = products.map(p => {
-            if (p.id === id) {
-                const price = Math.round((p.originalPrice || 0) * (1 - discountPercent / 100));
-                return { ...p, discountPercent, price };
-            }
-            return p;
-        });
-        saveProducts(updated);
+        setEditedProducts(prev => prev.map(p => 
+            p.id === id ? { ...p, discountPercent } : p
+        ));
     };
 
     const handleUpdateFinalPrice = (id, val) => {
-        const price = parseInt(val) || 0;
-        const updated = products.map(p => {
+        const targetFinalPrice = parseInt(val) || 0;
+        setEditedProducts(prev => prev.map(p => {
             if (p.id === id) {
-                const originalPrice = p.originalPrice || price;
-                const discountPercent = originalPrice > 0 ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
-                return { ...p, price, discountPercent };
+                const basePrice = p.price || targetFinalPrice;
+                const discountPercent = basePrice > 0 ? Math.round(((basePrice - targetFinalPrice) / basePrice) * 100) : 0;
+                return { ...p, discountPercent };
             }
             return p;
-        });
-        saveProducts(updated);
+        }));
+    };
+
+    const handleSavePricing = () => {
+        saveProducts(editedProducts);
+        alert('Perubahan harga dan diskon berhasil disimpan!');
     };
 
     const filteredCustomers = customers.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -548,23 +545,31 @@ export default function PenjualanPage() {
                     {activeTab === 'harga' && (
                         <div className="space-y-6 animate-in fade-in duration-500">
                              <div className="flex justify-between items-center">
-                                <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Penyesuaian Harga & Diskon</h3>
-                                <p className="text-slate-400 text-xs font-medium">Update harga produk jadi secara real-time.</p>
+                                <div>
+                                    <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Penyesuaian Harga & Diskon</h3>
+                                    <p className="text-slate-400 text-xs font-medium">Update harga produk secara berkala untuk sinkronisasi POS.</p>
+                                </div>
+                                <button 
+                                    onClick={handleSavePricing}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-200 transition-all flex items-center gap-2 active:scale-95"
+                                >
+                                    <CheckCircle2 size={18} /> Simpan Perubahan
+                                </button>
                             </div>
 
-                            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+                            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden mb-20">
                                 <table className="w-full text-left">
                                     <thead>
                                         <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400">
                                             <th className="px-8 py-5">Produk</th>
                                             <th className="px-8 py-5">Kategori</th>
-                                            <th className="px-8 py-5">Harga Awal</th>
-                                            <th className="px-8 py-5">Diskon</th>
-                                            <th className="px-8 py-5">Harga Saat Ini</th>
+                                            <th className="px-8 py-5">Harga Awal (Base)</th>
+                                            <th className="px-8 py-5">Diskon (%)</th>
+                                            <th className="px-8 py-5">Harga Akhir (Nett)</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
-                                        {products.map(p => (
+                                        {editedProducts.map(p => (
                                             <tr key={p.id} className="hover:bg-slate-50/50 transition-colors group">
                                                 <td className="px-8 py-5">
                                                     <div className="flex items-center gap-4">
@@ -580,7 +585,7 @@ export default function PenjualanPage() {
                                                         <span className="text-[10px] font-bold text-slate-400 mr-1">Rp</span>
                                                         <input 
                                                             type="number" 
-                                                            value={p.originalPrice || p.price}
+                                                            value={p.price}
                                                             className="w-28 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500"
                                                             onChange={(e) => handleUpdateOriginalPrice(p.id, e.target.value)}
                                                         />
@@ -603,11 +608,8 @@ export default function PenjualanPage() {
                                                         <span className="text-[10px] font-bold text-emerald-600 mr-1">Rp</span>
                                                         <input 
                                                             type="number" 
-                                                            value={p.price}
-                                                            onChange={(e) => {
-                                                                // Fast update for responsive feel
-                                                                handleUpdateFinalPrice(p.id, e.target.value);
-                                                            }}
+                                                            value={Math.round(p.price * (1 - (p.discountPercent || 0) / 100))}
+                                                            onChange={(e) => handleUpdateFinalPrice(p.id, e.target.value)}
                                                             className="w-28 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-lg text-xs font-black text-emerald-700 outline-none focus:ring-2 focus:ring-emerald-500"
                                                         />
                                                         <div className="bg-emerald-600 text-white p-1.5 rounded-lg shadow-sm">

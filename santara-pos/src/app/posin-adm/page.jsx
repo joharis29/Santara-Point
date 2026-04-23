@@ -424,7 +424,7 @@ function AdminPortalContent() {
                 const localData = JSON.parse(storedProducts);
                 const syncedProducts = INITIAL_PRODUCTS.map(p => {
                     const localMatch = localData.find(lp => lp.id === p.id);
-                    return { ...p, stock: localMatch ? localMatch.stock : p.stock };
+                    return localMatch ? { ...p, ...localMatch } : p;
                 });
                 setProducts(syncedProducts);
                 localStorage.setItem('santaraProducts', JSON.stringify(syncedProducts));
