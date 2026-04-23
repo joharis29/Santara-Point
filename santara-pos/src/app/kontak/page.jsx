@@ -21,7 +21,7 @@ export default function ContactPage() {
   useEffect(() => {
     const stored = localStorage.getItem('santaraStoreSettings');
     if (stored) {
-      setStoreSettings(JSON.parse(stored));
+      setStoreSettings(prev => ({ ...prev, ...JSON.parse(stored) }));
     }
   }, []);
 

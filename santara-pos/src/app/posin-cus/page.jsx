@@ -491,6 +491,8 @@ function CustomerPortalContent() {
                     const mapped = {
                         storeName: data.store_name,
                         storeTagline: data.store_tagline,
+                        whatsapp: data.whatsapp,
+                        email: data.email,
                         isPajakActive: data.is_pajak_active,
                         address: data.address,
                         companyCategory: data.company_category,
@@ -500,7 +502,7 @@ function CustomerPortalContent() {
                         companyType: data.company_type,
                         authorizedUsers: data.authorized_users
                     };
-                    setStoreSettings(mapped);
+                    setStoreSettings(prev => ({ ...prev, ...mapped }));
                     localStorage.setItem('santaraStoreSettings', JSON.stringify(mapped));
                 }
             } catch (err) {

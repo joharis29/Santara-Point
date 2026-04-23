@@ -298,7 +298,7 @@ function FavoritesContent() {
         const storedSettings = localStorage.getItem('santaraStoreSettings');
         if (storedSettings) {
             try {
-                setStoreSettings(JSON.parse(storedSettings));
+                setStoreSettings(prev => ({ ...prev, ...JSON.parse(storedSettings) }));
             } catch (e) {
                 console.error("Error parsing settings", e);
             }

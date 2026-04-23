@@ -160,6 +160,8 @@ export default function PenjualanPage() {
                 id: 1,
                 store_name: storeSettings.storeName,
                 store_tagline: storeSettings.storeTagline || '',
+                whatsapp: storeSettings.whatsapp || '',
+                email: storeSettings.email || '',
                 is_pajak_active: storeSettings.isPajakActive,
                 address: storeSettings.address || '',
                 company_category: storeSettings.companyCategory || '',
@@ -318,6 +320,8 @@ export default function PenjualanPage() {
                     const mapped = {
                         storeName: data.store_name,
                         storeTagline: data.store_tagline,
+                        whatsapp: data.whatsapp,
+                        email: data.email,
                         isPajakActive: data.is_pajak_active,
                         address: data.address,
                         companyCategory: data.company_category,
@@ -327,7 +331,7 @@ export default function PenjualanPage() {
                         companyType: data.company_type,
                         authorizedUsers: data.authorized_users
                     };
-                    setStoreSettings(mapped);
+                    setStoreSettings(prev => ({ ...prev, ...mapped }));
                     localStorage.setItem('santaraStoreSettings', JSON.stringify(mapped));
                 } else {
                     const storedSettings = localStorage.getItem('santaraStoreSettings');
