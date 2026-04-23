@@ -46,14 +46,14 @@ import AdminSidebar from '@/components/AdminSidebar';
 import SettingsModal from '@/components/SettingsModal';
 
 const INITIAL_PRODUCTS = [
-    { id: 7, name: 'Nasi Kuning', price: 15000, stock: 15, category: 'Makanan', img: '/nasi-kuning-baru.jpg' },
-    { id: 8, name: 'Nasi Uduk', price: 15000, stock: 20, category: 'Makanan', img: '/nasi-uduk-asli.jpg' },
-    { id: 9, name: 'Soto Ayam', price: 15000, stock: 15, category: 'Makanan', img: '/soto-ayam-asli.jpg' },
-    { id: 10, name: 'Bubur Ayam', price: 15000, stock: 20, category: 'Makanan', img: '/bubur-ayam-asli.jpg' },
-    { id: 11, name: 'Ketoprak', price: 15000, stock: 15, category: 'Makanan', img: '/ketoprak-asli.jpg' },
-    { id: 12, name: 'Nasi Ayam Pop', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-pop-asli.jpg' },
-    { id: 13, name: 'Nasi Ayam Kecap', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-kecap-asli.jpg' },
-    { id: 14, name: 'Nasi Ayam Balado', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-balado-asli.jpg' },
+    { id: 7, name: 'Nasi Kuning', price: 15000, stock: 15, category: 'Makanan', img: '/nasi-kuning-baru.jpg', discountPercent: 10, rating: 4.8 },
+    { id: 8, name: 'Nasi Uduk', price: 15000, stock: 20, category: 'Makanan', img: '/nasi-uduk-asli.jpg', discountPercent: 0, rating: 4.5 },
+    { id: 9, name: 'Soto Ayam', price: 15000, stock: 15, category: 'Makanan', img: '/soto-ayam-asli.jpg', discountPercent: 0, rating: 4.7 },
+    { id: 10, name: 'Bubur Ayam', price: 15000, stock: 20, category: 'Makanan', img: '/bubur-ayam-asli.jpg', discountPercent: 0, rating: 4.6 },
+    { id: 11, name: 'Ketoprak', price: 15000, stock: 15, category: 'Makanan', img: '/ketoprak-asli.jpg', discountPercent: 15, rating: 4.9 },
+    { id: 12, name: 'Nasi Ayam Pop', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-pop-asli.jpg', discountPercent: 0, rating: 4.4 },
+    { id: 13, name: 'Nasi Ayam Kecap', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-kecap-asli.jpg', discountPercent: 0, rating: 4.3 },
+    { id: 14, name: 'Nasi Ayam Balado', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-balado-asli.jpg', discountPercent: 0, rating: 4.2 },
     { id: 15, name: 'Nasi Ayam Kremes', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-kremes-asli.jpg' },
     { id: 16, name: 'Nasi Chicken Nugget', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-chicken-nugget-asli.jpg' },
     { id: 17, name: 'Nasi Ayam Rica-Rica', price: 16000, stock: 15, category: 'Makanan', img: '/nasi-ayam-rica-rica-asli.jpg' },
@@ -580,9 +580,9 @@ export default function PenjualanPage() {
                                                         <span className="text-[10px] font-bold text-slate-400 mr-1">Rp</span>
                                                         <input 
                                                             type="number" 
-                                                            defaultValue={p.originalPrice || p.price}
+                                                            value={p.originalPrice || p.price}
                                                             className="w-28 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500"
-                                                            onBlur={(e) => handleUpdateOriginalPrice(p.id, e.target.value)}
+                                                            onChange={(e) => handleUpdateOriginalPrice(p.id, e.target.value)}
                                                         />
                                                     </div>
                                                 </td>
@@ -591,9 +591,9 @@ export default function PenjualanPage() {
                                                         <input 
                                                             type="number" 
                                                             step="0.1"
-                                                            defaultValue={p.discountPercent || 0}
+                                                            value={p.discountPercent || 0}
                                                             className="w-20 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500"
-                                                            onBlur={(e) => handleUpdateDiscountPercent(p.id, e.target.value)}
+                                                            onChange={(e) => handleUpdateDiscountPercent(p.id, e.target.value)}
                                                         />
                                                         <span className="text-[10px] font-bold text-slate-400">%</span>
                                                     </div>
@@ -605,11 +605,9 @@ export default function PenjualanPage() {
                                                             type="number" 
                                                             value={p.price}
                                                             onChange={(e) => {
-                                                                // Local update for responsive feel
-                                                                const newPrice = parseInt(e.target.value) || 0;
-                                                                setProducts(prev => prev.map(item => item.id === p.id ? { ...item, price: newPrice } : item));
+                                                                // Fast update for responsive feel
+                                                                handleUpdateFinalPrice(p.id, e.target.value);
                                                             }}
-                                                            onBlur={(e) => handleUpdateFinalPrice(p.id, e.target.value)}
                                                             className="w-28 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-lg text-xs font-black text-emerald-700 outline-none focus:ring-2 focus:ring-emerald-500"
                                                         />
                                                         <div className="bg-emerald-600 text-white p-1.5 rounded-lg shadow-sm">
