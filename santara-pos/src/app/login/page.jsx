@@ -2,27 +2,48 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import {
+  Lock,
+  Mail,
+  Eye,
+  EyeOff,
+  ArrowLeft
+} from 'lucide-react';
+
+const DEFAULT_SETTINGS = {
+    storeName: 'Santara Point',
+    storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
+    whatsapp: '6285846802177',
+    email: 'santarapoint@gmail.com',
+    address: 'Jl. Raya Santara No. 123, Bandung',
+    footerText: '© 2024 Santara Point. Berkah setiap saat.'
+};
 
 export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [storeSettings, setStoreSettings] = useState(DEFAULT_SETTINGS);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isClient, setIsClient] = useState(false);
 
-    // Cek sisi client
     useEffect(() => {
         setIsClient(true);
-        // Cara manual cek query param tanpa Suspense
+        // Stable way to get query params without Suspense/useSearchParams hook
         const params = new URLSearchParams(window.location.search);
         if (params.get('message') === 'confirmed') {
             alert('Selamat! Akun Anda telah terkonfirmasi. Silakan masuk.');
             router.replace('/login');
         }
+
+        const stored = localStorage.getItem('santaraStoreSettings');
+        if (stored) {
+            setStoreSettings(JSON.parse(stored));
+        }
     }, [router]);
 
-    async function handleLogin(e) {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
 
@@ -39,12 +60,19 @@ export default function LoginPage() {
             });
 
             if (error) {
-                alert(`Gagal Masuk: ${error.message}`);
+                if (error.message.toLowerCase().includes('email not confirmed')) {
+                    alert('Email Anda belum terverifikasi. Silakan cek kotak masuk email Anda.');
+                } else {
+                    alert(`Gagal Masuk: ${error.message}`);
+                }
                 setIsSubmitting(false);
                 return;
             }
 
             let role = 'Customer';
+            const meta = user.user_metadata || {};
+            const finalName = `${meta.first_name || ''} ${meta.last_name || ''}`.trim() || 'Sobat Santara';
+
             if (email.toLowerCase() === 'santarapoint@gmail.com') {
                 role = 'Administrator';
             } else {
@@ -56,10 +84,9 @@ export default function LoginPage() {
                 }
             }
 
-            const meta = user.user_metadata || {};
             localStorage.setItem('currentUserRole', role);
             localStorage.setItem('registeredEmail', email);
-            localStorage.setItem('customerName', `${meta.first_name || ''} ${meta.last_name || ''}`.trim() || 'Sobat Santara');
+            localStorage.setItem('customerName', finalName);
 
             if (role === 'Administrator') router.push('/posin-adm');
             else if (role === 'Operator') router.push('/posin-cas');
@@ -70,109 +97,100 @@ export default function LoginPage() {
             alert("Terjadi kesalahan sistem.");
             setIsSubmitting(false);
         }
-    }
+    };
 
     if (!isClient) return null;
 
     return (
-        <div style={{ 
-            minHeight: '100vh', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            padding: '20px',
-            backgroundColor: '#064e3b',
-            backgroundImage: "url('/bg-food.png')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            position: 'relative',
-            fontFamily: 'sans-serif'
-        }}>
-            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6, 78, 59, 0.7)', backdropFilter: 'blur(4px)' }}></div>
-            
-            <div style={{ 
-                position: 'relative', 
-                zIndex: 10, 
-                maxWidth: '400px', 
-                width: '100%', 
-                backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                borderRadius: '20px', 
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-                overflow: 'hidden'
-            }}>
-                <div style={{ backgroundColor: '#047857', padding: '40px 20px', textAlign: 'center', color: 'white' }}>
-                    <div style={{ backgroundColor: 'white', padding: '10px', borderRadius: '50%', display: 'inline-block', marginBottom: '15px' }}>
-                        <img src="/santara-logo.png" alt="Logo" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+        <div className="min-h-screen flex items-center justify-center p-4 bg-cover bg-center bg-no-repeat relative" style={{ backgroundImage: "url('/bg-food.png')" }}>
+            {/* Background Overlay */}
+            <div className="absolute inset-0 bg-emerald-950/70 backdrop-blur-md"></div>
+
+            {/* Main Content Container */}
+            <div className="relative z-10 max-w-md w-full bg-white/95 rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20 animate-in zoom-in-95 duration-300">
+                <div className="bg-emerald-700 p-10 text-white text-center flex flex-col items-center">
+                    <div className="inline-flex p-2 bg-white rounded-full mb-6 shadow-xl">
+                        <img src="/santara-logo.png" alt="Santara Logo" className="w-20 h-20 object-contain rounded-full" />
                     </div>
-                    <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 'bold' }}>MASUK</h1>
-                    <p style={{ fontSize: '10px', opacity: 0.7, marginTop: '5px' }}>V2.1.0 - ULTRA STABLE</p>
+                    <h1 className="text-4xl font-black tracking-tighter uppercase mb-1">MASUK</h1>
+                    <p className="text-emerald-100/70 text-[10px] font-black uppercase tracking-[0.2em]">{storeSettings.storeName}</p>
                 </div>
+                
+                <div className="p-10">
+                    <div className="mb-8 p-6 bg-emerald-50 border-l-4 border-emerald-500 rounded-2xl text-emerald-800 text-xs font-medium italic leading-relaxed">
+                        "Sesungguhnya Allah menyukai jika salah seorang dari kalian melakukan suatu pekerjaan, ia melakukannya dengan itqan (profesional/sempurna)."
+                    </div>
 
-                <div style={{ padding: '30px' }}>
-                    <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        <div style={{ textAlign: 'left' }}>
-                            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>Email</label>
-                            <input 
-                                type="email" 
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none', fontWeight: 'bold', boxSizing: 'border-box' }}
-                                placeholder="nama@email.com"
-                                required
-                            />
-                        </div>
-
-                        <div style={{ textAlign: 'left' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                <label style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>Kata Sandi</label>
-                                <button type="button" onClick={() => router.push('/forgot-password')} style={{ fontSize: '12px', color: '#059669', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 'bold' }}>Lupa Sandi?</button>
-                            </div>
-                            <div style={{ position: 'relative' }}>
-                                <input 
-                                    type={showPassword ? "text" : "password"} 
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none', fontWeight: 'bold', boxSizing: 'border-box' }}
-                                    placeholder="••••••••"
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div>
+                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-2">Email</label>
+                            <div className="relative">
+                                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                <input
+                                    type="email"
+                                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 font-bold text-slate-700 transition-all"
+                                    placeholder="nama@email.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     required
                                 />
+                            </div>
+                        </div>
+
+                        <div>
+                            <div className="flex justify-between items-center mb-2 ml-2">
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Kata Sandi</label>
                                 <button 
                                     type="button" 
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'none', cursor: 'pointer', color: '#9ca3af', fontWeight: 'bold' }}
+                                    onClick={() => router.push('/forgot-password')}
+                                    className="text-[10px] font-black text-emerald-600 hover:underline uppercase tracking-widest"
                                 >
-                                    {showPassword ? 'HIDUP' : 'LIHAT'}
+                                    Lupa Sandi?
+                                </button>
+                            </div>
+                            <div className="relative">
+                                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    className="w-full pl-14 pr-14 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 font-bold text-slate-700 transition-all"
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-emerald-500 transition-colors"
+                                >
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                 </button>
                             </div>
                         </div>
 
                         <button 
-                            type="submit" 
+                            type="submit"
                             disabled={isSubmitting}
-                            style={{ 
-                                width: '100%', 
-                                padding: '14px', 
-                                borderRadius: '10px', 
-                                border: 'none', 
-                                backgroundColor: '#059669', 
-                                color: 'white', 
-                                fontWeight: 'bold', 
-                                fontSize: '16px', 
-                                cursor: 'pointer',
-                                marginTop: '10px',
-                                opacity: isSubmitting ? 0.7 : 1
-                            }}
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-5 rounded-2xl shadow-xl shadow-emerald-200 active:scale-[0.98] transition-all text-[10px] uppercase tracking-[0.2em] disabled:opacity-70"
                         >
-                            {isSubmitting ? 'Memproses...' : 'Masuk Sekarang'}
+                            {isSubmitting ? 'MEMPROSES...' : 'MASUK SEKARANG'}
                         </button>
                     </form>
 
-                    <div style={{ marginTop: '25px', textAlign: 'center', fontSize: '14px', color: '#6b7280' }}>
-                        Belum punya akun? <button onClick={() => router.push('/register')} style={{ color: '#059669', fontWeight: 'bold', border: 'none', background: 'none', cursor: 'pointer' }}>Daftar Disini</button>
+                    <div className="mt-10 text-center">
+                        <p className="text-xs text-slate-400 font-medium">
+                            Belum punya akun? 
+                            <button onClick={() => router.push('/register')} className="ml-2 text-emerald-600 font-black hover:underline uppercase tracking-widest">
+                                Daftar Disini
+                            </button>
+                        </p>
                     </div>
 
-                    <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                        <button onClick={() => router.push('/')} style={{ fontSize: '12px', color: '#9ca3af', border: 'none', background: 'none', cursor: 'pointer' }}>Kembali ke Beranda</button>
+                    <div className="mt-8 pt-8 border-t border-slate-50 flex justify-center">
+                        <button onClick={() => router.push('/')} className="inline-flex items-center text-[10px] font-black text-slate-300 hover:text-emerald-600 transition-all uppercase tracking-widest">
+                            <ArrowLeft className="w-4 h-4 mr-2" />
+                            Kembali ke Beranda
+                        </button>
                     </div>
                 </div>
             </div>
