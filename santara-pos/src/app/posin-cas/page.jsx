@@ -174,6 +174,7 @@ function CashierPortalContent() {
     const [isUpdatingWhatsapp, setIsUpdatingWhatsapp] = useState(false);
     const [newPasswordInput, setNewPasswordInput] = useState('');
     const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
+    const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
     // --- Function Hoisting (Standard Function Declarations for TDZ Safety) ---
 
     async function handleSaveProfile(e) {

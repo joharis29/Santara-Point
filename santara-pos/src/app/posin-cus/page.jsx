@@ -235,6 +235,27 @@ function CustomerPortalContent() {
     const [newPasswordInput, setNewPasswordInput] = useState('');
     const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
     const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+    const [isWaitingOpen, setIsWaitingOpen] = useState(false);
+    const [currentTxId, setCurrentTxId] = useState(null);
+
+    const [cart, setCart] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [activeCategory, setActiveCategory] = useState('Semua');
+    const [customerEmail, setCustomerEmail] = useState('');
+    const [customerPhone, setCustomerPhone] = useState('');
+    const [customerAddress, setCustomerAddress] = useState('');
+    const [orderNote, setOrderNote] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('');
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [sortBy, setSortBy] = useState('default');
+    const [orderType, setOrderType] = useState('Ambil di Resto');
+    
+    const [isCartOpen, setIsCartOpen] = useState(false);
+    const [toppingModalProduct, setToppingModalProduct] = useState(null);
+    const [isQrisOpen, setIsQrisOpen] = useState(false);
+    const [isCodOpen, setIsCodOpen] = useState(false);
+    const [isTransferOpen, setIsTransferOpen] = useState(false);
+    const [isCartModalOpen, setIsCartModalOpen] = useState(false);
 
     // --- Function Hoisting (Standard Function Declarations for TDZ Safety) ---
 
@@ -474,26 +495,8 @@ function CustomerPortalContent() {
         localStorage.setItem('santaraFavorites', JSON.stringify(newFavs));
     };
 
-    const [cart, setCart] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [activeCategory, setActiveCategory] = useState('Semua');
-    const [customerEmail, setCustomerEmail] = useState('');
-    const [customerPhone, setCustomerPhone] = useState('');
-    const [customerAddress, setCustomerAddress] = useState('');
-    const [orderNote, setOrderNote] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('');
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [sortBy, setSortBy] = useState('default');
-    const [orderType, setOrderType] = useState('Ambil di Resto');
     // Global Order Tracking
     const { startTracking } = useOrderTracking();
-
-    const [isCartOpen, setIsCartOpen] = useState(false);
-    const [toppingModalProduct, setToppingModalProduct] = useState(null);
-    const [isQrisOpen, setIsQrisOpen] = useState(false);
-    const [isCodOpen, setIsCodOpen] = useState(false);
-    const [isTransferOpen, setIsTransferOpen] = useState(false);
-    const [isCartModalOpen, setIsCartModalOpen] = useState(false);
     // Pajak Daerah is strictly mandatory
 
 
