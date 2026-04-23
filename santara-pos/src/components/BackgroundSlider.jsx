@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
  * BackgroundSlider Component
  * Cycles through an array of images with a smooth sliding/fading transition.
  */
-const BackgroundSlider = ({ images, interval = 8000 }) => {
+export default function BackgroundSlider({ images, interval = 8000 }) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
@@ -42,6 +42,5 @@ const BackgroundSlider = ({ images, interval = 8000 }) => {
             <div className="absolute inset-0 bg-black/10 mix-blend-overlay z-10 pointer-events-none"></div>
         </div>
     );
-};
+}
 
-export default BackgroundSlider;

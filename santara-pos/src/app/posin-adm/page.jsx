@@ -147,9 +147,9 @@ const DEFAULT_SETTINGS = {
     isPajakActive: true
 };
 
-// --- Modal Components (Moved to top to avoid ReferenceError) ---
+// --- Modal Components (Converted to function declarations for better hoisting/stability) ---
 
-const ChangeEmailModal = ({ isOpen, onClose, oldEmail, newEmail, setNewEmail, onConfirm, isProcessing }) => {
+function ChangeEmailModal({ isOpen, onClose, oldEmail, newEmail, setNewEmail, onConfirm, isProcessing }) {
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
@@ -168,9 +168,9 @@ const ChangeEmailModal = ({ isOpen, onClose, oldEmail, newEmail, setNewEmail, on
             </div>
         </div>
     );
-};
+}
 
-const ChangeWhatsappModal = ({ isOpen, onClose, oldWhatsapp, newWhatsapp, setNewWhatsapp, onConfirm, isProcessing }) => {
+function ChangeWhatsappModal({ isOpen, onClose, oldWhatsapp, newWhatsapp, setNewWhatsapp, onConfirm, isProcessing }) {
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
@@ -189,9 +189,9 @@ const ChangeWhatsappModal = ({ isOpen, onClose, oldWhatsapp, newWhatsapp, setNew
             </div>
         </div>
     );
-};
+}
 
-const ChangePasswordModal = ({ isOpen, onClose, newPassword, setNewPassword, confirmPassword, setConfirmPassword, onConfirm, isProcessing }) => {
+function ChangePasswordModal({ isOpen, onClose, newPassword, setNewPassword, confirmPassword, setConfirmPassword, onConfirm, isProcessing }) {
     const [showNewPassword, setShowNewPassword] = React.useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
@@ -243,7 +243,7 @@ const ChangePasswordModal = ({ isOpen, onClose, newPassword, setNewPassword, con
             </div>
         </div>
     );
-};
+}
 
 
 function AdminPortalContent() {

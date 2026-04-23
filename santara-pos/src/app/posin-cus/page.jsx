@@ -121,9 +121,9 @@ const PRODUCTS = [
     { id: 54, name: 'Es Campur', price: 10000, stock: 10, category: 'Minuman', img: '/minuman-es-campur-asli.png', images: ['/minuman-es-campur-asli.png'], rating: 4.8 },
 ];
 
-// --- Modal Components (Moved to top to avoid ReferenceError) ---
+// --- Modal Components (Converted to function declarations for better hoisting/stability) ---
 
-const ChangeEmailModal = ({ isOpen, onClose, oldEmail, newEmail, setNewEmail, onConfirm, isProcessing }) => {
+function ChangeEmailModal({ isOpen, onClose, oldEmail, newEmail, setNewEmail, onConfirm, isProcessing }) {
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
@@ -149,9 +149,9 @@ const ChangeEmailModal = ({ isOpen, onClose, oldEmail, newEmail, setNewEmail, on
             </div>
         </div>
     );
-};
+}
 
-const ChangeWhatsappModal = ({ isOpen, onClose, oldWhatsapp, newWhatsapp, setNewWhatsapp, onConfirm, isProcessing }) => {
+function ChangeWhatsappModal({ isOpen, onClose, oldWhatsapp, newWhatsapp, setNewWhatsapp, onConfirm, isProcessing }) {
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
@@ -177,9 +177,9 @@ const ChangeWhatsappModal = ({ isOpen, onClose, oldWhatsapp, newWhatsapp, setNew
             </div>
         </div>
     );
-};
+}
 
-const ChangePasswordModal = ({ isOpen, onClose, newPassword, setNewPassword, confirmPassword, setConfirmPassword, onConfirm, isProcessing }) => {
+function ChangePasswordModal({ isOpen, onClose, newPassword, setNewPassword, confirmPassword, setConfirmPassword, onConfirm, isProcessing }) {
     const [showNewPassword, setShowNewPassword] = React.useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
     if (!isOpen) return null;
@@ -213,9 +213,9 @@ const ChangePasswordModal = ({ isOpen, onClose, newPassword, setNewPassword, con
             </div>
         </div>
     );
-};
+}
 
-const ProductImageSlider = ({ product }) => {
+function ProductImageSlider({ product }) {
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const hasMultiple = product.images && product.images.length > 1;
@@ -279,7 +279,7 @@ const ProductImageSlider = ({ product }) => {
             )}
         </div>
     );
-};
+}
 
 function CustomerPortalContent() {
     const router = useRouter();
