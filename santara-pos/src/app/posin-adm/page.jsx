@@ -205,8 +205,12 @@ function AdminPortalContent() {
     React.useEffect(() => {
         // Security Check
         const userRole = localStorage.getItem('currentUserRole');
-        if (userRole !== 'Administrator') {
-            console.log('Access denied: Role is', userRole);
+        const userEmail = localStorage.getItem('registeredEmail');
+        
+        const isAdmin = userRole === 'Administrator' || (userEmail && userEmail.toLowerCase() === 'santarapoint@gmail.com');
+
+        if (!isAdmin) {
+            console.log('Access denied: Role is', userRole, 'Email is', userEmail);
             router.push('/login');
             return;
         }

@@ -176,8 +176,12 @@ function CashierPortalContent() {
     React.useEffect(() => {
         // Security Check
         const userRole = localStorage.getItem('currentUserRole');
-        if (userRole !== 'Operator' && userRole !== 'Administrator') {
-            console.log('Access denied in POS-CAS: Role is', userRole);
+        const userEmail = localStorage.getItem('registeredEmail');
+        
+        const isAuthorized = userRole === 'Operator' || userRole === 'Administrator' || (userEmail && userEmail.toLowerCase() === 'santarapoint@gmail.com');
+
+        if (!isAuthorized) {
+            console.log('Access denied in POS-CAS: Role is', userRole, 'Email is', userEmail);
             router.push('/login');
             return;
         }
