@@ -795,29 +795,43 @@ function CustomerPortalContent() {
                                     {(() => {
                                         const productInCart = cart.filter(item => item.originalId === product.id || item.id === product.id);
                                         const totalQty = productInCart.reduce((sum, item) => sum + item.quantity, 0);
-                                        if (totalQty === 0) return null;
+                                        
                                         return (
-                                            <div className="absolute bottom-4 right-4 z-30 bg-emerald-600 text-white flex items-center gap-2 px-1.5 py-1 rounded-full shadow-lg border-2 border-white animate-in zoom-in duration-300">
-                                                <button 
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        const itemToDec = productInCart[0];
-                                                        if (itemToDec) updateQty(itemToDec.id, -1);
-                                                    }}
-                                                    className="w-6 h-6 flex items-center justify-center hover:bg-emerald-700 rounded-full transition-colors"
-                                                >
-                                                    <Minus size={12} strokeWidth={4} />
-                                                </button>
-                                                <span className="text-[12px] font-black min-w-[12px] text-center">{totalQty}</span>
-                                                <button 
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        addToCart(product);
-                                                    }}
-                                                    className="w-6 h-6 flex items-center justify-center hover:bg-emerald-700 rounded-full transition-colors"
-                                                >
-                                                    <Plus size={12} strokeWidth={4} />
-                                                </button>
+                                            <div className={`absolute bottom-4 right-4 z-40 flex items-center transition-all duration-300 ${totalQty > 0 ? 'bg-emerald-600 text-white px-1.5 py-1 rounded-full shadow-lg border-2 border-white gap-2' : ''}`}>
+                                                {totalQty > 0 ? (
+                                                    <>
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const itemToDec = productInCart[0];
+                                                                if (itemToDec) updateQty(itemToDec.id, -1);
+                                                            }}
+                                                            className="w-7 h-7 flex items-center justify-center hover:bg-emerald-700 rounded-full transition-colors"
+                                                        >
+                                                            <Minus size={14} strokeWidth={4} />
+                                                        </button>
+                                                        <span className="text-[13px] font-black min-w-[14px] text-center">{totalQty}</span>
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                addToCart(product);
+                                                            }}
+                                                            className="w-7 h-7 flex items-center justify-center hover:bg-emerald-700 rounded-full transition-colors"
+                                                        >
+                                                            <Plus size={14} strokeWidth={4} />
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <button 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            addToCart(product);
+                                                        }}
+                                                        className="w-10 h-10 bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white hover:scale-110 active:scale-95 transition-all"
+                                                    >
+                                                        <Plus size={20} strokeWidth={4} />
+                                                    </button>
+                                                )}
                                             </div>
                                         );
                                     })()}
