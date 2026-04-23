@@ -1,28 +1,10 @@
 "use client";
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
-// --------------------------------------------------------------------------------
-// STABILIZATION: Inline SVGs to avoid Lucide-React initialization errors in NextJS
-// --------------------------------------------------------------------------------
-const IconMail = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-);
-const IconLock = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-);
-const IconEye = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
-);
-const IconEyeOff = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
-);
-const IconArrowLeft = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-);
-
-export default function LoginPage() {
+const LoginPage = () => {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -33,8 +15,7 @@ export default function LoginPage() {
 
     useEffect(() => {
         setIsClient(true);
-        
-        // Cek konfirmasi email dari URL (Stable)
+        // Handle confirmed message
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
             if (params.get('message') === 'confirmed') {
@@ -52,7 +33,7 @@ export default function LoginPage() {
         }
     }, [router]);
 
-    async function handleLogin(e) {
+    const handleLogin = async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
 
@@ -107,7 +88,7 @@ export default function LoginPage() {
             alert("Terjadi kesalahan sistem.");
             setIsSubmitting(false);
         }
-    }
+    };
 
     if (!isClient) {
         return <div className="min-h-screen bg-emerald-950"></div>;
@@ -115,9 +96,11 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-cover bg-center bg-no-repeat relative" style={{ backgroundImage: "url('/bg-food.png')" }}>
+            {/* Background Overlay */}
             <div className="absolute inset-0 bg-emerald-950/70 backdrop-blur-md"></div>
 
-            <div className="relative z-10 max-w-md w-full bg-white/95 rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20 animate-in zoom-in-95 duration-300">
+            {/* Main Content Container */}
+            <div className="relative z-10 max-w-md w-full bg-white/95 rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20">
                 <div className="bg-emerald-700 p-10 text-white text-center flex flex-col items-center">
                     <div className="inline-flex p-2 bg-white rounded-full mb-6 shadow-xl">
                         <img src="/santara-logo.png" alt="Santara Logo" className="w-20 h-20 object-contain rounded-full" />
@@ -134,19 +117,14 @@ export default function LoginPage() {
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div>
                             <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-2">Email</label>
-                            <div className="relative">
-                                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500">
-                                    <IconMail />
-                                </div>
-                                <input
-                                    type="email"
-                                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 font-bold text-slate-700 transition-all"
-                                    placeholder="nama@email.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
-                            </div>
+                            <input
+                                type="email"
+                                className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 font-bold text-slate-700 transition-all"
+                                placeholder="nama@email.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
                         </div>
 
                         <div>
@@ -161,12 +139,9 @@ export default function LoginPage() {
                                 </button>
                             </div>
                             <div className="relative">
-                                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500">
-                                    <IconLock />
-                                </div>
                                 <input
                                     type={showPassword ? "text" : "password"}
-                                    className="w-full pl-14 pr-14 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 font-bold text-slate-700 transition-all"
+                                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 font-bold text-slate-700 transition-all"
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -175,9 +150,9 @@ export default function LoginPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-emerald-500 transition-colors"
+                                    className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-[10px] uppercase tracking-widest hover:text-emerald-500 transition-colors"
                                 >
-                                    {showPassword ? <IconEyeOff /> : <IconEye />}
+                                    {showPassword ? 'HIDUP' : 'LIHAT'}
                                 </button>
                             </div>
                         </div>
@@ -202,7 +177,6 @@ export default function LoginPage() {
 
                     <div className="mt-8 pt-8 border-t border-slate-50 flex justify-center">
                         <button onClick={() => router.push('/')} className="inline-flex items-center text-[10px] font-black text-slate-300 hover:text-emerald-600 transition-all uppercase tracking-widest">
-                            <span className="mr-2"><IconArrowLeft /></span>
                             Kembali ke Beranda
                         </button>
                     </div>
@@ -210,4 +184,6 @@ export default function LoginPage() {
             </div>
         </div>
     );
-}
+};
+
+export default LoginPage;
