@@ -566,7 +566,22 @@ function AdminPortalContent() {
                                                         >
                                                             <Minus size={10} strokeWidth={4} />
                                                         </button>
-                                                        <span className="text-[10px] font-black min-w-[10px] text-center">{totalQty}</span>
+                                                        <input 
+                                                            type="number"
+                                                            value={totalQty}
+                                                            onChange={(e) => {
+                                                                e.stopPropagation();
+                                                                const newVal = Math.max(0, parseInt(e.target.value) || 0);
+                                                                const diff = newVal - totalQty;
+                                                                if (diff !== 0) {
+                                                                    const itemToUpdate = productInCart[0];
+                                                                    if (itemToUpdate) updateQty(itemToUpdate.id, diff);
+                                                                    else addToCart(product);
+                                                                }
+                                                            }}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="text-[10px] font-black min-w-[20px] w-6 text-center bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                        />
                                                         <button 
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
