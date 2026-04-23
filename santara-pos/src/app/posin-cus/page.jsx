@@ -935,31 +935,40 @@ function CustomerPortalContent() {
                         <div className="space-y-4 bg-white p-5 rounded-[24px] border border-slate-100 shadow-sm mt-auto">
                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Informasi Pemesanan</h3>
                             <div className="grid grid-cols-1 gap-3">
-                                <select
-                                    value={orderType}
-                                    onChange={(e) => setOrderType(e.target.value)}
-                                    className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium appearance-none"
-                                >
-                                    <option value="" disabled>Opsi Pengiriman *</option>
-                                    <option value="Ambil di Resto">Ambil di Resto</option>
-                                    <option value="Delivery">Delivery</option>
-                                </select>
+                                <div className="relative">
+                                    <select
+                                        value={orderType}
+                                        onChange={(e) => setOrderType(e.target.value)}
+                                        className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium appearance-none"
+                                    >
+                                        <option value="" disabled>Opsi Pengiriman</option>
+                                        <option value="Ambil di Resto">Ambil di Resto</option>
+                                        <option value="Delivery">Delivery</option>
+                                    </select>
+                                    <span className="absolute top-2 right-4 text-red-500 font-bold text-sm">*</span>
+                                </div>
 
-                                <input type="text" placeholder="Nama Lengkap *" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium" />
+                                <div className="relative">
+                                    <input type="text" placeholder="Nama Lengkap" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium" />
+                                    <span className="absolute top-2 right-4 text-red-500 font-bold text-sm">*</span>
+                                </div>
                                 
                                 {orderType === 'Delivery' && (
                                     <div className="space-y-2">
                                         <div className="flex gap-2">
-                                            <select
-                                                value={customerAddress}
-                                                onChange={(e) => setCustomerAddress(e.target.value)}
-                                                className="flex-1 text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium appearance-none"
-                                            >
-                                                <option value="" disabled>Pilih Alamat Pengiriman *</option>
-                                                {userProfile.addresses.map(addr => (
-                                                    <option key={addr.id} value={addr.details}>{addr.label}: {addr.details}</option>
-                                                ))}
-                                            </select>
+                                            <div className="relative flex-1">
+                                                <select
+                                                    value={customerAddress}
+                                                    onChange={(e) => setCustomerAddress(e.target.value)}
+                                                    className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium appearance-none"
+                                                >
+                                                    <option value="" disabled>Pilih Alamat Pengiriman</option>
+                                                    {userProfile.addresses.map(addr => (
+                                                        <option key={addr.id} value={addr.details}>{addr.label}: {addr.details}</option>
+                                                    ))}
+                                                </select>
+                                                <span className="absolute top-2 right-4 text-red-500 font-bold text-sm">*</span>
+                                            </div>
                                             <button
                                                 onClick={() => {
                                                     setIsSettingsOpen(true);
@@ -982,7 +991,10 @@ function CustomerPortalContent() {
                                     onChange={(e) => setOrderNote(e.target.value)}
                                     className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium min-h-[100px] resize-none"
                                 ></textarea>
-                                <input type="tel" placeholder="Nomor WhatsApp *" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium" />
+                                <div className="relative">
+                                    <input type="tel" placeholder="Nomor WhatsApp" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium" />
+                                    <span className="absolute top-2 right-4 text-red-500 font-bold text-sm">*</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1238,31 +1250,40 @@ function CustomerPortalContent() {
                                     <div className="pt-6 space-y-4">
                                         <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Informasi Pemesanan</h3>
-                                            <select
-                                                value={orderType}
-                                                onChange={(e) => setOrderType(e.target.value)}
-                                                className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold appearance-none mb-1"
-                                            >
-                                                <option value="" disabled>Opsi Pengiriman *</option>
-                                                <option value="Ambil di Resto">Ambil di Resto</option>
-                                                <option value="Delivery">Delivery</option>
-                                            </select>
+                                            <div className="relative">
+                                                <select
+                                                    value={orderType}
+                                                    onChange={(e) => setOrderType(e.target.value)}
+                                                    className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold appearance-none mb-1"
+                                                >
+                                                    <option value="" disabled>Opsi Pengiriman</option>
+                                                    <option value="Ambil di Resto">Ambil di Resto</option>
+                                                    <option value="Delivery">Delivery</option>
+                                                </select>
+                                                <span className="absolute top-2 right-4 text-red-500 font-bold text-sm">*</span>
+                                            </div>
 
-                                            <input type="text" placeholder="Nama Lengkap *" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
+                                            <div className="relative">
+                                                <input type="text" placeholder="Nama Lengkap" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
+                                                <span className="absolute top-2 right-4 text-red-500 font-bold text-sm">*</span>
+                                            </div>
                                             
                                             {orderType === 'Delivery' && (
                                                 <div className="space-y-2">
                                                     <div className="flex gap-2">
-                                                        <select
-                                                            value={customerAddress}
-                                                            onChange={(e) => setCustomerAddress(e.target.value)}
-                                                            className="flex-1 text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold appearance-none"
-                                                        >
-                                                            <option value="" disabled>Pilih Alamat Pengiriman *</option>
-                                                            {userProfile.addresses.map(addr => (
-                                                                <option key={addr.id} value={addr.details}>{addr.label}: {addr.details}</option>
-                                                            ))}
-                                                        </select>
+                                                        <div className="relative flex-1">
+                                                            <select
+                                                                value={customerAddress}
+                                                                onChange={(e) => setCustomerAddress(e.target.value)}
+                                                                className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold appearance-none"
+                                                            >
+                                                                <option value="" disabled>Pilih Alamat Pengiriman</option>
+                                                                {userProfile.addresses.map(addr => (
+                                                                    <option key={addr.id} value={addr.details}>{addr.label}: {addr.details}</option>
+                                                                ))}
+                                                            </select>
+                                                            <span className="absolute top-2 right-4 text-red-500 font-bold text-sm">*</span>
+                                                        </div>
                                                         <button
                                                             onClick={() => {
                                                                 setIsCartModalOpen(false);
@@ -1285,7 +1306,10 @@ function CustomerPortalContent() {
                                                 onChange={(e) => setOrderNote(e.target.value)}
                                                 className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold min-h-[100px] resize-none"
                                             ></textarea>
-                                            <input type="tel" placeholder="Nomor WhatsApp *" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
+                                            <div className="relative">
+                                                <input type="tel" placeholder="Nomor WhatsApp" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
+                                                <span className="absolute top-2 right-4 text-red-500 font-bold text-sm">*</span>
+                                            </div>
                                         </div>
 
                                         <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl">
