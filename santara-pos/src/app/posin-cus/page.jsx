@@ -236,9 +236,116 @@ function CustomerPortalContent() {
     const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
     const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
+    // --- Function Hoisting (Standard Function Declarations for TDZ Safety) ---
+
+    function addAddress() {
+        const newAddress = { id: Date.now(), label: '', details: '' };
+        setUserProfile(prev => ({ ...prev, addresses: [...prev.addresses, newAddress] }));
+    }
+
+    function removeAddress(id) {
+        setUserProfile(prev => ({ ...prev, addresses: prev.addresses.filter(a => a.id !== id) }));
+    }
+
+    function updateAddress(id, field, value) {
+        setUserProfile(prev => ({
+            ...prev,
+            addresses: prev.addresses.map(a => a.id === id ? { ...a, [field]: value } : a)
+        }));
+    }
+
+    async function handleSaveProfile(e) {
+        if (e) e.preventDefault();
+        const fullName = `${userProfile.firstName} ${userProfile.lastName}`.trim();
+        try {
+            const { error } = await supabase.auth.updateUser({
+                data: {
+                    first_name: userProfile.firstName,
+                    last_name: userProfile.lastName,
+                    whatsapp: userProfile.whatsapp,
+                    addresses: userProfile.addresses
+                }
+            });
+            if (error) {
+                alert(`Gagal memperbarui profil: ${error.message}`);
+                return;
+            }
+            localStorage.setItem('customerFirstName', userProfile.firstName);
+            localStorage.setItem('customerLastName', userProfile.lastName);
+            localStorage.setItem('customerName', fullName);
+            localStorage.setItem('registeredEmail', userProfile.email);
+            localStorage.setItem('registeredWhatsapp', userProfile.whatsapp);
+            localStorage.setItem('santaraCustomerAddresses', JSON.stringify(userProfile.addresses));
+            setCustomerName(fullName);
+            alert('Profil berhasil diperbaharui!');
+        } catch (err) {
+            console.error("Gagal memperbarui profil:", err);
+            alert("Terjadi kesalahan sistem.");
+        }
+    }
+
+    async function handleConfirmEmailChange(e) {
+        if (e) e.preventDefault();
+        if (!newEmailInput || !newEmailInput.includes('@')) return alert('Email tidak valid.');
+        setIsUpdatingEmail(true);
+        try {
+            const { error } = await supabase.auth.updateUser({ email: newEmailInput });
+            if (error) {
+                alert(`Gagal mengirim konfirmasi: ${error.message}`);
+            } else {
+                alert('Alhamdulillah! Permintaan perubahan email telah dikirim. Cek email BARU Anda.');
+                setIsChangeEmailOpen(false);
+                setNewEmailInput('');
+            }
+        } catch (err) {
+            alert("Terjadi kesalahan sistem.");
+        } finally {
+            setIsUpdatingEmail(false);
+        }
+    }
+
+    async function handleConfirmWhatsappChange(e) {
+        if (e) e.preventDefault();
+        if (!newWhatsappInput || newWhatsappInput.length < 10) return alert('WhatsApp tidak valid.');
+        setIsUpdatingWhatsapp(true);
+        try {
+            const { error } = await supabase.auth.updateUser({
+                data: { whatsapp: newWhatsappInput }
+            });
+            if (error) throw error;
+            setUserProfile(prev => ({ ...prev, whatsapp: newWhatsappInput }));
+            localStorage.setItem('registeredWhatsapp', newWhatsappInput);
+            alert('WhatsApp berhasil diperbaharui.');
+            setIsChangeWhatsappOpen(false);
+            setNewWhatsappInput('');
+        } catch (err) {
+            alert("Gagal: " + err.message);
+        } finally {
+            setIsUpdatingWhatsapp(false);
+        }
+    }
+
+    async function handleConfirmPasswordChange(e) {
+        if (e) e.preventDefault();
+        if (newPasswordInput.length < 6) return alert('Sandi minimal 6 karakter.');
+        if (newPasswordInput !== confirmPasswordInput) return alert('Konfirmasi sandi tidak cocok.');
+        setIsUpdatingPassword(true);
+        try {
+            const { error } = await supabase.auth.updateUser({ password: newPasswordInput });
+            if (error) throw error;
+            alert('Kata sandi berhasil diperbaharui.');
+            setIsChangePasswordOpen(false);
+            setNewPasswordInput('');
+            setConfirmPasswordInput('');
+        } catch (err) {
+            alert("Gagal: " + err.message);
+        } finally {
+            setIsUpdatingPassword(false);
+        }
+    }
+
     React.useEffect(() => {
-        const fetchUserData = async () => {
-            // Role-Based Safety Check: Redirect Admins/Operators to their designated portals
+        async function fetchUserData() {
             const currentRole = localStorage.getItem('currentUserRole');
             const currentUserEmail = localStorage.getItem('registeredEmail');
 
@@ -250,7 +357,7 @@ function CustomerPortalContent() {
                 return;
             }
 
-            const { data: { user }, error } = await supabase.auth.getUser();
+            const { data: { user } } = await supabase.auth.getUser();
             if (user) {
                 const meta = user.user_metadata || {};
                 const fName = meta.first_name || '';
@@ -260,7 +367,6 @@ function CustomerPortalContent() {
                 setCustomerName(fullName);
                 setIsLoggedIn(true);
 
-                // Load additional data (Priority: Supabase Metadata > localStorage)
                 let storedAddresses = meta.addresses;
                 if (!storedAddresses || storedAddresses.length === 0) {
                     storedAddresses = JSON.parse(localStorage.getItem('santaraCustomerAddresses') || '[]');
@@ -275,22 +381,19 @@ function CustomerPortalContent() {
                     addresses: storedAddresses
                 });
 
-                // Sync to localStorage for immediate consistency check in other tabs if needed
                 localStorage.setItem('customerName', fullName);
                 localStorage.setItem('customerFirstName', fName);
                 localStorage.setItem('customerLastName', lName);
                 localStorage.setItem('registeredEmail', user.email || '');
                 if (meta.whatsapp) localStorage.setItem('registeredWhatsapp', meta.whatsapp);
             } else {
-                // Fallback to localStorage if no session (guest mode or legacy)
                 const storedName = localStorage.getItem('customerName');
                 if (storedName) {
                     setCustomerName(storedName);
                     setIsLoggedIn(true);
                 }
             }
-        };
-
+        }
         fetchUserData();
 
         const storedFavs = JSON.parse(localStorage.getItem('santaraFavorites') || '[]');
@@ -300,14 +403,12 @@ function CustomerPortalContent() {
         if (storedProducts) {
             try {
                 const parsed = JSON.parse(storedProducts);
-                // Merge with master data to ensure new properties like discountPercent are present
                 const merged = PRODUCTS.map(masterItem => {
                     const storedItem = parsed.find(p => p.id === masterItem.id);
                     return storedItem ? { ...storedItem, ...masterItem } : masterItem;
                 });
                 setProducts(merged);
             } catch (e) {
-                console.error("Error parsing products", e);
                 setProducts(PRODUCTS);
             }
         } else {
@@ -320,43 +421,30 @@ function CustomerPortalContent() {
             try {
                 const parsed = JSON.parse(storedSettings);
                 setStoreSettings({ ...DEFAULT_SETTINGS, ...parsed });
-            } catch (e) {
-                console.error("Error parsing settings", e);
-            }
+            } catch (e) { }
         }
 
-        // Restore active transaction overlay if any
         const activeTxId = localStorage.getItem('santaraActiveTxId');
         if (activeTxId) {
             setCurrentTxId(activeTxId);
             setIsWaitingOpen(true);
         }
 
-        // Load language & theme
         const storedLang = localStorage.getItem('santaraLanguage');
         if (storedLang) setLanguage(storedLang);
         const storedTheme = localStorage.getItem('santaraTheme');
         if (storedTheme) setTheme(storedTheme);
 
-        // Check for settings query param
         if (searchParams.get('settings') === 'true') {
             setIsSettingsOpen(true);
-            const tab = searchParams.get('tab');
-            if (tab === 'profile') {
-                setActiveSettingsTab('profil');
-            }
+            if (searchParams.get('tab') === 'profile') setActiveSettingsTab('profil');
         }
 
-        // Load cart from localStorage
         const storedCart = localStorage.getItem('santaraCart');
         if (storedCart) {
-            try {
-                setCart(JSON.parse(storedCart));
-            } catch (e) {
-                console.error("Error parsing cart", e);
-            }
+            try { setCart(JSON.parse(storedCart)); } catch (e) { }
         }
-    }, [router]);
+    }, [router, searchParams]);
 
     // Save cart to localStorage whenever it changes
     React.useEffect(() => {

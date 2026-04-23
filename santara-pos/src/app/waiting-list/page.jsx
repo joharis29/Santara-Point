@@ -44,14 +44,6 @@ const DEFAULT_SETTINGS = {
     footerText: '© 2024 Santara Point. Berkah setiap saat.'
 };
 
-export default function WaitingListPage() {
-    return (
-        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div></div>}>
-            <WaitingListContent />
-        </Suspense>
-    );
-}
-
 function WaitingListContent() {
     // --- State Standarisasi ---
     const [searchTerm, setSearchTerm] = useState('');
@@ -92,10 +84,12 @@ function WaitingListContent() {
     const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
     const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
-    const handleCloseWaiting = () => {
+    // --- Function Hoisting (Standard Function Declarations for TDZ Safety) ---
+
+    function handleCloseWaiting() {
         setIsWaitingOpen(false);
         setCurrentTxId(null);
-    };
+    }
 
     const loadData = async () => {
         try {
@@ -598,6 +592,14 @@ function WaitingListContent() {
                 isProcessing={isUpdatingPassword}
             />
         </div>
+    );
+}
+
+export default function WaitingListPage() {
+    return (
+        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div></div>}>
+            <WaitingListContent />
+        </Suspense>
     );
 }
 

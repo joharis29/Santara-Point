@@ -125,13 +125,11 @@ const DEFAULT_SETTINGS = {
     email: 'santarapoint@gmail.com',
     address: 'Jl. Raya Santara No. 123, Bandung',
     footerText: '© 2024 Santara Point. Berkah setiap saat.',
-    // Info Perusahaan
     companyCategory: 'Retailer',
     companyField: 'Restoran',
     startDate: '',
     accountingPeriod: 'Januari - Desember',
     currency: 'IDR',
-    // Pajak
     taxCompanyName: '',
     pkpDate: '',
     pkpNumber: '',
@@ -140,13 +138,12 @@ const DEFAULT_SETTINGS = {
     klu: '',
     nitku: '',
     taxAddress: '',
-    // Pengguna
     authorizedUsers: [
         { contact: 'santarapoint@gmail.com', role: 'Administrator' }
     ],
-    // Pengaturan Pajak
     isPajakActive: true
 };
+
 
 
 
@@ -170,11 +167,13 @@ function AdminPortalContent() {
     const [orderType, setOrderType] = useState('Dine-In');
     const [toppingModalProduct, setToppingModalProduct] = useState(null);
 
-    const handleCloseWaiting = () => {
+    // --- Function Hoisting (Standard Function Declarations for TDZ Safety) ---
+
+    function handleCloseWaiting() {
         setIsWaitingOpen(false);
         localStorage.removeItem('santaraActiveTxId');
         setCurrentTxId(null);
-    };
+    }
 
     // --- State Standarisasi ---
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -205,93 +204,8 @@ function AdminPortalContent() {
     const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
     const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
-    React.useEffect(() => {
-        // Security Check
-        const userRole = localStorage.getItem('currentUserRole');
-        const userEmail = localStorage.getItem('registeredEmail');
-        
-        const isAdmin = userRole === 'Administrator' || (userEmail && userEmail.toLowerCase() === 'santarapoint@gmail.com');
-
-        if (!isAdmin) {
-            console.log('Access denied: Role is', userRole, 'Email is', userEmail);
-            router.push('/login');
-            return;
-        }
-
-        const stored = localStorage.getItem('santaraUsedQueue');
-        if (stored) {
-            try { setUsedQueueNumbers(JSON.parse(stored)); } catch (e) { }
-        }
-
-        const storedProducts = localStorage.getItem('santaraProducts');
-        if (storedProducts) {
-            try {
-                const localData = JSON.parse(storedProducts);
-                // Sinkronisasi: Master source (INITIAL_PRODUCTS) menimpa data di localStorage untuk harga, nama, dll.
-                const syncedProducts = INITIAL_PRODUCTS.map(p => {
-                    const localMatch = localData.find(lp => lp.id === p.id);
-                    return {
-                        ...p,
-                        stock: localMatch ? localMatch.stock : p.stock
-                    };
-                });
-                setProducts(syncedProducts);
-                localStorage.setItem('santaraProducts', JSON.stringify(syncedProducts));
-            } catch (e) {
-                setProducts(INITIAL_PRODUCTS);
-            }
-        } else {
-            setProducts(INITIAL_PRODUCTS);
-            localStorage.setItem('santaraProducts', JSON.stringify(INITIAL_PRODUCTS));
-        }
-
-        const storedSettings = localStorage.getItem('santaraStoreSettings');
-        if (storedSettings) {
-            try {
-                const parsed = JSON.parse(storedSettings);
-                setStoreSettings({ ...DEFAULT_SETTINGS, ...parsed });
-            } catch (e) {
-                console.error("Error parsing settings", e);
-            }
-        } else {
-            localStorage.setItem('santaraStoreSettings', JSON.stringify(DEFAULT_SETTINGS));
-        }
-
-        const fetchUserProfile = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const meta = user.user_metadata || {};
-                setUserProfile({
-                    firstName: meta.first_name || '',
-                    lastName: meta.last_name || '',
-                    email: user.email || '',
-                    whatsapp: meta.whatsapp || '',
-                    password: '••••••••',
-                    addresses: meta.addresses || []
-                });
-            }
-        };
-        fetchUserProfile();
-
-        const activeTxId = localStorage.getItem('santaraActiveTxId');
-        if (activeTxId) {
-            setCurrentTxId(activeTxId);
-        }
-
-        // Check for settings query param
-        if (searchParams.get('settings') === 'true') {
-            setIsSettingsOpen(true);
-            const tab = searchParams.get('tab');
-            if (tab === 'profile') {
-                setActiveSettingsTab('profil');
-            }
-        }
-    }, [router, searchParams]);
-
-    const handleSaveProfile = async (e) => {
-        e.preventDefault();
-        const fullName = `${userProfile.firstName} ${userProfile.lastName}`.trim();
-
+    async function handleSaveProfile(e) {
+        if (e) e.preventDefault();
         try {
             const { error } = await supabase.auth.updateUser({
                 data: {
@@ -306,10 +220,10 @@ function AdminPortalContent() {
         } catch (err) {
             alert(err.message);
         }
-    };
+    }
 
-    const handleConfirmEmailChange = async (e) => {
-        e.preventDefault();
+    async function handleConfirmEmailChange(e) {
+        if (e) e.preventDefault();
         if (!newEmailInput || !newEmailInput.includes('@')) return alert('Email tidak valid.');
 
         setIsUpdatingEmail(true);
@@ -324,10 +238,10 @@ function AdminPortalContent() {
         } finally {
             setIsUpdatingEmail(false);
         }
-    };
+    }
 
-    const handleConfirmWhatsappChange = async (e) => {
-        e.preventDefault();
+    async function handleConfirmWhatsappChange(e) {
+        if (e) e.preventDefault();
         if (!newWhatsappInput || newWhatsappInput.length < 10) return alert('Nomor WhatsApp tidak valid.');
 
         setIsUpdatingWhatsapp(true);
@@ -345,10 +259,10 @@ function AdminPortalContent() {
         } finally {
             setIsUpdatingWhatsapp(false);
         }
-    };
+    }
 
-    const handleConfirmPasswordChange = async (e) => {
-        e.preventDefault();
+    async function handleConfirmPasswordChange(e) {
+        if (e) e.preventDefault();
         if (newPasswordInput.length < 6) return alert('Sandi minimal 6 karakter.');
         if (newPasswordInput !== confirmPasswordInput) return alert('Konfirmasi sandi tidak cocok.');
 
@@ -365,80 +279,63 @@ function AdminPortalContent() {
         } finally {
             setIsUpdatingPassword(false);
         }
-    };
+    }
 
-    const addAddress = () => {
+    function addAddress() {
         const newAddr = { id: Date.now(), label: '', details: '' };
-        setUserProfile({ ...userProfile, addresses: [...userProfile.addresses, newAddr] });
-    };
+        setUserProfile(prev => ({ ...prev, addresses: [...prev.addresses, newAddr] }));
+    }
 
-    const removeAddress = (id) => {
-        setUserProfile({ ...userProfile, addresses: userProfile.addresses.filter(a => a.id !== id) });
-    };
+    function removeAddress(id) {
+        setUserProfile(prev => ({ ...prev, addresses: prev.addresses.filter(a => a.id !== id) }));
+    }
 
-    const updateAddress = (id, field, value) => {
-        setUserProfile({
-            ...userProfile,
-            addresses: userProfile.addresses.map(a => a.id === id ? { ...a, [field]: value } : a)
-        });
-    };
+    function updateAddress(id, field, value) {
+        setUserProfile(prev => ({
+            ...prev,
+            addresses: prev.addresses.map(a => a.id === id ? { ...a, [field]: value } : a)
+        }));
+    }
 
-    const menuTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const subtotal = storeSettings.isPajakActive ? menuTotal / 1.10 : menuTotal;
-    const pajakValue = storeSettings.isPajakActive ? Math.round(menuTotal - subtotal) : 0;
-    const totalAmount = menuTotal;
-
-    const filteredProducts = products.filter(p => {
-        const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = activeCategory === 'Semua' || p.category === activeCategory;
-        return matchesSearch && matchesCategory;
-    }).sort((a, b) => {
-        if (sortBy === 'price-low') return a.price - b.price;
-        if (sortBy === 'price-high') return b.price - a.price;
-        if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
-        if (sortBy === 'discount') return (b.discountPercent || 0) - (a.discountPercent || 0);
-        return 0;
-    });
-
-    const addToCart = (product) => {
+    function addToCart(product) {
         if (product.stock <= 0) return;
         if (product.id === 35) {
             setToppingModalProduct(product);
             return;
         }
         confirmAddToCart(product);
-    };
+    }
 
-    const confirmAddToCart = (product, topping = null) => {
+    function confirmAddToCart(product, topping = null) {
         const finalId = topping && topping !== 'Tanpa Toping' ? `${product.id}-${topping}` : product.id;
         const finalName = topping && topping !== 'Tanpa Toping' ? `${product.name} (${topping})` : product.name;
-        const exist = cart.find(x => x.id === finalId);
-        if (exist) {
-            setCart(cart.map(x => x.id === finalId ? { ...x, quantity: x.quantity + 1 } : x));
-        } else {
-            setCart([...cart, { ...product, id: finalId, name: finalName, quantity: 1, originalId: product.id }]);
-        }
+        
+        setCart(prev => {
+            const exist = prev.find(x => x.id === finalId);
+            if (exist) {
+                return prev.map(x => x.id === finalId ? { ...x, quantity: x.quantity + 1 } : x);
+            }
+            return [...prev, { ...product, id: finalId, name: finalName, quantity: 1, originalId: product.id }];
+        });
         setToppingModalProduct(null);
-    };
+    }
 
-    const updateQty = (id, delta) => {
-        setCart(cart.map(item => {
+    function updateQty(id, delta) {
+        setCart(prev => prev.map(item => {
             if (item.id === id) {
                 const newQty = Math.max(0, item.quantity + delta);
                 return { ...item, quantity: newQty };
             }
             return item;
         }).filter(item => item.quantity > 0));
-    };
+    }
 
-    const handleCheckout = async () => {
+    async function handleCheckout() {
         if (cart.length === 0) return alert('Keranjang masih kosong!');
         if (!customerName || !queueNumber) return alert('Mohon lengkapi Nama Pemesan dan Nomor Antrian!');
         if (!paymentMethod) return alert('Mohon pilih Metode Pembayaran!');
 
         const trxId = 'TRX-' + Math.floor(Math.random() * 1000000);
-        
-        // 1. Create CamelCase object for PDF & Local Logic
         const newTransaction = {
             id: trxId,
             timestamp: new Date().toISOString(),
@@ -459,7 +356,6 @@ function AdminPortalContent() {
             }))
         };
 
-        // 2. Create SnakeCase object for Supabase
         const dbTransaction = {
             id: newTransaction.id,
             timestamp: newTransaction.timestamp,
@@ -477,25 +373,20 @@ function AdminPortalContent() {
         };
 
         try {
-            // 3. Sync to Supabase
             const { error } = await supabase.from('transactions').insert([dbTransaction]);
             if (error) throw error;
 
-            // 4. Save to Local History
             const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
             localStorage.setItem('santaraTransactionHistory', JSON.stringify([newTransaction, ...existingHistory]));
 
-            // 5. Mark Queue as Used
             const newUsed = [...usedQueueNumbers, queueNumber.toString()];
             setUsedQueueNumbers(newUsed);
             localStorage.setItem('santaraUsedQueue', JSON.stringify(newUsed));
 
-            // 6. Generate PDF Receipt (Expects CamelCase)
             await generateReceiptPDF(newTransaction, storeSettings);
 
             alert(`Transaksi Admin Berhasil!\nMetode: ${paymentMethod}\nNota telah dibuat.`);
             
-            // 7. Clear Cart & State
             setCart([]);
             setCustomerName('');
             setQueueNumber('');
@@ -506,7 +397,91 @@ function AdminPortalContent() {
             console.error("Error processing admin transaction:", err);
             alert("Gagal memproses transaksi: " + err.message);
         }
-    };
+    }
+
+    React.useEffect(() => {
+        const userRole = localStorage.getItem('currentUserRole');
+        const userEmail = localStorage.getItem('registeredEmail');
+        const isAdmin = userRole === 'Administrator' || (userEmail && userEmail.toLowerCase() === 'santarapoint@gmail.com');
+
+        if (!isAdmin) {
+            router.push('/login');
+            return;
+        }
+
+        const storedQueue = localStorage.getItem('santaraUsedQueue');
+        if (storedQueue) {
+            try { setUsedQueueNumbers(JSON.parse(storedQueue)); } catch (e) { }
+        }
+
+        const storedProducts = localStorage.getItem('santaraProducts');
+        if (storedProducts) {
+            try {
+                const localData = JSON.parse(storedProducts);
+                const syncedProducts = INITIAL_PRODUCTS.map(p => {
+                    const localMatch = localData.find(lp => lp.id === p.id);
+                    return { ...p, stock: localMatch ? localMatch.stock : p.stock };
+                });
+                setProducts(syncedProducts);
+                localStorage.setItem('santaraProducts', JSON.stringify(syncedProducts));
+            } catch (e) {
+                setProducts(INITIAL_PRODUCTS);
+            }
+        } else {
+            setProducts(INITIAL_PRODUCTS);
+            localStorage.setItem('santaraProducts', JSON.stringify(INITIAL_PRODUCTS));
+        }
+
+        const storedSettings = localStorage.getItem('santaraStoreSettings');
+        if (storedSettings) {
+            try {
+                const parsed = JSON.parse(storedSettings);
+                setStoreSettings({ ...DEFAULT_SETTINGS, ...parsed });
+            } catch (e) { }
+        }
+
+        async function fetchUserProfile() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const meta = user.user_metadata || {};
+                setUserProfile({
+                    firstName: meta.first_name || '',
+                    lastName: meta.last_name || '',
+                    email: user.email || '',
+                    whatsapp: meta.whatsapp || '',
+                    password: '••••••••',
+                    addresses: meta.addresses || []
+                });
+            }
+        }
+        fetchUserProfile();
+
+        const activeTxId = localStorage.getItem('santaraActiveTxId');
+        if (activeTxId) setCurrentTxId(activeTxId);
+
+        if (searchParams.get('settings') === 'true') {
+            setIsSettingsOpen(true);
+            if (searchParams.get('tab') === 'profile') setActiveSettingsTab('profil');
+        }
+    }, [router, searchParams]);
+
+    const menuTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const subtotal = storeSettings.isPajakActive ? menuTotal / 1.10 : menuTotal;
+    const pajakValue = storeSettings.isPajakActive ? Math.round(menuTotal - subtotal) : 0;
+    const totalAmount = menuTotal;
+
+    const filteredProducts = products.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = activeCategory === 'Semua' || p.category === activeCategory;
+        return matchesSearch && matchesCategory;
+    }).sort((a, b) => {
+        if (sortBy === 'price-low') return a.price - b.price;
+        if (sortBy === 'price-high') return b.price - a.price;
+        if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+        if (sortBy === 'discount') return (b.discountPercent || 0) - (a.discountPercent || 0);
+        return 0;
+    });
+
 
     return (
         <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden relative">

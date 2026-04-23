@@ -175,8 +175,10 @@ function HistoryContent() {
         return () => clearInterval(pollInterval);
     }, [router, searchParams]);
 
-    const handleConfirmEmailChange = async (e) => {
-        e.preventDefault();
+    // --- Function Hoisting (Standard Function Declarations for TDZ Safety) ---
+
+    async function handleConfirmEmailChange(e) {
+        if (e) e.preventDefault();
         if (!newEmailInput || !newEmailInput.includes('@')) return alert('Email tidak valid.');
         setIsUpdatingEmail(true);
         try {
@@ -190,10 +192,10 @@ function HistoryContent() {
         } finally {
             setIsUpdatingEmail(false);
         }
-    };
+    }
 
-    const handleConfirmWhatsappChange = async (e) => {
-        e.preventDefault();
+    async function handleConfirmWhatsappChange(e) {
+        if (e) e.preventDefault();
         if (!newWhatsappInput || newWhatsappInput.length < 10) return alert('Nomor WhatsApp tidak valid.');
         setIsUpdatingWhatsapp(true);
         try {
@@ -208,10 +210,10 @@ function HistoryContent() {
         } finally {
             setIsUpdatingWhatsapp(false);
         }
-    };
+    }
 
-    const handleConfirmPasswordChange = async (e) => {
-        e.preventDefault();
+    async function handleConfirmPasswordChange(e) {
+        if (e) e.preventDefault();
         if (newPasswordInput.length < 6) return alert('Sandi minimal 6 karakter.');
         if (newPasswordInput !== confirmPasswordInput) return alert('Konfirmasi sandi tidak cocok.');
         setIsUpdatingPassword(true);
@@ -227,10 +229,10 @@ function HistoryContent() {
         } finally {
             setIsUpdatingPassword(false);
         }
-    };
+    }
 
-    const handleSaveProfile = async (e) => {
-        e.preventDefault();
+    async function handleSaveProfile(e) {
+        if (e) e.preventDefault();
         try {
             const { error } = await supabase.auth.updateUser({
                 data: {
@@ -243,23 +245,23 @@ function HistoryContent() {
         } catch (err) {
             alert(err.message);
         }
-    };
+    }
 
-    const addAddress = () => {
+    function addAddress() {
         const newAddr = { id: Date.now(), label: '', details: '' };
-        setUserProfile({ ...userProfile, addresses: [...userProfile.addresses, newAddr] });
-    };
+        setUserProfile(prev => ({ ...prev, addresses: [...prev.addresses, newAddr] }));
+    }
 
-    const removeAddress = (id) => {
-        setUserProfile({ ...userProfile, addresses: userProfile.addresses.filter(a => a.id !== id) });
-    };
+    function removeAddress(id) {
+        setUserProfile(prev => ({ ...prev, addresses: prev.addresses.filter(a => a.id !== id) }));
+    }
 
-    const updateAddress = (id, field, value) => {
-        setUserProfile({
-            ...userProfile,
-            addresses: userProfile.addresses.map(a => a.id === id ? { ...a, [field]: value } : a)
-        });
-    };
+    function updateAddress(id, field, value) {
+        setUserProfile(prev => ({
+            ...prev,
+            addresses: prev.addresses.map(a => a.id === id ? { ...a, [field]: value } : a)
+        }));
+    }
 
     // Get unique months from transactions for the 'folder' dropdown
     const availableMonths = Array.from(new Set([
