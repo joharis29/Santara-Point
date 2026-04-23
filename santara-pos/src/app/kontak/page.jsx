@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Mail, Phone, ArrowLeft } from 'lucide-react';
+import { Mail, Phone, ArrowLeft, MapPin } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 const DEFAULT_SETTINGS = {
@@ -10,7 +10,7 @@ const DEFAULT_SETTINGS = {
     storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
     whatsapp: '6285846802177',
     email: 'santarapoint@gmail.com',
-    address: 'Jl. Raya Santara No. 123, Bandung',
+    address: 'Jl. Ir. H. Djuanda No. 78, Sentul, Kota Bogor, Jawa Barat 16810',
     footerText: '© 2024 Santara Point. Berkah setiap saat.'
 };
 
@@ -75,6 +75,19 @@ export default function ContactPage() {
               <p className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">+{storeSettings.whatsapp}</p>
             </div>
           </a>
+
+          {/* Address */}
+          <div className="group flex items-center p-5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-emerald-500/50 transition-all duration-300">
+            <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl group-hover:scale-110 transition-transform mr-5">
+              <MapPin size={24} />
+            </div>
+            <div>
+              <p className="text-sm text-gray-400 mb-1">Alamat</p>
+              <p className="text-sm font-bold text-white leading-relaxed group-hover:text-emerald-400 transition-colors">
+                {storeSettings.address}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="mt-12 text-center text-sm text-gray-500">

@@ -60,7 +60,7 @@ export async function generateReceiptPDF(transaction, storeSettings) {
     currentY += 6;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
-    const addressLines = doc.splitTextToSize(storeSettings.address || 'Jl. Raya Santara No. 123, Bandung', pageWidth - 10);
+    const addressLines = doc.splitTextToSize(storeSettings.address || 'Jl. Ir. H. Djuanda No. 78, Sentul, Kota Bogor, Jawa Barat 16810', pageWidth - 10);
     doc.text(addressLines, pageWidth / 2, currentY, { align: 'center' });
     
     currentY += (addressLines.length * 3) + 2;

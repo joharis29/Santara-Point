@@ -326,9 +326,15 @@ export default function HomePage() {
             {/* 5. Footer Refinement */}
             <footer className="relative z-10 px-6 lg:px-16 py-2 flex-none flex flex-col sm:flex-row justify-between items-center text-gray-500 text-[9px] border-t border-white/5 bg-black/60 shadow-2xl backdrop-blur-md gap-4">
                 <p className="font-bold">© 2024 <span className="text-emerald-600">Santara Point</span>. Dikembangkan dengan prinsip Amanah & Keberkahan.</p>
-                <div className="flex gap-8 font-black uppercase tracking-widest text-[9px]">
-                    <span className="hover:text-emerald-500 cursor-pointer transition">Syarat & Ketentuan</span>
-                    <span className="hover:text-emerald-500 cursor-pointer transition">Kebijakan Privasi</span>
+                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-center sm:text-left">
+                    <div className="flex items-center gap-2">
+                         <span className="text-emerald-500/50">•</span>
+                         <p className="font-medium opacity-70 italic">Jl. Ir. H. Djuanda No. 78, Sentul, Kota Bogor, Jawa Barat 16810</p>
+                    </div>
+                    <div className="flex gap-8 font-black uppercase tracking-widest text-[9px]">
+                        <span className="hover:text-emerald-500 cursor-pointer transition">Syarat & Ketentuan</span>
+                        <span className="hover:text-emerald-500 cursor-pointer transition">Kebijakan Privasi</span>
+                    </div>
                 </div>
             </footer>
         </div>

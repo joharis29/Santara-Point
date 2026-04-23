@@ -46,7 +46,7 @@ const DEFAULT_SETTINGS = {
     storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
     whatsapp: '6285846802177',
     email: 'santarapoint@gmail.com',
-    address: 'Jl. Raya Santara No. 123, Bandung',
+    address: 'Jl. Ir. H. Djuanda No. 78, Sentul, Kota Bogor, Jawa Barat 16810',
     footerText: '© 2024 Santara Point. Berkah setiap saat.',
     // Info Perusahaan
     companyCategory: 'Retailer',
