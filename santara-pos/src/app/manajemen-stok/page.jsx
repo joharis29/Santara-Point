@@ -138,32 +138,39 @@ export default function ManajemenStok() {
             router.push('/login');
             return;
         }
-        const storedProducts = localStorage.getItem('santaraProducts');
-        if (storedProducts) {
+        const fetchProducts = async () => {
             try {
-                const parsed = JSON.parse(storedProducts);
-                
-                // Merge logic: trust localStorage for modified properties (stock, price),
-                // but include any new products from INITIAL_PRODUCTS.
-                const merged = [...parsed];
-                INITIAL_PRODUCTS.forEach(ip => {
-                    const localIndex = merged.findIndex(p => p.id === ip.id);
-                    if (localIndex === -1) {
-                        merged.push(ip);
-                    } else {
-                        merged[localIndex] = { ...ip, ...merged[localIndex] };
-                    }
-                });
-                
-                setProducts(merged);
-                localStorage.setItem('santaraProducts', JSON.stringify(merged));
-            } catch (e) {
-                setProducts(INITIAL_PRODUCTS);
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .order('id', { ascending: true });
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    const mapped = data.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        price: p.price,
+                        stock: p.stock,
+                        category: p.category,
+                        img: p.img,
+                        discountPercent: p.discount_percent,
+                        originalPrice: p.original_price
+                    }));
+                    setProducts(mapped);
+                    localStorage.setItem('santaraProducts', JSON.stringify(mapped));
+                } else {
+                    setProducts(INITIAL_PRODUCTS);
+                    localStorage.setItem('santaraProducts', JSON.stringify(INITIAL_PRODUCTS));
+                }
+            } catch (err) {
+                console.error("Supabase Products Fetch Error:", err);
+                const stored = localStorage.getItem('santaraProducts');
+                if (stored) setProducts(JSON.parse(stored));
             }
-        } else {
-            setProducts(INITIAL_PRODUCTS);
-            localStorage.setItem('santaraProducts', JSON.stringify(INITIAL_PRODUCTS));
-        }
+        };
+        fetchProducts();
 
         const storedSettings = localStorage.getItem('santaraStoreSettings');
         if (storedSettings) setStoreSettings(JSON.parse(storedSettings));
@@ -271,21 +278,49 @@ export default function ManajemenStok() {
         });
     };
 
-    const handleUpdateStock = (id, newStock) => {
-        const updated = products.map(p => p.id === id ? { ...p, stock: newStock } : p);
-        setProducts(updated);
-        localStorage.setItem('santaraProducts', JSON.stringify(updated));
-    };
+    const handleUpdateStock = async (id, newStock) => {
+        try {
+            const { error } = await supabase
+                .from('products')
+                .update({ stock: newStock })
+                .eq('id', id);
+            
+            if (error) throw error;
 
-    const handleDeleteProduct = (id) => {
-        if(window.confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
-            const updated = products.filter(p => p.id !== id);
+            const updated = products.map(p => p.id === id ? { ...p, stock: newStock } : p);
+            setProducts(updated);
+            localStorage.setItem('santaraProducts', JSON.stringify(updated));
+        } catch (err) {
+            console.error("Stock sync error:", err);
+            const updated = products.map(p => p.id === id ? { ...p, stock: newStock } : p);
             setProducts(updated);
             localStorage.setItem('santaraProducts', JSON.stringify(updated));
         }
     };
 
-    const handleAddProduct = (e) => {
+    const handleDeleteProduct = async (id) => {
+        if(window.confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+            try {
+                const { error } = await supabase
+                    .from('products')
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) throw error;
+
+                const updated = products.filter(p => p.id !== id);
+                setProducts(updated);
+                localStorage.setItem('santaraProducts', JSON.stringify(updated));
+            } catch (err) {
+                console.error("Delete sync error:", err);
+                const updated = products.filter(p => p.id !== id);
+                setProducts(updated);
+                localStorage.setItem('santaraProducts', JSON.stringify(updated));
+            }
+        }
+    };
+
+    const handleAddProduct = async (e) => {
         e.preventDefault();
         if (!newProduct.name || !newProduct.price || !newProduct.stock) {
             alert('Harap isi Nama, Harga, dan Stok!');
@@ -303,12 +338,37 @@ export default function ManajemenStok() {
             isNew: true
         };
 
-        const updated = [productToAdd, ...products];
-        setProducts(updated);
-        localStorage.setItem('santaraProducts', JSON.stringify(updated));
-        setIsModalOpen(false);
-        setNewProduct({ name: '', price: '', category: 'Makanan', stock: '', img: '' });
-        alert('Produk berhasil ditambahkan!');
+        try {
+            const { error } = await supabase
+                .from('products')
+                .insert([{
+                    id: productToAdd.id,
+                    name: productToAdd.name,
+                    price: productToAdd.price,
+                    stock: productToAdd.stock,
+                    category: productToAdd.category,
+                    img: productToAdd.img,
+                    discount_percent: 0,
+                    original_price: productToAdd.price
+                }]);
+            
+            if (error) throw error;
+
+            const updated = [productToAdd, ...products];
+            setProducts(updated);
+            localStorage.setItem('santaraProducts', JSON.stringify(updated));
+            setIsModalOpen(false);
+            setNewProduct({ name: '', price: '', category: 'Makanan', stock: '', img: '' });
+            alert('Produk berhasil ditambahkan dan disinkronkan!');
+        } catch (err) {
+            console.error("Add product sync error:", err);
+            const updated = [productToAdd, ...products];
+            setProducts(updated);
+            localStorage.setItem('santaraProducts', JSON.stringify(updated));
+            setIsModalOpen(false);
+            setNewProduct({ name: '', price: '', category: 'Makanan', stock: '', img: '' });
+            alert('Produk ditambahkan lokal, gagal sinkron: ' + err.message);
+        }
     };
 
     return (

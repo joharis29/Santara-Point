@@ -377,8 +377,21 @@ function AdminPortalContent() {
         };
 
         try {
+            // 1. Save to Supabase (Transactions)
             const { error } = await supabase.from('transactions').insert([dbTransaction]);
             if (error) throw error;
+
+            // 2. Update Stock in Supabase for global consistency
+            for (const item of cart) {
+                const product = products.find(p => p.id === item.id);
+                if (product) {
+                    const newStock = Math.max(0, product.stock - item.quantity);
+                    await supabase
+                        .from('products')
+                        .update({ stock: newStock })
+                        .eq('id', item.id);
+                }
+            }
 
             const existingHistory = JSON.parse(localStorage.getItem('santaraTransactionHistory') || '[]');
             localStorage.setItem('santaraTransactionHistory', JSON.stringify([newTransaction, ...existingHistory]));
@@ -418,33 +431,39 @@ function AdminPortalContent() {
             try { setUsedQueueNumbers(JSON.parse(storedQueue)); } catch (e) { }
         }
 
-        const storedProducts = localStorage.getItem('santaraProducts');
-        if (storedProducts) {
+        const fetchProducts = async () => {
             try {
-                const localData = JSON.parse(storedProducts);
-                
-                // Use localData as the base (so deleted items stay deleted and new items appear)
-                const syncedProducts = localData.map(lp => {
-                    const masterMatch = INITIAL_PRODUCTS.find(p => p.id === lp.id);
-                    return masterMatch ? { ...masterMatch, ...lp } : lp;
-                });
-                
-                // Also add any products from code (INITIAL_PRODUCTS) that are missing in localData
-                INITIAL_PRODUCTS.forEach(p => {
-                    if (!syncedProducts.find(lp => lp.id === p.id)) {
-                        syncedProducts.push(p);
-                    }
-                });
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .order('id', { ascending: true });
 
-                setProducts(syncedProducts);
-                localStorage.setItem('santaraProducts', JSON.stringify(syncedProducts));
-            } catch (e) {
-                setProducts(INITIAL_PRODUCTS);
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    const mapped = data.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        price: p.price,
+                        stock: p.stock,
+                        category: p.category,
+                        img: p.img,
+                        discountPercent: p.discount_percent,
+                        originalPrice: p.original_price
+                    }));
+                    setProducts(mapped);
+                    localStorage.setItem('santaraProducts', JSON.stringify(mapped));
+                } else {
+                    setProducts(INITIAL_PRODUCTS);
+                }
+            } catch (err) {
+                console.error("Admin POS Fetch Error:", err);
+                const stored = localStorage.getItem('santaraProducts');
+                if (stored) setProducts(JSON.parse(stored));
+                else setProducts(INITIAL_PRODUCTS);
             }
-        } else {
-            setProducts(INITIAL_PRODUCTS);
-            localStorage.setItem('santaraProducts', JSON.stringify(INITIAL_PRODUCTS));
-        }
+        };
+        fetchProducts();
 
         const storedSettings = localStorage.getItem('santaraStoreSettings');
         if (storedSettings) {

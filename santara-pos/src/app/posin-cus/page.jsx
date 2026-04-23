@@ -420,32 +420,39 @@ function CustomerPortalContent() {
         const storedFavs = JSON.parse(localStorage.getItem('santaraFavorites') || '[]');
         setFavorites(storedFavs);
 
-        const storedProducts = localStorage.getItem('santaraProducts');
-        if (storedProducts) {
+        const fetchProducts = async () => {
             try {
-                const parsed = JSON.parse(storedProducts);
-                
-                // Use parsed (localStorage) as the base
-                const merged = parsed.map(lp => {
-                    const masterMatch = PRODUCTS.find(p => p.id === lp.id);
-                    return masterMatch ? { ...masterMatch, ...lp } : lp;
-                });
-                
-                // Add any missing items from code
-                PRODUCTS.forEach(p => {
-                    if (!merged.find(lp => lp.id === p.id)) {
-                        merged.push(p);
-                    }
-                });
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .order('id', { ascending: true });
 
-                setProducts(merged);
-            } catch (e) {
-                setProducts(PRODUCTS);
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    const mapped = data.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        price: p.price,
+                        stock: p.stock,
+                        category: p.category,
+                        img: p.img,
+                        discountPercent: p.discount_percent,
+                        originalPrice: p.original_price
+                    }));
+                    setProducts(mapped);
+                    localStorage.setItem('santaraProducts', JSON.stringify(mapped));
+                } else {
+                    setProducts(PRODUCTS);
+                }
+            } catch (err) {
+                console.error("Customer POS Fetch Error:", err);
+                const stored = localStorage.getItem('santaraProducts');
+                if (stored) setProducts(JSON.parse(stored));
+                else setProducts(PRODUCTS);
             }
-        } else {
-            localStorage.setItem('santaraProducts', JSON.stringify(PRODUCTS));
-            setProducts(PRODUCTS);
-        }
+        };
+        fetchProducts();
 
         const storedSettings = localStorage.getItem('santaraStoreSettings');
         if (storedSettings) {

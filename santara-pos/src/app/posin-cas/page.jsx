@@ -358,8 +358,21 @@ function CashierPortalContent() {
                 status: newTransaction.status,
                 items: newTransaction.items
             };
+            // 1. Save to Supabase (Transactions)
             const { error } = await supabase.from('transactions').insert([dbTrx]);
             if (error) throw error;
+
+            // 2. Update Stock in Supabase for global consistency
+            for (const item of cart) {
+                const product = products.find(p => p.id === item.id);
+                if (product) {
+                    const newStock = Math.max(0, product.stock - item.quantity);
+                    await supabase
+                        .from('products')
+                        .update({ stock: newStock })
+                        .eq('id', item.id);
+                }
+            }
 
             localStorage.setItem('santaraActiveTxId', newTransaction.id);
             setCurrentTxId(newTransaction.id);
@@ -412,34 +425,39 @@ function CashierPortalContent() {
         const storedQueue = localStorage.getItem('santaraUsedQueue');
         if (storedQueue) setUsedQueueNumbers(JSON.parse(storedQueue));
 
-        const storedProducts = localStorage.getItem('santaraProducts');
-        if (storedProducts) {
+        const fetchProducts = async () => {
             try {
-                const localData = JSON.parse(storedProducts);
-                
-                // Use localData as the base (so deleted items stay deleted and new items appear)
-                // But merge with PRODUCTS to get any code-side updates for existing items.
-                const syncedProducts = localData.map(lp => {
-                    const masterMatch = PRODUCTS.find(p => p.id === lp.id);
-                    return masterMatch ? { ...masterMatch, ...lp } : lp;
-                });
-                
-                // Also add any products from code (PRODUCTS) that are missing in localData
-                PRODUCTS.forEach(p => {
-                    if (!syncedProducts.find(lp => lp.id === p.id)) {
-                        syncedProducts.push(p);
-                    }
-                });
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .order('id', { ascending: true });
 
-                setProducts(syncedProducts);
-                localStorage.setItem('santaraProducts', JSON.stringify(syncedProducts));
-            } catch (e) {
-                setProducts(PRODUCTS);
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    const mapped = data.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        price: p.price,
+                        stock: p.stock,
+                        category: p.category,
+                        img: p.img,
+                        discountPercent: p.discount_percent,
+                        originalPrice: p.original_price
+                    }));
+                    setProducts(mapped);
+                    localStorage.setItem('santaraProducts', JSON.stringify(mapped));
+                } else {
+                    setProducts(PRODUCTS);
+                }
+            } catch (err) {
+                console.error("POS Fetch Error:", err);
+                const stored = localStorage.getItem('santaraProducts');
+                if (stored) setProducts(JSON.parse(stored));
+                else setProducts(PRODUCTS);
             }
-        } else {
-            setProducts(PRODUCTS);
-            localStorage.setItem('santaraProducts', JSON.stringify(PRODUCTS));
-        }
+        };
+        fetchProducts();
 
         const storedSettings = localStorage.getItem('santaraStoreSettings');
         if (storedSettings) {
