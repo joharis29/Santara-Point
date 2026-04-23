@@ -20,7 +20,7 @@ export default function CashierHeader({
     onSettingsClick,
     onMenuClick, 
     showBackButton = false 
-}) => {
+}) {
     const router = useRouter();
 
     return (
@@ -92,4 +92,3 @@ export default function CashierHeader({
         </header>
     );
 }
-
