@@ -310,12 +310,16 @@ function AdminPortalContent() {
         const finalId = topping && topping !== 'Tanpa Toping' ? `${product.id}-${topping}` : product.id;
         const finalName = topping && topping !== 'Tanpa Toping' ? `${product.name} (${topping})` : product.name;
         
+        const finalPrice = product.discountPercent > 0 
+            ? Math.round(product.price * (1 - (product.discountPercent / 100))) 
+            : product.price;
+        
         setCart(prev => {
             const exist = prev.find(x => x.id === finalId);
             if (exist) {
                 return prev.map(x => x.id === finalId ? { ...x, quantity: x.quantity + 1 } : x);
             }
-            return [...prev, { ...product, id: finalId, name: finalName, quantity: 1, originalId: product.id }];
+            return [...prev, { ...product, id: finalId, name: finalName, price: finalPrice, quantity: 1, originalId: product.id }];
         });
         setToppingModalProduct(null);
     }
@@ -610,7 +614,18 @@ function AdminPortalContent() {
                                 <div className="px-1 lg:px-2 flex-1 flex flex-col justify-between">
                                     <div>
                                         <h4 className="font-bold text-slate-800 text-[11px] lg:text-sm line-clamp-2 leading-tight mb-1">{product.name}</h4>
-                                        <p className="text-emerald-700 font-black text-xs lg:text-base italic">Rp {product.price.toLocaleString('id-ID')}</p>
+                                        <div className="flex flex-col">
+                                            {product.discountPercent > 0 && (
+                                                <span className="text-[9px] lg:text-[10px] font-bold line-through text-slate-400">
+                                                    Rp {product.price.toLocaleString('id-ID')}
+                                                </span>
+                                            )}
+                                            <p className="text-emerald-700 font-black text-xs lg:text-base italic leading-none">
+                                                Rp {(product.discountPercent > 0 
+                                                    ? Math.round(product.price * (1 - (product.discountPercent / 100))) 
+                                                    : product.price).toLocaleString('id-ID')}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
