@@ -791,6 +791,36 @@ function CustomerPortalContent() {
                                         <Heart size={16} fill={favorites.includes(product.id) ? "#ef4444" : "transparent"} color={favorites.includes(product.id) ? "#ef4444" : "#94a3b8"} />
                                     </button>
                                     <ProductImageSlider product={product} />
+                                    {/* Quantity Overlay */}
+                                    {(() => {
+                                        const productInCart = cart.filter(item => item.originalId === product.id || item.id === product.id);
+                                        const totalQty = productInCart.reduce((sum, item) => sum + item.quantity, 0);
+                                        if (totalQty === 0) return null;
+                                        return (
+                                            <div className="absolute bottom-4 right-4 z-30 bg-emerald-600 text-white flex items-center gap-2 px-1.5 py-1 rounded-full shadow-lg border-2 border-white animate-in zoom-in duration-300">
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        const itemToDec = productInCart[0];
+                                                        if (itemToDec) updateQty(itemToDec.id, -1);
+                                                    }}
+                                                    className="w-6 h-6 flex items-center justify-center hover:bg-emerald-700 rounded-full transition-colors"
+                                                >
+                                                    <Minus size={12} strokeWidth={4} />
+                                                </button>
+                                                <span className="text-[12px] font-black min-w-[12px] text-center">{totalQty}</span>
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        addToCart(product);
+                                                    }}
+                                                    className="w-6 h-6 flex items-center justify-center hover:bg-emerald-700 rounded-full transition-colors"
+                                                >
+                                                    <Plus size={12} strokeWidth={4} />
+                                                </button>
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                                 <div className="px-2 flex-1 flex flex-col justify-between">
                                     <div>

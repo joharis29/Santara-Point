@@ -547,6 +547,36 @@ function AdminPortalContent() {
                                             -{product.discountPercent}%
                                         </div>
                                     )}
+                                    {/* Quantity Overlay */}
+                                    {(() => {
+                                        const productInCart = cart.filter(item => item.originalId === product.id || item.id === product.id);
+                                        const totalQty = productInCart.reduce((sum, item) => sum + item.quantity, 0);
+                                        if (totalQty === 0) return null;
+                                        return (
+                                            <div className="absolute bottom-2 right-2 z-30 bg-emerald-600 text-white flex items-center gap-1.5 px-1 py-1 rounded-full shadow-lg border-2 border-white">
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        const itemToDec = productInCart[0];
+                                                        if (itemToDec) updateQty(itemToDec.id, -1);
+                                                    }}
+                                                    className="w-5 h-5 flex items-center justify-center hover:bg-emerald-700 rounded-full transition-colors"
+                                                >
+                                                    <Minus size={10} strokeWidth={4} />
+                                                </button>
+                                                <span className="text-[10px] font-black min-w-[10px] text-center">{totalQty}</span>
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        addToCart(product);
+                                                    }}
+                                                    className="w-5 h-5 flex items-center justify-center hover:bg-emerald-700 rounded-full transition-colors"
+                                                >
+                                                    <Plus size={10} strokeWidth={4} />
+                                                </button>
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                                 <div className="px-1 lg:px-2 flex-1 flex flex-col justify-between">
                                     <div>
