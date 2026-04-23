@@ -121,7 +121,102 @@ const PRODUCTS = [
     { id: 54, name: 'Es Campur', price: 10000, stock: 10, category: 'Minuman', img: '/minuman-es-campur-asli.png', images: ['/minuman-es-campur-asli.png'], rating: 4.8 },
 ];
 
+// --- Modal Components (Moved to top to avoid ReferenceError) ---
+
+const ChangeEmailModal = ({ isOpen, onClose, oldEmail, newEmail, setNewEmail, onConfirm, isProcessing }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+            <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 space-y-6">
+                <div>
+                    <h4 className="text-2xl font-black text-slate-800 tracking-tight">Ganti Email</h4>
+                    <p className="text-slate-400 text-sm font-medium mt-1">Sistem akan mengirimkan link verifikasi ke email baru Anda.</p>
+                </div>
+                <form onSubmit={onConfirm} className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Lama</label>
+                        <input type="email" value={oldEmail} readOnly className="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-400 cursor-not-allowed" />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Baru</label>
+                        <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} required className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 transition-all" placeholder="nama@emailbaru.com" />
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                        <button type="button" onClick={onClose} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black transition-all hover:bg-slate-200">Batal</button>
+                        <button type="submit" disabled={isProcessing} className="flex-2 py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all flex items-center justify-center disabled:opacity-50">{isProcessing ? 'Memproses...' : 'Konfirmasi Email'}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+const ChangeWhatsappModal = ({ isOpen, onClose, oldWhatsapp, newWhatsapp, setNewWhatsapp, onConfirm, isProcessing }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+            <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 space-y-6">
+                <div>
+                    <h4 className="text-2xl font-black text-slate-800 tracking-tight">Ganti WhatsApp</h4>
+                    <p className="text-slate-400 text-sm font-medium mt-1">Masukkan nomor WhatsApp baru Anda yang aktif.</p>
+                </div>
+                <form onSubmit={onConfirm} className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Nomor Lama</label>
+                        <input type="tel" value={oldWhatsapp} readOnly className="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-400 cursor-not-allowed" />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Nomor Baru</label>
+                        <input type="tel" value={newWhatsapp} onChange={(e) => setNewWhatsapp(e.target.value)} required className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 transition-all" placeholder="08xxxxxxxxxx" />
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                        <button type="button" onClick={onClose} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black transition-all hover:bg-slate-200">Batal</button>
+                        <button type="submit" disabled={isProcessing} className="flex-2 py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all flex items-center justify-center disabled:opacity-50">{isProcessing ? 'Memproses...' : 'Simpan Nomor'}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+const ChangePasswordModal = ({ isOpen, onClose, newPassword, setNewPassword, confirmPassword, setConfirmPassword, onConfirm, isProcessing }) => {
+    const [showNewPassword, setShowNewPassword] = React.useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+    if (!isOpen) return null;
+    return (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+            <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 space-y-6">
+                <div>
+                    <h4 className="text-2xl font-black text-slate-800 tracking-tight">Ganti Kata Sandi</h4>
+                    <p className="text-slate-400 text-sm font-medium mt-1">Gunakan kata sandi yang kuat dan mudah diingat.</p>
+                </div>
+                <form onSubmit={onConfirm} className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Kata Sandi Baru</label>
+                        <div className="relative">
+                            <input type={showNewPassword ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 transition-all" placeholder="••••••••" />
+                            <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors">Toggle</button>
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Konfirmasi Kata Sandi Baru</label>
+                        <div className="relative">
+                            <input type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 transition-all" placeholder="••••••••" />
+                            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors">Toggle</button>
+                        </div>
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                        <button type="button" onClick={onClose} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black transition-all hover:bg-slate-200">Batal</button>
+                        <button type="submit" disabled={isProcessing} className="flex-2 py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all flex items-center justify-center disabled:opacity-50">{isProcessing ? 'Memproses...' : 'Ubah Kata Sandi'}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
 const ProductImageSlider = ({ product }) => {
+
     const [currentIndex, setCurrentIndex] = useState(0);
     const hasMultiple = product.images && product.images.length > 1;
 
@@ -1365,199 +1460,7 @@ function CustomerPortalContent() {
     );
 }
 
-// Modal Ganti Email
-const ChangeEmailModal = ({ isOpen, onClose, oldEmail, newEmail, setNewEmail, onConfirm, isProcessing }) => {
-    if (!isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
-            <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 space-y-6">
-                <div>
-                    <h4 className="text-2xl font-black text-slate-800 tracking-tight">Ganti Email</h4>
-                    <p className="text-slate-400 text-sm font-medium mt-1">Sistem akan mengirimkan link verifikasi ke email baru Anda.</p>
-                </div>
-
-                <form onSubmit={onConfirm} className="space-y-4">
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Lama</label>
-                        <input
-                            type="email"
-                            value={oldEmail}
-                            readOnly
-                            className="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-400 cursor-not-allowed"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Baru</label>
-                        <input
-                            type="email"
-                            value={newEmail}
-                            onChange={(e) => setNewEmail(e.target.value)}
-                            required
-                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 transition-all"
-                            placeholder="nama@emailbaru.com"
-                        />
-                    </div>
-
-                    <div className="flex gap-3 pt-2">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black transition-all hover:bg-slate-200"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isProcessing}
-                            className="flex-2 py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all flex items-center justify-center disabled:opacity-50"
-                        >
-                            {isProcessing ? 'Memproses...' : 'Konfirmasi Email'}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
-
-// Modal Ganti WhatsApp
-const ChangeWhatsappModal = ({ isOpen, onClose, oldWhatsapp, newWhatsapp, setNewWhatsapp, onConfirm, isProcessing }) => {
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
-            <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 space-y-6">
-                <div>
-                    <h4 className="text-2xl font-black text-slate-800 tracking-tight">Ganti WhatsApp</h4>
-                    <p className="text-slate-400 text-sm font-medium mt-1">Masukkan nomor WhatsApp baru Anda yang aktif.</p>
-                </div>
-
-                <form onSubmit={onConfirm} className="space-y-4">
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Nomor Lama</label>
-                        <input
-                            type="tel"
-                            value={oldWhatsapp}
-                            readOnly
-                            className="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-400 cursor-not-allowed"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Nomor Baru</label>
-                        <input
-                            type="tel"
-                            value={newWhatsapp}
-                            onChange={(e) => setNewWhatsapp(e.target.value)}
-                            required
-                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 transition-all"
-                            placeholder="08xxxxxxxxxx"
-                        />
-                    </div>
-
-                    <div className="flex gap-3 pt-2">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black transition-all hover:bg-slate-200"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isProcessing}
-                            className="flex-2 py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all flex items-center justify-center disabled:opacity-50"
-                        >
-                            {isProcessing ? 'Memproses...' : 'Simpan Nomor'}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
-
-// Modal Ganti Password
-const ChangePasswordModal = ({ isOpen, onClose, newPassword, setNewPassword, confirmPassword, setConfirmPassword, onConfirm, isProcessing }) => {
-    const [showNewPassword, setShowNewPassword] = React.useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
-
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
-            <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 space-y-6">
-                <div>
-                    <h4 className="text-2xl font-black text-slate-800 tracking-tight">Ganti Kata Sandi</h4>
-                    <p className="text-slate-400 text-sm font-medium mt-1">Gunakan kata sandi yang kuat dan mudah diingat.</p>
-                </div>
-
-                <form onSubmit={onConfirm} className="space-y-4">
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Kata Sandi Baru</label>
-                        <div className="relative">
-                            <input
-                                type={showNewPassword ? "text" : "password"}
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                required
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 transition-all"
-                                placeholder="••••••••"
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowNewPassword(!showNewPassword)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors"
-                            >
-                                {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Konfirmasi Kata Sandi Baru</label>
-                        <div className="relative">
-                            <input
-                                type={showConfirmPassword ? "text" : "password"}
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                required
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 transition-all"
-                                placeholder="••••••••"
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors"
-                            >
-                                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="flex gap-3 pt-2">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black transition-all hover:bg-slate-200"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isProcessing}
-                            className="flex-2 py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all flex items-center justify-center disabled:opacity-50"
-                        >
-                            {isProcessing ? 'Memproses...' : 'Ubah Kata Sandi'}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
 
 export default function App() {
     return (
