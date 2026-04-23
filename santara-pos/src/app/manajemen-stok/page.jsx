@@ -140,15 +140,31 @@ export default function ManajemenStok() {
         }
         const fetchProducts = async () => {
             try {
-                const { data, error } = await supabase
+                const { data: dbData, error } = await supabase
                     .from('products')
                     .select('*')
                     .order('id', { ascending: true });
 
                 if (error) throw error;
 
-                if (data && data.length > 0) {
-                    const mapped = data.map(p => ({
+                const stored = localStorage.getItem('santaraProducts');
+                const localData = stored ? JSON.parse(stored) : [];
+
+                if (localData.length > (dbData?.length || 0)) {
+                    const toUpsert = localData.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        price: p.price,
+                        stock: p.stock,
+                        category: p.category,
+                        img: p.img,
+                        discount_percent: p.discountPercent || 0,
+                        original_price: p.originalPrice || p.price
+                    }));
+                    await supabase.from('products').upsert(toUpsert, { onConflict: 'id' });
+                    setProducts(localData);
+                } else if (dbData && dbData.length > 0) {
+                    const mapped = dbData.map(p => ({
                         id: p.id,
                         name: p.name,
                         price: p.price,
@@ -162,7 +178,6 @@ export default function ManajemenStok() {
                     localStorage.setItem('santaraProducts', JSON.stringify(mapped));
                 } else {
                     setProducts(INITIAL_PRODUCTS);
-                    localStorage.setItem('santaraProducts', JSON.stringify(INITIAL_PRODUCTS));
                 }
             } catch (err) {
                 console.error("Supabase Products Fetch Error:", err);

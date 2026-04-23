@@ -433,15 +433,36 @@ function AdminPortalContent() {
 
         const fetchProducts = async () => {
             try {
-                const { data, error } = await supabase
+                // 1. Fetch from Supabase
+                const { data: dbData, error } = await supabase
                     .from('products')
                     .select('*')
                     .order('id', { ascending: true });
 
                 if (error) throw error;
 
-                if (data && data.length > 0) {
-                    const mapped = data.map(p => ({
+                // 2. Fetch from Local Storage (Recovery source)
+                const stored = localStorage.getItem('santaraProducts');
+                const localData = stored ? JSON.parse(stored) : [];
+
+                // 3. Recovery Logic: If local has more data than cloud, restore it
+                if (localData.length > (dbData?.length || 0)) {
+                    const toUpsert = localData.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        price: p.price,
+                        stock: p.stock,
+                        category: p.category,
+                        img: p.img,
+                        discount_percent: p.discountPercent || 0,
+                        original_price: p.originalPrice || p.price
+                    }));
+                    await supabase.from('products').upsert(toUpsert, { onConflict: 'id' });
+                    
+                    // Use local for immediate UI update
+                    setProducts(localData);
+                } else if (dbData && dbData.length > 0) {
+                    const mapped = dbData.map(p => ({
                         id: p.id,
                         name: p.name,
                         price: p.price,
