@@ -872,7 +872,9 @@ function CustomerPortalContent() {
                         <div className="space-y-4 bg-white p-5 rounded-[24px] border border-slate-100 shadow-sm mt-auto">
                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Data Diri Pemesan</h3>
                             <div className="grid grid-cols-1 gap-3">
-                                <select
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Opsi Pengiriman</p>
+                                    <select
                                     value={orderType}
                                     onChange={(e) => setOrderType(e.target.value)}
                                     className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium appearance-none"
@@ -880,6 +882,7 @@ function CustomerPortalContent() {
                                     <option value="Ambil di Resto">Ambil di Resto</option>
                                     <option value="Delivery">Delivery</option>
                                 </select>
+                                </div>
 
                                 <input type="text" placeholder="Nama Lengkap" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium" />
                                 
@@ -1174,14 +1177,17 @@ function CustomerPortalContent() {
                                     <div className="pt-6 space-y-4">
                                         <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Data Pemesan</h3>
-                                            <select
-                                                value={orderType}
-                                                onChange={(e) => setOrderType(e.target.value)}
-                                                className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold appearance-none mb-1"
-                                            >
+                                            <div className="space-y-1">
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Opsi Pengiriman</p>
+                                                <select
+                                                    value={orderType}
+                                                    onChange={(e) => setOrderType(e.target.value)}
+                                                    className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold appearance-none mb-1"
+                                                >
                                                 <option value="Ambil di Resto">Ambil di Resto</option>
-                                                <option value="Delivery">Delivery</option>
-                                            </select>
+                                                    <option value="Delivery">Delivery</option>
+                                                </select>
+                                            </div>
 
                                             <input type="text" placeholder="Nama Lengkap" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
                                             
