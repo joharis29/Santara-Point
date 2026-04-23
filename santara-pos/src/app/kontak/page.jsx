@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Mail, Phone, ArrowLeft, MapPin } from 'lucide-react';
+import { Mail, Phone, ArrowLeft, MapPin, Instagram } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 const DEFAULT_SETTINGS = {
@@ -11,6 +11,8 @@ const DEFAULT_SETTINGS = {
     whatsapp: '6285846802177',
     email: 'santarapoint@gmail.com',
     address: 'Jl. Ir. H. Djuanda No. 78, Sentul, Kota Bogor, Jawa Barat 16810',
+    instagram: '@santarapoint',
+    instagram: '@santarapoint',
     footerText: '© 2024 Santara Point. Berkah setiap saat.'
 };
 
@@ -73,6 +75,22 @@ export default function ContactPage() {
             <div>
               <p className="text-sm text-gray-400 mb-1">WhatsApp</p>
               <p className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">+{storeSettings.whatsapp}</p>
+            </div>
+          </a>
+
+          {/* Instagram */}
+          <a 
+            href={`https://instagram.com/${storeSettings.instagram?.replace('@', '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center p-5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-emerald-500/50 transition-all duration-300"
+          >
+            <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl group-hover:scale-110 transition-transform mr-5">
+              <Instagram size={24} />
+            </div>
+            <div>
+              <p className="text-sm text-gray-400 mb-1">Instagram</p>
+              <p className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">{storeSettings.instagram}</p>
             </div>
           </a>
 

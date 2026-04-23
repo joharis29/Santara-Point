@@ -124,6 +124,9 @@ export default function PenjualanPage() {
     const [storeSettings, setStoreSettings] = useState({
         storeName: 'Santara Point',
         storeTagline: 'Hidangan Lezat, Penuh Keberkahan.',
+        address: 'Jl. Ir. H. Djuanda No. 78, Sentul, Kota Bogor, Jawa Barat 16810',
+        instagram: '@santarapoint',
+        footerText: '© 2024 Santara Point. Berkah setiap saat.',
         isPajakActive: true,
         authorizedUsers: []
     });
@@ -162,6 +165,7 @@ export default function PenjualanPage() {
                 store_tagline: storeSettings.storeTagline || '',
                 whatsapp: storeSettings.whatsapp || '',
                 email: storeSettings.email || '',
+                instagram: storeSettings.instagram || '',
                 is_pajak_active: storeSettings.isPajakActive,
                 address: storeSettings.address || '',
                 company_category: storeSettings.companyCategory || '',
@@ -322,6 +326,7 @@ export default function PenjualanPage() {
                         storeTagline: data.store_tagline,
                         whatsapp: data.whatsapp,
                         email: data.email,
+                        instagram: data.instagram,
                         isPajakActive: data.is_pajak_active,
                         address: data.address,
                         companyCategory: data.company_category,

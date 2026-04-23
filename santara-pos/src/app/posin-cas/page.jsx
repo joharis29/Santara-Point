@@ -48,6 +48,7 @@ const DEFAULT_SETTINGS = {
     whatsapp: '6285846802177',
     email: 'santarapoint@gmail.com',
     address: 'Jl. Ir. H. Djuanda No. 78, Sentul, Kota Bogor, Jawa Barat 16810',
+    instagram: '@santarapoint',
     footerText: '© 2024 Santara Point. Berkah setiap saat.',
     // Info Perusahaan
     companyCategory: 'Retailer',
@@ -499,6 +500,7 @@ function CashierPortalContent() {
                         storeTagline: data.store_tagline,
                         whatsapp: data.whatsapp,
                         email: data.email,
+                        instagram: data.instagram,
                         isPajakActive: data.is_pajak_active,
                         address: data.address,
                         companyCategory: data.company_category,
