@@ -478,6 +478,34 @@ function CustomerPortalContent() {
                 if (stored) setProducts(JSON.parse(stored));
                 else setProducts(PRODUCTS);
             }
+
+            // Fetch Store Settings from Supabase
+            try {
+                const { data, error } = await supabase
+                    .from('store_settings')
+                    .select('*')
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') throw error;
+                if (data) {
+                    const mapped = {
+                        storeName: data.store_name,
+                        storeTagline: data.store_tagline,
+                        isPajakActive: data.is_pajak_active,
+                        address: data.address,
+                        companyCategory: data.company_category,
+                        companyField: data.company_field,
+                        currency: data.currency,
+                        companyNpwp: data.company_npwp,
+                        companyType: data.company_type,
+                        authorizedUsers: data.authorized_users
+                    };
+                    setStoreSettings(mapped);
+                    localStorage.setItem('santaraStoreSettings', JSON.stringify(mapped));
+                }
+            } catch (err) {
+                console.error("Error fetching store settings:", err);
+            }
         };
         fetchProducts();
 

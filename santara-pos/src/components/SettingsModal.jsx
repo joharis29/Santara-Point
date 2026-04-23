@@ -40,6 +40,8 @@ export default function SettingsModal({
     isAdmin = false,
     storeSettings = {},
     setStoreSettings = () => {},
+    onSaveStoreSettings = () => {},
+    isSavingStore = false,
     newUserContact = '',
     setNewUserContact = () => {},
     newUserRole = 'Operator',
@@ -367,6 +369,21 @@ export default function SettingsModal({
                                     onChange={(e) => setStoreSettings({ ...storeSettings, address: e.target.value })}
                                 ></textarea>
                             </div>
+
+                            <button
+                                onClick={onSaveStoreSettings}
+                                disabled={isSavingStore}
+                                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-2"
+                            >
+                                {isSavingStore ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                        Menyimpan...
+                                    </>
+                                ) : (
+                                    'Simpan Perubahan Toko'
+                                )}
+                            </button>
                         </div>
                     )}
 
@@ -415,6 +432,21 @@ export default function SettingsModal({
                                     </select>
                                 </div>
                             </div>
+
+                            <button
+                                onClick={onSaveStoreSettings}
+                                disabled={isSavingStore}
+                                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-2 mt-6"
+                            >
+                                {isSavingStore ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                        Menyimpan...
+                                    </>
+                                ) : (
+                                    'Simpan Pengaturan Pajak'
+                                )}
+                            </button>
                         </div>
                     )}
 

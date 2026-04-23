@@ -203,6 +203,40 @@ function AdminPortalContent() {
     const [newPasswordInput, setNewPasswordInput] = useState('');
     const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
     const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+    const [isSavingStore, setIsSavingStore] = useState(false);
+
+    const handleSaveStoreSettings = async () => {
+        setIsSavingStore(true);
+        try {
+            const toSave = {
+                id: 1,
+                store_name: storeSettings.storeName,
+                store_tagline: storeSettings.storeTagline || '',
+                is_pajak_active: storeSettings.isPajakActive,
+                address: storeSettings.address || '',
+                company_category: storeSettings.companyCategory || '',
+                company_field: storeSettings.companyField || '',
+                currency: storeSettings.currency || 'IDR',
+                company_npwp: storeSettings.companyNpwp || '',
+                company_type: storeSettings.companyType || 'PT',
+                authorized_users: storeSettings.authorizedUsers || [],
+                updated_at: new Date().toISOString()
+            };
+
+            const { error } = await supabase
+                .from('store_settings')
+                .upsert(toSave, { onConflict: 'id' });
+
+            if (error) throw error;
+            localStorage.setItem('santaraStoreSettings', JSON.stringify(storeSettings));
+            alert('Pengaturan toko berhasil disimpan secara global!');
+        } catch (err) {
+            console.error("Error saving store settings:", err);
+            alert('Gagal menyimpan pengaturan toko: ' + err.message);
+        } finally {
+            setIsSavingStore(false);
+        }
+    };
 
     async function handleSaveProfile(e) {
         if (e) e.preventDefault();
@@ -489,6 +523,39 @@ function AdminPortalContent() {
                 const stored = localStorage.getItem('santaraProducts');
                 if (stored) setProducts(JSON.parse(stored));
                 else setProducts(INITIAL_PRODUCTS);
+            }
+
+            // Fetch Store Settings from Supabase
+            try {
+                const { data, error } = await supabase
+                    .from('store_settings')
+                    .select('*')
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') throw error;
+                if (data) {
+                    const mapped = {
+                        storeName: data.store_name,
+                        storeTagline: data.store_tagline,
+                        isPajakActive: data.is_pajak_active,
+                        address: data.address,
+                        companyCategory: data.company_category,
+                        companyField: data.company_field,
+                        currency: data.currency,
+                        companyNpwp: data.company_npwp,
+                        companyType: data.company_type,
+                        authorizedUsers: data.authorized_users
+                    };
+                    setStoreSettings(mapped);
+                    localStorage.setItem('santaraStoreSettings', JSON.stringify(mapped));
+                } else {
+                    const storedSettings = localStorage.getItem('santaraStoreSettings');
+                    if (storedSettings) setStoreSettings(JSON.parse(storedSettings));
+                }
+            } catch (err) {
+                console.error("Error fetching store settings:", err);
+                const storedSettings = localStorage.getItem('santaraStoreSettings');
+                if (storedSettings) setStoreSettings(JSON.parse(storedSettings));
             }
         };
         fetchProducts();
@@ -911,6 +978,9 @@ function AdminPortalContent() {
                 handleSaveProfile={handleSaveProfile}
                 storeSettings={storeSettings}
                 setStoreSettings={setStoreSettings}
+                onSaveStoreSettings={handleSaveStoreSettings}
+                isSavingStore={isSavingStore}
+                newUserContact={newUserContact}
                 setIsChangeEmailOpen={setIsChangeEmailOpen}
                 setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
                 setIsChangePasswordOpen={setIsChangePasswordOpen}

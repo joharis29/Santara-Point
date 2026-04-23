@@ -151,6 +151,40 @@ export default function PenjualanPage() {
     const [newPasswordInput, setNewPasswordInput] = useState('');
     const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
     const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+    const [isSavingStore, setIsSavingStore] = useState(false);
+
+    const handleSaveStoreSettings = async () => {
+        setIsSavingStore(true);
+        try {
+            const toSave = {
+                id: 1,
+                store_name: storeSettings.storeName,
+                store_tagline: storeSettings.storeTagline || '',
+                is_pajak_active: storeSettings.isPajakActive,
+                address: storeSettings.address || '',
+                company_category: storeSettings.companyCategory || '',
+                company_field: storeSettings.companyField || '',
+                currency: storeSettings.currency || 'IDR',
+                company_npwp: storeSettings.companyNpwp || '',
+                company_type: storeSettings.companyType || 'PT',
+                authorized_users: storeSettings.authorizedUsers || [],
+                updated_at: new Date().toISOString()
+            };
+
+            const { error } = await supabase
+                .from('store_settings')
+                .upsert(toSave, { onConflict: 'id' });
+
+            if (error) throw error;
+            localStorage.setItem('santaraStoreSettings', JSON.stringify(storeSettings));
+            alert('Pengaturan toko berhasil disimpan secara global!');
+        } catch (err) {
+            console.error("Error saving store settings:", err);
+            alert('Gagal menyimpan pengaturan toko: ' + err.message);
+        } finally {
+            setIsSavingStore(false);
+        }
+    };
 
     useEffect(() => {
         // Security Check
@@ -272,8 +306,38 @@ export default function PenjualanPage() {
             const storedReturns = localStorage.getItem('santaraReturns');
             if (storedReturns) setReturns(JSON.parse(storedReturns));
 
-            const storedSettings = localStorage.getItem('santaraStoreSettings');
-            if (storedSettings) setStoreSettings(JSON.parse(storedSettings));
+            // Fetch Store Settings from Supabase
+            try {
+                const { data, error } = await supabase
+                    .from('store_settings')
+                    .select('*')
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') throw error; // PGRST116 is no rows found
+                if (data) {
+                    const mapped = {
+                        storeName: data.store_name,
+                        storeTagline: data.store_tagline,
+                        isPajakActive: data.is_pajak_active,
+                        address: data.address,
+                        companyCategory: data.company_category,
+                        companyField: data.company_field,
+                        currency: data.currency,
+                        companyNpwp: data.company_npwp,
+                        companyType: data.company_type,
+                        authorizedUsers: data.authorized_users
+                    };
+                    setStoreSettings(mapped);
+                    localStorage.setItem('santaraStoreSettings', JSON.stringify(mapped));
+                } else {
+                    const storedSettings = localStorage.getItem('santaraStoreSettings');
+                    if (storedSettings) setStoreSettings(JSON.parse(storedSettings));
+                }
+            } catch (err) {
+                console.error("Error fetching store settings:", err);
+                const storedSettings = localStorage.getItem('santaraStoreSettings');
+                if (storedSettings) setStoreSettings(JSON.parse(storedSettings));
+            }
         };
         fetchData();
 
@@ -816,14 +880,16 @@ export default function PenjualanPage() {
                 <SettingsModal 
                     isOpen={isSettingsOpen}
                     onClose={() => setIsSettingsOpen(false)}
-                    isAdmin={true}
                     activeTab={activeSettingsTab}
                     setActiveTab={setActiveSettingsTab}
                     userProfile={userProfile}
                     setUserProfile={setUserProfile}
                     handleSaveProfile={handleSaveProfile}
+                    isAdmin={true}
                     storeSettings={storeSettings}
                     setStoreSettings={setStoreSettings}
+                    onSaveStoreSettings={handleSaveStoreSettings}
+                    isSavingStore={isSavingStore}
                     newUserContact={newUserContact}
                     setNewUserContact={setNewUserContact}
                     newUserRole={newUserRole}
