@@ -204,6 +204,8 @@ function AdminPortalContent() {
     const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
     const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
     const [isSavingStore, setIsSavingStore] = useState(false);
+    const [newUserContact, setNewUserContact] = useState('');
+    const [newUserRole, setNewUserRole] = useState('Operator');
 
     const handleSaveStoreSettings = async () => {
         setIsSavingStore(true);
@@ -981,6 +983,9 @@ function AdminPortalContent() {
                 onSaveStoreSettings={handleSaveStoreSettings}
                 isSavingStore={isSavingStore}
                 newUserContact={newUserContact}
+                setNewUserContact={setNewUserContact}
+                newUserRole={newUserRole}
+                setNewUserRole={setNewUserRole}
                 setIsChangeEmailOpen={setIsChangeEmailOpen}
                 setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
                 setIsChangePasswordOpen={setIsChangePasswordOpen}
