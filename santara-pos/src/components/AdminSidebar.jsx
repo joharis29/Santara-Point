@@ -19,7 +19,7 @@ import {
     ArrowLeft
 } from 'lucide-react';
 
-const AdminSidebar = ({ isOpen, setIsOpen, onOpenSettings }) => {
+export default function AdminSidebar({ isOpen, setIsOpen, onOpenSettings }) {
     const router = useRouter();
     const pathname = usePathname();
 
@@ -38,11 +38,11 @@ const AdminSidebar = ({ isOpen, setIsOpen, onOpenSettings }) => {
         { icon: <Settings size={20} />, label: "Pengaturan Toko", action: onOpenSettings, id: 'pengaturan' },
     ];
 
-    const isActive = (item) => {
+    function isActive(item) {
         if (!item.href) return false;
         const itemPath = item.href.split('?')[0];
         return pathname === itemPath;
-    };
+    }
 
     return (
         <aside className={`fixed lg:static inset-y-0 left-0 w-64 bg-emerald-900 text-white flex flex-col shadow-2xl z-[100] transition-transform duration-300 transform ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
@@ -91,6 +91,5 @@ const AdminSidebar = ({ isOpen, setIsOpen, onOpenSettings }) => {
             </div>
         </aside>
     );
-};
+}
 
-export default AdminSidebar;

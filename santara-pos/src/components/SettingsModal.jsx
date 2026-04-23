@@ -22,7 +22,7 @@ import {
     ChevronDown
 } from 'lucide-react';
 
-const SettingsModal = ({ 
+export default function SettingsModal({ 
     isOpen, 
     onClose, 
     activeTab, 
@@ -44,7 +44,7 @@ const SettingsModal = ({
     setNewUserContact = () => {},
     newUserRole = 'Operator',
     setNewUserRole = () => {}
-}) => {
+}) {
     if (!isOpen) return null;
 
     return (
@@ -490,6 +490,5 @@ const SettingsModal = ({
             </div>
         </div>
     );
-};
+}
 
-export default SettingsModal;

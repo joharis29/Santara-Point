@@ -14,7 +14,7 @@ import {
     Home
 } from 'lucide-react';
 
-const CustomerHeader = ({ 
+export default function CustomerHeader({ 
     title, 
     subtitle, 
     showBackButton = false,
@@ -25,7 +25,7 @@ const CustomerHeader = ({
     onCartClick,
     onSettingsClick,
     customerAddress
-}) => {
+}) {
     const router = useRouter();
     const pathname = usePathname();
 
@@ -94,6 +94,5 @@ const CustomerHeader = ({
             </div>
         </header>
     );
-};
+}
 
-export default CustomerHeader;

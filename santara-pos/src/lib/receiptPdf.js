@@ -5,7 +5,8 @@ import autoTable from 'jspdf-autotable';
  * SANTARA POINT - PDF Receipt Generator
  * Generates a professional, branded PDF receipt.
  */
-export const generateReceiptPDF = async (transaction, storeSettings) => {
+export async function generateReceiptPDF(transaction, storeSettings) {
+
     if (!transaction || !transaction.items || transaction.items.length === 0) {
         console.error('Invalid transaction data for PDF generation');
         return;
@@ -151,4 +152,5 @@ export const generateReceiptPDF = async (transaction, storeSettings) => {
 
     // Save PDF
     doc.save(`Santara_Receipt_${transaction.id}.pdf`);
-};
+}
+

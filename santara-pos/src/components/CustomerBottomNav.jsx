@@ -10,7 +10,7 @@ import {
     Settings 
 } from 'lucide-react';
 
-const CustomerBottomNav = ({ onOpenSettings }) => {
+export default function CustomerBottomNav({ onOpenSettings }) {
     const router = useRouter();
     const pathname = usePathname();
 
@@ -22,10 +22,10 @@ const CustomerBottomNav = ({ onOpenSettings }) => {
         { icon: <Settings size={20} />, label: "Pengaturan", action: onOpenSettings },
     ];
 
-    const isActive = (item) => {
+    function isActive(item) {
         if (item.action) return false;
         return pathname === item.href;
-    };
+    }
 
     return (
         <nav className="lg:hidden fixed bottom-6 left-6 right-6 bg-slate-900/90 backdrop-blur-xl border border-white/10 px-6 py-4 flex justify-between items-center z-[100] rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
@@ -49,6 +49,5 @@ const CustomerBottomNav = ({ onOpenSettings }) => {
             ))}
         </nav>
     );
-};
+}
 
-export default CustomerBottomNav;

@@ -9,7 +9,7 @@ import {
     ShieldCheck 
 } from 'lucide-react';
 
-const AdminHeader = ({ 
+export default function AdminHeader({ 
     title, 
     subtitle, 
     searchTerm, 
@@ -17,7 +17,7 @@ const AdminHeader = ({
     onMenuClick, 
     showBackButton = true,
     customAction
-}) => {
+}) {
     const router = useRouter();
 
     return (
@@ -71,6 +71,5 @@ const AdminHeader = ({
             </div>
         </header>
     );
-};
+}
 
-export default AdminHeader;

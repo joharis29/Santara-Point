@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { ChangeEmailModal, ChangeWhatsappModal, ChangePasswordModal } from '@/components/UserManagementModals';
+
 import {
     Truck,
     Building2,
@@ -41,6 +43,14 @@ const DEFAULT_SETTINGS = {
     address: 'Jl. Raya Santara No. 123, Bandung',
     footerText: '© 2024 Santara Point. Berkah setiap saat.'
 };
+
+export default function WaitingListPage() {
+    return (
+        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div></div>}>
+            <WaitingListContent />
+        </Suspense>
+    );
+}
 
 function WaitingListContent() {
     // --- State Standarisasi ---
@@ -294,134 +304,137 @@ function WaitingListContent() {
     const diprosesList = transactions.filter(t => t.status === 'Diproses');
     const selesaiList = transactions.filter(t => t.status === 'Selesai').slice(-10); // Hanya tampilkan 10 terakhir di kolom selesai
 
-    const QueueCard = ({ trx, type }) => (
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-3 group relative overflow-hidden transition-all hover:shadow-md">
-            {/* Indikator Warna Header */}
-            <div className={`absolute top-0 left-0 w-full h-1 ${
-                type === 'Menunggu' ? 'bg-amber-400' : 
-                type === 'Diproses' ? 'bg-blue-500' : 'bg-emerald-500'
-            }`} />
+    function QueueCard({ trx, type }) {
+        return (
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-3 group relative overflow-hidden transition-all hover:shadow-md">
+                {/* Indikator Warna Header */}
+                <div className={`absolute top-0 left-0 w-full h-1 ${
+                    type === 'Menunggu' ? 'bg-amber-400' : 
+                    type === 'Diproses' ? 'bg-blue-500' : 'bg-emerald-500'
+                }`} />
 
-            <div className="flex justify-between items-start mt-1">
-                <div>
-                    <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Antrian</span>
-                    <h3 className="text-2xl font-black text-slate-800 leading-none">{trx.queueNumber}</h3>
+                <div className="flex justify-between items-start mt-1">
+                    <div>
+                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Antrian</span>
+                        <h3 className="text-2xl font-black text-slate-800 leading-none">{trx.queueNumber}</h3>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full uppercase">
+                            {trx.source}
+                        </span>
+                        <p className="text-[10px] text-slate-400 font-medium mt-1">
+                            {(() => {
+                                try {
+                                    const d = new Date(trx.timestamp);
+                                    return isNaN(d.getTime()) ? '...' : d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                                } catch (e) {
+                                    return '...';
+                                }
+                            })()}
+                        </p>
+                    </div>
                 </div>
-                <div className="text-right">
-                    <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full uppercase">
-                        {trx.source}
-                    </span>
-                    <p className="text-[10px] text-slate-400 font-medium mt-1">
-                        {(() => {
-                            try {
-                                const d = new Date(trx.timestamp);
-                                return isNaN(d.getTime()) ? '...' : d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                            } catch (e) {
-                                return '...';
-                            }
-                        })()}
-                    </p>
+
+                <div className="flex items-center gap-2 text-sm font-bold text-slate-700 bg-slate-50 p-2 rounded-lg">
+                    <User size={14} className="text-slate-400" /> {trx.customerName}
+                </div>
+
+                <div className="space-y-2.5">
+                    {(trx.source === 'Owner' || trx.source === 'Kasir') ? (
+                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 space-y-2">
+                            <div className="flex items-center gap-2 border-b border-slate-100 pb-1.5">
+                                <Info size={11} className="text-slate-400" />
+                                <h4 className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Keterangan Pesanan</h4>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="flex items-center gap-1.5">
+                                    <Utensils size={12} className="text-emerald-500" />
+                                    <span className="text-[10px] font-bold text-slate-600">{trx.orderType || 'Dine-In'}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <Hash size={12} className="text-amber-500" />
+                                    <span className="text-[10px] font-bold text-slate-600">No. {trx.queueNumber}</span>
+                                </div>
+                            </div>
+                            {trx.keterangan && (
+                                <p className="text-[10px] text-slate-500 italic bg-amber-50/50 p-2 rounded border border-amber-100/50 border-dashed">
+                                    "{trx.keterangan}"
+                                </p>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="bg-emerald-50/30 p-2.5 rounded-xl border border-emerald-100/50 space-y-2">
+                            <div className="flex items-center gap-2 border-b border-emerald-100/30 pb-1.5">
+                                <Truck size={11} className="text-emerald-600" />
+                                <h4 className="text-[9px] font-black uppercase text-emerald-600 tracking-widest">Data Diri Pemesan</h4>
+                            </div>
+                            <div className="space-y-1.5">
+                                <div className="flex items-center gap-1.5">
+                                    <Phone size={11} className="text-emerald-600" />
+                                    <span className="text-[10px] font-bold text-slate-600">{trx.customerPhone || 'N/A'}</span>
+                                </div>
+                                <div className="flex items-start gap-1.5">
+                                    <MapPin size={11} className="text-red-500 mt-0.5 shrink-0" />
+                                    <p className="text-[10px] font-bold text-slate-600 leading-tight line-clamp-2">{trx.deliveryAddress || 'Ambil di Toko'}</p>
+                                </div>
+                            </div>
+                            {trx.keterangan && (
+                                <p className="text-[10px] text-emerald-700 italic bg-white/80 p-2 rounded border border-emerald-100/50 border-dashed">
+                                    "{trx.keterangan}"
+                                </p>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex-1">
+                    <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 border-b border-slate-100 pb-1">Pesanan:</h4>
+                    <ul className="space-y-1">
+                        {trx.items && trx.items.map((item, idx) => (
+                            <li key={idx} className="flex gap-2 text-xs font-medium text-slate-700">
+                                <span className="font-black text-emerald-600">{item.quantity}x</span>
+                                <span className="line-clamp-1">{item.name}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                {/* Aksi */}
+                <div className="pt-2 mt-2 border-t border-slate-100">
+                    {type === 'Menunggu' && (
+                        <div className="flex gap-2">
+                            <button 
+                                onClick={() => handleChangeStatus(trx.id, 'Ditolak')}
+                                className="flex-1 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 font-black text-xs uppercase tracking-widest rounded-xl transition flex items-center justify-center gap-1"
+                            >
+                                Tolak
+                            </button>
+                            <button 
+                                onClick={() => handleChangeStatus(trx.id, 'Diproses')}
+                                className="flex-1 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-black text-xs uppercase tracking-widest rounded-xl transition flex items-center justify-center gap-1"
+                            >
+                                <ChefHat size={14} /> Terima
+                            </button>
+                        </div>
+                    )}
+                    {type === 'Diproses' && (
+                        <button 
+                            onClick={() => handleChangeStatus(trx.id, 'Selesai')}
+                            className="w-full py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-black text-xs uppercase tracking-widest rounded-xl transition flex items-center justify-center gap-2"
+                        >
+                            <Utensils size={14} /> Pesanan Siap
+                        </button>
+                    )}
+                    {type === 'Selesai' && (
+                        <div className="w-full py-2.5 bg-emerald-50 text-emerald-600 font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2">
+                            <CheckCircle2 size={14} /> Berhasil
+                        </div>
+                    )}
                 </div>
             </div>
+        );
+    }
 
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-700 bg-slate-50 p-2 rounded-lg">
-                <User size={14} className="text-slate-400" /> {trx.customerName}
-            </div>
-
-            <div className="space-y-2.5">
-                {(trx.source === 'Owner' || trx.source === 'Kasir') ? (
-                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 space-y-2">
-                        <div className="flex items-center gap-2 border-b border-slate-100 pb-1.5">
-                            <Info size={11} className="text-slate-400" />
-                            <h4 className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Keterangan Pesanan</h4>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                            <div className="flex items-center gap-1.5">
-                                <Utensils size={12} className="text-emerald-500" />
-                                <span className="text-[10px] font-bold text-slate-600">{trx.orderType || 'Dine-In'}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <Hash size={12} className="text-amber-500" />
-                                <span className="text-[10px] font-bold text-slate-600">No. {trx.queueNumber}</span>
-                            </div>
-                        </div>
-                        {trx.keterangan && (
-                            <p className="text-[10px] text-slate-500 italic bg-amber-50/50 p-2 rounded border border-amber-100/50 border-dashed">
-                                "{trx.keterangan}"
-                            </p>
-                        )}
-                    </div>
-                ) : (
-                    <div className="bg-emerald-50/30 p-2.5 rounded-xl border border-emerald-100/50 space-y-2">
-                        <div className="flex items-center gap-2 border-b border-emerald-100/30 pb-1.5">
-                            <Truck size={11} className="text-emerald-600" />
-                            <h4 className="text-[9px] font-black uppercase text-emerald-600 tracking-widest">Data Diri Pemesan</h4>
-                        </div>
-                        <div className="space-y-1.5">
-                            <div className="flex items-center gap-1.5">
-                                <Phone size={11} className="text-emerald-600" />
-                                <span className="text-[10px] font-bold text-slate-600">{trx.customerPhone || 'N/A'}</span>
-                            </div>
-                            <div className="flex items-start gap-1.5">
-                                <MapPin size={11} className="text-red-500 mt-0.5 shrink-0" />
-                                <p className="text-[10px] font-bold text-slate-600 leading-tight line-clamp-2">{trx.deliveryAddress || 'Ambil di Toko'}</p>
-                            </div>
-                        </div>
-                        {trx.keterangan && (
-                            <p className="text-[10px] text-emerald-700 italic bg-white/80 p-2 rounded border border-emerald-100/50 border-dashed">
-                                "{trx.keterangan}"
-                            </p>
-                        )}
-                    </div>
-                )}
-            </div>
-
-            <div className="flex-1">
-                <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 border-b border-slate-100 pb-1">Pesanan:</h4>
-                <ul className="space-y-1">
-                    {trx.items && trx.items.map((item, idx) => (
-                        <li key={idx} className="flex gap-2 text-xs font-medium text-slate-700">
-                            <span className="font-black text-emerald-600">{item.quantity}x</span>
-                            <span className="line-clamp-1">{item.name}</span>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-
-            {/* Aksi */}
-            <div className="pt-2 mt-2 border-t border-slate-100">
-                {type === 'Menunggu' && (
-                    <div className="flex gap-2">
-                        <button 
-                            onClick={() => handleChangeStatus(trx.id, 'Ditolak')}
-                            className="flex-1 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 font-black text-xs uppercase tracking-widest rounded-xl transition flex items-center justify-center gap-1"
-                        >
-                            Tolak
-                        </button>
-                        <button 
-                            onClick={() => handleChangeStatus(trx.id, 'Diproses')}
-                            className="flex-1 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-black text-xs uppercase tracking-widest rounded-xl transition flex items-center justify-center gap-1"
-                        >
-                            <ChefHat size={14} /> Terima
-                        </button>
-                    </div>
-                )}
-                {type === 'Diproses' && (
-                    <button 
-                        onClick={() => handleChangeStatus(trx.id, 'Selesai')}
-                        className="w-full py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-black text-xs uppercase tracking-widest rounded-xl transition flex items-center justify-center gap-2"
-                    >
-                        <Utensils size={14} /> Pesanan Siap
-                    </button>
-                )}
-                {type === 'Selesai' && (
-                    <div className="w-full py-2.5 bg-emerald-50 text-emerald-600 font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2">
-                        <CheckCircle2 size={14} /> Berhasil
-                    </div>
-                )}
-            </div>
-        </div>
-    );
 
     return (
         <div className="flex h-screen bg-slate-100 font-sans text-slate-900 overflow-hidden relative">
@@ -588,109 +601,9 @@ function WaitingListContent() {
     );
 }
 
-export default function WaitingListPage() {
-    return (
-        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div></div>}>
-            <WaitingListContent />
-        </Suspense>
-    );
-}
 
-// Modal Ganti Email
-const ChangeEmailModal = ({ isOpen, onClose, oldEmail, newEmail, setNewEmail, onConfirm, isProcessing }) => {
-    if (!isOpen) return null;
-    return (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
-            <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 space-y-6">
-                <h4 className="text-2xl font-black text-slate-800">Ganti Email</h4>
-                <form onSubmit={onConfirm} className="space-y-4">
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Email Baru</label>
-                        <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} required className="w-full px-5 py-3 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
-                    </div>
-                    <div className="flex gap-3">
-                        <button type="button" onClick={onClose} className="flex-1 py-4 bg-slate-100 rounded-2xl font-black">Batal</button>
-                        <button type="submit" disabled={isProcessing} className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-black disabled:opacity-50">Konfirmasi</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
 
-// Modal Ganti WhatsApp
-const ChangeWhatsappModal = ({ isOpen, onClose, oldWhatsapp, newWhatsapp, setNewWhatsapp, onConfirm, isProcessing }) => {
-    if (!isOpen) return null;
-    return (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
-            <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 space-y-6">
-                <h4 className="text-2xl font-black text-slate-800">Ganti WhatsApp</h4>
-                <form onSubmit={onConfirm} className="space-y-4">
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Nomor Baru</label>
-                        <input type="tel" value={newWhatsapp} onChange={(e) => setNewWhatsapp(e.target.value)} required className="w-full px-5 py-3 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
-                    </div>
-                    <div className="flex gap-3">
-                        <button type="button" onClick={onClose} className="flex-1 py-4 bg-slate-100 rounded-2xl font-black">Batal</button>
-                        <button type="submit" disabled={isProcessing} className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-black disabled:opacity-50">Simpan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
 
-// Modal Ganti Password
-const ChangePasswordModal = ({ isOpen, onClose, newPassword, setNewPassword, confirmPassword, setConfirmPassword, onConfirm, isProcessing }) => {
-    const [showNewPassword, setShowNewPassword] = React.useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
-    if (!isOpen) return null;
-    return (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
-            <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl p-8 space-y-6">
-                <h4 className="text-2xl font-black text-slate-800">Ganti Sandi</h4>
-                <form onSubmit={onConfirm} className="space-y-4">
-                    <div className="relative">
-                        <input
-                            type={showNewPassword ? "text" : "password"}
-                            placeholder="Sandi Baru"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            required
-                            className="w-full px-5 py-3 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold"
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowNewPassword(!showNewPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors"
-                        >
-                            {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                        </button>
-                    </div>
-                    <div className="relative">
-                        <input
-                            type={showConfirmPassword ? "text" : "password"}
-                            placeholder="Konfirmasi Sandi"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                            className="w-full px-5 py-3 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold"
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors"
-                        >
-                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                        </button>
-                    </div>
-                    <div className="flex gap-3">
-                        <button type="button" onClick={onClose} className="flex-1 py-4 bg-slate-100 rounded-2xl font-black">Batal</button>
-                        <button type="submit" disabled={isProcessing} className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-black disabled:opacity-50">Simpan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
+
+

@@ -12,7 +12,7 @@ import {
     Store
 } from 'lucide-react';
 
-const CashierHeader = ({ 
+export default function CashierHeader({ 
     storeName = "Santara Point",
     activeShift = "Pagi",
     searchTerm, 
@@ -91,6 +91,5 @@ const CashierHeader = ({
             </div>
         </header>
     );
-};
+}
 
-export default CashierHeader;

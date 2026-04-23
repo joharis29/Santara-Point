@@ -2,11 +2,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
-const OrderTrackingContext = createContext();
+const OrderTrackingContext = createContext(null);
 
-export const useOrderTracking = () => useContext(OrderTrackingContext);
 
-export const OrderTrackingProvider = ({ children }) => {
+export function useOrderTracking() {
+    return useContext(OrderTrackingContext);
+}
+
+export function OrderTrackingProvider({ children }) {
     const [activeTxId, setActiveTxId] = useState(null);
 
     // Sync with auth - Clear local tracking ID on logout
@@ -36,19 +39,20 @@ export const OrderTrackingProvider = ({ children }) => {
         checkAuthAndSync();
     }, []);
 
-    const startTracking = (id) => {
+    function startTracking(id) {
         localStorage.setItem('santaraActiveTxId', id);
         setActiveTxId(id);
-    };
+    }
 
-    const stopTracking = () => {
+    function stopTracking() {
         localStorage.removeItem('santaraActiveTxId');
         setActiveTxId(null);
-    };
+    }
 
     return (
         <OrderTrackingContext.Provider value={{ activeTxId, startTracking, stopTracking }}>
             {children}
         </OrderTrackingContext.Provider>
     );
-};
+}
+
