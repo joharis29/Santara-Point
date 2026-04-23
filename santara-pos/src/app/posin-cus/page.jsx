@@ -248,7 +248,7 @@ function CustomerPortalContent() {
     const [paymentMethod, setPaymentMethod] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [sortBy, setSortBy] = useState('default');
-    const [orderType, setOrderType] = useState('Ambil di Resto');
+    const [orderType, setOrderType] = useState('');
     
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [toppingModalProduct, setToppingModalProduct] = useState(null);
@@ -640,6 +640,10 @@ function CustomerPortalContent() {
         if (!customerName || !customerPhone || !paymentMethod) {
             return alert('Mohon lengkapi Nama, Nomor WhatsApp, dan Metode Pembayaran!');
         }
+
+        if (!orderType) {
+            return alert('Mohon pilih Opsi Pengiriman!');
+        }
         
         if (orderType === 'Delivery' && !customerAddress) {
             return alert('Mohon pilih/isi Alamat Pengiriman untuk pesanan Delivery!');
@@ -931,17 +935,15 @@ function CustomerPortalContent() {
                         <div className="space-y-4 bg-white p-5 rounded-[24px] border border-slate-100 shadow-sm mt-auto">
                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Data Diri Pemesan</h3>
                             <div className="grid grid-cols-1 gap-3">
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Opsi Pengiriman</p>
-                                    <select
+                                <select
                                     value={orderType}
                                     onChange={(e) => setOrderType(e.target.value)}
                                     className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium appearance-none"
                                 >
+                                    <option value="" disabled>Opsi Pengiriman</option>
                                     <option value="Ambil di Resto">Ambil di Resto</option>
                                     <option value="Delivery">Delivery</option>
                                 </select>
-                                </div>
 
                                 <input type="text" placeholder="Nama Lengkap" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium" />
                                 
@@ -1236,17 +1238,15 @@ function CustomerPortalContent() {
                                     <div className="pt-6 space-y-4">
                                         <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Data Pemesan</h3>
-                                            <div className="space-y-1">
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Opsi Pengiriman</p>
-                                                <select
-                                                    value={orderType}
-                                                    onChange={(e) => setOrderType(e.target.value)}
-                                                    className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold appearance-none mb-1"
-                                                >
+                                            <select
+                                                value={orderType}
+                                                onChange={(e) => setOrderType(e.target.value)}
+                                                className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold appearance-none mb-1"
+                                            >
+                                                <option value="" disabled>Opsi Pengiriman</option>
                                                 <option value="Ambil di Resto">Ambil di Resto</option>
-                                                    <option value="Delivery">Delivery</option>
-                                                </select>
-                                            </div>
+                                                <option value="Delivery">Delivery</option>
+                                            </select>
 
                                             <input type="text" placeholder="Nama Lengkap" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
                                             
