@@ -424,10 +424,20 @@ function CustomerPortalContent() {
         if (storedProducts) {
             try {
                 const parsed = JSON.parse(storedProducts);
-                const merged = PRODUCTS.map(masterItem => {
-                    const storedItem = parsed.find(p => p.id === masterItem.id);
-                    return storedItem ? { ...masterItem, ...storedItem } : masterItem;
+                
+                // Use parsed (localStorage) as the base
+                const merged = parsed.map(lp => {
+                    const masterMatch = PRODUCTS.find(p => p.id === lp.id);
+                    return masterMatch ? { ...masterMatch, ...lp } : lp;
                 });
+                
+                // Add any missing items from code
+                PRODUCTS.forEach(p => {
+                    if (!merged.find(lp => lp.id === p.id)) {
+                        merged.push(p);
+                    }
+                });
+
                 setProducts(merged);
             } catch (e) {
                 setProducts(PRODUCTS);

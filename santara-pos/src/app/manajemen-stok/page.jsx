@@ -140,19 +140,28 @@ export default function ManajemenStok() {
         }
         const storedProducts = localStorage.getItem('santaraProducts');
         if (storedProducts) {
-            const parsed = JSON.parse(storedProducts);
-            // Self-healing: Jika data yang tersimpan tidak lengkap (kategori hilang), kembalikan ke INITIAL_PRODUCTS
-            const missingCategories = !parsed.some(p => p.category === 'Minuman') || 
-                                     !parsed.some(p => p.category === 'Snack') || 
-                                     !parsed.some(p => p.category === 'Frozen Food');
-                                     
-            if (missingCategories) {
+            try {
+                const parsed = JSON.parse(storedProducts);
+                
+                // Merge logic: trust localStorage for modified properties (stock, price),
+                // but include any new products from INITIAL_PRODUCTS.
+                const merged = [...parsed];
+                INITIAL_PRODUCTS.forEach(ip => {
+                    const localIndex = merged.findIndex(p => p.id === ip.id);
+                    if (localIndex === -1) {
+                        merged.push(ip);
+                    } else {
+                        merged[localIndex] = { ...ip, ...merged[localIndex] };
+                    }
+                });
+                
+                setProducts(merged);
+                localStorage.setItem('santaraProducts', JSON.stringify(merged));
+            } catch (e) {
                 setProducts(INITIAL_PRODUCTS);
-                localStorage.setItem('santaraProducts', JSON.stringify(INITIAL_PRODUCTS));
-            } else {
-                setProducts(parsed);
             }
         } else {
+            setProducts(INITIAL_PRODUCTS);
             localStorage.setItem('santaraProducts', JSON.stringify(INITIAL_PRODUCTS));
         }
 

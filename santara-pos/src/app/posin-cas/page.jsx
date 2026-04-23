@@ -416,10 +416,21 @@ function CashierPortalContent() {
         if (storedProducts) {
             try {
                 const localData = JSON.parse(storedProducts);
-                const syncedProducts = PRODUCTS.map(p => {
-                    const localMatch = localData.find(lp => lp.id === p.id);
-                    return localMatch ? { ...p, ...localMatch } : p;
+                
+                // Use localData as the base (so deleted items stay deleted and new items appear)
+                // But merge with PRODUCTS to get any code-side updates for existing items.
+                const syncedProducts = localData.map(lp => {
+                    const masterMatch = PRODUCTS.find(p => p.id === lp.id);
+                    return masterMatch ? { ...masterMatch, ...lp } : lp;
                 });
+                
+                // Also add any products from code (PRODUCTS) that are missing in localData
+                PRODUCTS.forEach(p => {
+                    if (!syncedProducts.find(lp => lp.id === p.id)) {
+                        syncedProducts.push(p);
+                    }
+                });
+
                 setProducts(syncedProducts);
                 localStorage.setItem('santaraProducts', JSON.stringify(syncedProducts));
             } catch (e) {

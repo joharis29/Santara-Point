@@ -137,15 +137,33 @@ export default function PenjualanPage() {
         }
         const storedProducts = localStorage.getItem('santaraProducts');
         if (storedProducts) {
-            const parsed = JSON.parse(storedProducts);
-            // Migrasi data: pastikan originalPrice dan discountPercent ada
-            const migrated = parsed.map(p => ({
-                ...p,
-                originalPrice: p.originalPrice ?? p.price,
-                discountPercent: p.discountPercent ?? 0
-            }));
-            setProducts(migrated);
-            setEditedProducts(JSON.parse(JSON.stringify(migrated)));
+            try {
+                const parsed = JSON.parse(storedProducts);
+                
+                // Merge logic: trust localStorage for modified properties, 
+                // but include any new products from INITIAL_PRODUCTS.
+                const merged = [...parsed];
+                INITIAL_PRODUCTS.forEach(ip => {
+                    const localIndex = merged.findIndex(p => p.id === ip.id);
+                    if (localIndex === -1) {
+                        merged.push({ ...ip, originalPrice: ip.price, discountPercent: 0 });
+                    } else {
+                        // Ensure migrated fields exist
+                        merged[localIndex] = {
+                            ...ip,
+                            ...merged[localIndex],
+                            originalPrice: merged[localIndex].originalPrice ?? merged[localIndex].price ?? ip.price,
+                            discountPercent: merged[localIndex].discountPercent ?? 0
+                        };
+                    }
+                });
+                
+                setProducts(merged);
+                setEditedProducts(JSON.parse(JSON.stringify(merged)));
+            } catch (e) {
+                console.error("Error parsing stored products:", e);
+                setProducts(INITIAL_PRODUCTS);
+            }
         } else {
             const initial = INITIAL_PRODUCTS.map(p => ({ 
                 ...p, 
@@ -157,12 +175,41 @@ export default function PenjualanPage() {
             localStorage.setItem('santaraProducts', JSON.stringify(initial));
         }
 
-        const fetchData = () => {
+        const fetchData = async () => {
             const storedCustomers = localStorage.getItem('santaraCustomers');
             if (storedCustomers) setCustomers(JSON.parse(storedCustomers));
 
-            const storedHistory = localStorage.getItem('santaraTransactionHistory');
-            if (storedHistory) setTransactions(JSON.parse(storedHistory));
+            // Fetch Transactions from Supabase for global sync
+            try {
+                const { data, error } = await supabase
+                    .from('transactions')
+                    .select('*')
+                    .order('timestamp', { ascending: false });
+                
+                if (error) throw error;
+                if (data) {
+                    const mapped = data.map(t => ({
+                        id: t.id,
+                        timestamp: t.timestamp,
+                        customerName: t.customer_name,
+                        queueNumber: t.queue_number,
+                        orderType: t.order_type,
+                        keterangan: t.keterangan,
+                        paymentMethod: t.payment_method,
+                        source: t.source,
+                        cashierName: t.cashier_name,
+                        totalAmount: t.total_amount,
+                        pajak: t.pajak,
+                        status: t.status,
+                        items: t.items
+                    }));
+                    setTransactions(mapped);
+                }
+            } catch (err) {
+                console.error("Error fetching transactions from Supabase:", err);
+                const storedHistory = localStorage.getItem('santaraTransactionHistory');
+                if (storedHistory) setTransactions(JSON.parse(storedHistory));
+            }
 
             const storedReturns = localStorage.getItem('santaraReturns');
             if (storedReturns) setReturns(JSON.parse(storedReturns));
