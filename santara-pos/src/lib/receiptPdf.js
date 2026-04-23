@@ -87,6 +87,14 @@ export async function generateReceiptPDF(transaction, storeSettings) {
     doc.text(`Tipe: ${transaction.orderType || 'Dine-In'}`, margin, currentY);
     doc.text(`Kasir: ${transaction.cashierName || 'Online'}`, pageWidth - margin, currentY, { align: 'right' });
 
+    // New: Delivery Address if applicable
+    if (transaction.orderType === 'Delivery' && transaction.deliveryAddress) {
+        currentY += 4;
+        const addrLines = doc.splitTextToSize(`Alamat: ${transaction.deliveryAddress}`, pageWidth - 10);
+        doc.text(addrLines, margin, currentY);
+        currentY += (addrLines.length * 3) - 1;
+    }
+
     // --- Items Table ---
     currentY += 6;
     const tableHead = [['Menu', 'Qty', 'Total']];
@@ -113,6 +121,18 @@ export async function generateReceiptPDF(transaction, storeSettings) {
             currentY = data.cursor.y;
         }
     });
+
+    // New: Customer Notes/Keterangan after items
+    if (transaction.keterangan) {
+        currentY += 4;
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(7);
+        doc.setTextColor(80);
+        const noteLines = doc.splitTextToSize(`Catatan: ${transaction.keterangan}`, pageWidth - 10);
+        doc.text(noteLines, margin, currentY);
+        currentY += (noteLines.length * 3) + 1;
+        doc.setTextColor(0); // Reset color
+    }
 
     // --- Totals Section ---
     currentY += 6;

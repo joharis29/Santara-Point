@@ -113,7 +113,8 @@ function HistoryContent() {
                         totalAmount: trx.total_amount,
                         pajak: trx.pajak,
                         status: trx.status,
-                        items: trx.items
+                        items: trx.items,
+                        deliveryAddress: trx.delivery_address
                     }));
                     setTransactions(mapped);
                     

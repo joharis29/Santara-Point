@@ -163,7 +163,8 @@ export default function CustomerHistory() {
                         totalAmount: trx.total_amount,
                         pajak: trx.pajak,
                         status: trx.status,
-                        items: trx.items
+                        items: trx.items,
+                        deliveryAddress: trx.delivery_address // Added for PDF receipt
                     }));
                     setHistory(mapped);
                 } else {
