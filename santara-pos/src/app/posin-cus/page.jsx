@@ -124,13 +124,6 @@ const PRODUCTS = [
 
 const CATEGORIES = ['Semua', 'Makanan', 'Minuman', 'Snack', 'Frozen Food'];
 
-export default function App() {
-    return (
-        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center font-bold text-emerald-600">Loading Santara Point...</div>}>
-            <CustomerPortalContent />
-        </Suspense>
-    );
-}
 
 
 
@@ -1378,5 +1371,13 @@ function CustomerPortalContent() {
                 isProcessing={isUpdatingPassword}
             />
         </div>
+    );
+}
+
+export default function CustomerPOSPage() {
+    return (
+        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center font-bold text-emerald-600">Loading Santara Point...</div>}>
+            <CustomerPortalContent />
+        </Suspense>
     );
 }

@@ -838,15 +838,208 @@ function AdminPortalContent() {
                 confirmPassword={confirmPasswordInput}
                 setConfirmPassword={setConfirmPasswordInput}
                 onConfirm={handleConfirmPasswordChange}
+onChange={(e) => setQueueNumber(e.target.value)}
+                                className="w-full text-[13px] px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 cursor-pointer"
+                            >
+                                <option value="" disabled>Pilih Nomor Antrian</option>
+                                {Array.from({ length: 100 }, (_, i) => i + 1).map(num => {
+                                    const isUsed = usedQueueNumbers.includes(num.toString());
+                                    return (
+                                        <option key={num} value={num} disabled={isUsed}>
+                                            Antrian {num} {isUsed ? '(Terpakai)' : ''}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                            <select
+                                value={orderType}
+                                onChange={(e) => setOrderType(e.target.value)}
+                                className="w-full text-[13px] px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 cursor-pointer"
+                            >
+                                <option value="Dine-In">Dine-In</option>
+                                <option value="Takeaway">Takeaway</option>
+                            </select>
+                            <textarea 
+                                placeholder="Keterangan (Optional)..." 
+                                value={orderNote} 
+                                onChange={(e) => setOrderNote(e.target.value)} 
+                                className="w-full text-[13px] px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 min-h-[80px] resize-none"
+                            ></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Payment Summary */}
+                <div className="p-6 bg-slate-50 border-t border-slate-200">
+                    <div className="space-y-3 mb-5">
+                        <div className="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
+                            <span>Subtotal</span>
+                            <span className="text-slate-800">Rp {subtotal.toLocaleString('id-ID')}</span>
+                        </div>
+                        {storeSettings.isPajakActive && (
+                            <div className="flex items-center justify-between p-3 rounded-xl border bg-emerald-600 border-emerald-600 text-white shadow-lg">
+                                <div className="flex items-center gap-3">
+                                    <Calculator size={14} />
+                                    <span className="text-[10px] font-black uppercase">Pajak Daerah (10%)</span>
+                                </div>
+                                <span className="text-xs font-black">Rp {pajakValue.toLocaleString('id-ID')}</span>
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex justify-between items-center mb-5">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Tagihan</span>
+                        <span className="text-2xl font-black text-emerald-700 tracking-tight">Rp {totalAmount.toLocaleString('id-ID')}</span>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <select
+                            value={paymentMethod}
+                            onChange={(e) => setPaymentMethod(e.target.value)}
+                            className="w-full text-xs px-3 py-3 bg-white border-2 border-emerald-600 rounded-xl outline-none font-black text-emerald-700 cursor-pointer uppercase text-center appearance-none"
+                        >
+                            <option value="" disabled>Pilih Pembayaran</option>
+                            <option value="Tunai">Tunai</option>
+                            <option value="Transfer">Transfer</option>
+                        </select>
+                        <button
+                            onClick={handleCheckout}
+                            disabled={cart.length === 0}
+                            className="w-full py-3 rounded-xl bg-emerald-600 text-white font-black text-xs uppercase tracking-widest hover:bg-emerald-700 shadow-lg active:scale-95 disabled:opacity-50"
+                        >
+                            Proses Pesanan
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            {/* Floating Cart Button (Mobile) */}
+            <div className="lg:hidden fixed bottom-6 right-6 z-40">
+                <button
+                    onClick={() => setIsCartModalOpen(true)}
+                    className="relative bg-emerald-600 text-white p-4 rounded-full shadow-2xl active:scale-95 transition-all outline-none"
+                >
+                    <ShoppingBag size={24} />
+                    {cart.length > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-2 border-white animate-bounce">
+                            {cart.length}
+                        </span>
+                    )}
+                </button>
+            </div>
+
+            {/* Cart Modal Mobile (Admin) */}
+            {isCartModalOpen && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] lg:hidden">
+                    <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+                        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                            <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest">Ringkasan Pesanan</h2>
+                            <button onClick={() => setIsCartModalOpen(false)} className="p-2 bg-slate-100 rounded-full text-slate-400">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6">
+                            {cart.length === 0 ? (
+                                <div className="h-40 flex flex-col items-center justify-center text-slate-300 italic">
+                                    <ShoppingCart size={40} className="opacity-20" />
+                                    <p className="text-xs">Keranjang kosong</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {cart.map(item => (
+                                        <div key={item.id} className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border">
+                                            <div className="flex-1">
+                                                <h5 className="font-bold text-sm">{item.name}</h5>
+                                                <p className="text-xs font-black text-emerald-600">Rp {(item.price * item.quantity).toLocaleString('id-ID')}</p>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-3 bg-white p-1 rounded-lg border">
+                                                    <button onClick={() => updateQty(item.id, -1)} className="w-7 h-7 flex items-center justify-center bg-slate-50 rounded"><Minus size={12}/></button>
+                                                    <span className="font-black text-sm">{item.quantity}</span>
+                                                    <button onClick={() => addToCart(item)} className="w-7 h-7 flex items-center justify-center bg-slate-50 rounded"><Plus size={12}/></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className="mt-8 space-y-4">
+                                <input type="text" placeholder="Nama Pemesan" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full px-4 py-4 bg-slate-50 border rounded-2xl font-bold" />
+                                <select value={queueNumber} onChange={(e) => setQueueNumber(e.target.value)} className="w-full px-4 py-4 bg-slate-50 border rounded-2xl font-bold">
+                                    <option value="" disabled>No Antrian</option>
+                                    {Array.from({ length: 100 }, (_, i) => i + 1).map(num => <option key={num} value={num}>Antrian {num}</option>)}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="p-6 bg-slate-50 border-t border-slate-100">
+                            <div className="flex justify-between items-center mb-6">
+                                <span className="font-black text-slate-400 uppercase text-[10px]">Total Bayar</span>
+                                <span className="text-2xl font-black text-emerald-700">Rp {totalAmount.toLocaleString('id-ID')}</span>
+                            </div>
+                            <button onClick={handleCheckout} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-emerald-100">Proses Pembayaran</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Tracking Overlay */}
+            <WaitingOverlay 
+                isOpen={isWaitingOpen}
+                onClose={handleCloseWaiting}
+                customerName={customerName}
+                totalAmount={totalAmount}
+                transactionId={currentTxId}
+            />
+            <SettingsModal 
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                isAdmin={true}
+                activeTab={activeSettingsTab}
+                setActiveTab={setActiveSettingsTab}
+                userProfile={userProfile}
+                setUserProfile={setUserProfile}
+                handleSaveProfile={handleSaveProfile}
+                storeSettings={storeSettings}
+                setStoreSettings={setStoreSettings}
+                setIsChangeEmailOpen={setIsChangeEmailOpen}
+                setIsChangeWhatsappOpen={setIsChangeWhatsappOpen}
+                setIsChangePasswordOpen={setIsChangePasswordOpen}
+                addAddress={addAddress}
+                removeAddress={removeAddress}
+                updateAddress={updateAddress}
+            />
+            <ChangeEmailModal
+                isOpen={isChangeEmailOpen}
+                onClose={() => setIsChangeEmailOpen(false)}
+                oldEmail={userProfile.email}
+                newEmail={newEmailInput}
+                setNewEmail={setNewEmailInput}
+                onConfirm={handleConfirmEmailChange}
+                isProcessing={isUpdatingEmail}
+            />
+            <ChangeWhatsappModal
+                isOpen={isChangeWhatsappOpen}
+                onClose={() => setIsChangeWhatsappOpen(false)}
+                oldWhatsapp={userProfile.whatsapp}
+                newWhatsapp={newWhatsappInput}
+                setNewWhatsapp={setNewWhatsappInput}
+                onConfirm={handleConfirmWhatsappChange}
+                isProcessing={isUpdatingWhatsapp}
+            />
+            <ChangePasswordModal
+                isOpen={isChangePasswordOpen}
+                onClose={() => setIsChangePasswordOpen(false)}
+                newPassword={newPasswordInput}
+                setNewPassword={setNewPasswordInput}
+                confirmPassword={confirmPasswordInput}
+                setConfirmPassword={setConfirmPasswordInput}
+                onConfirm={handleConfirmPasswordChange}
                 isProcessing={isUpdatingPassword}
             />
         </div>
     );
 }
 
-
-
-export default function App() {
+export default function AdminPOSPage() {
     return (
         <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div></div>}>
             <AdminPortalContent />

@@ -23,7 +23,7 @@ import BackgroundSlider from '@/components/BackgroundSlider';
  * Visual: Fullscreen Food Background with Dark Overlay
  */
 
-export default function App() {
+export default function HomePage() {
     const router = useRouter();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
