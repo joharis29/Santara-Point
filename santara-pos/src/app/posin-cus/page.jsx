@@ -250,7 +250,7 @@ function CustomerPortalContent() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [sortBy, setSortBy] = useState('default');
     const [orderType, setOrderType] = useState('');
-    
+
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [toppingModalProduct, setToppingModalProduct] = useState(null);
     const [isQrisOpen, setIsQrisOpen] = useState(false);
@@ -444,7 +444,7 @@ function CustomerPortalContent() {
                         original_price: p.originalPrice || p.price
                     }));
                     await supabase.from('products').upsert(initial, { onConflict: 'id' });
-                    
+
                     const { data: syncedData } = await supabase.from('products').select('*').order('id', { ascending: true });
                     const mapped = syncedData.map(p => ({
                         id: p.id,
@@ -486,7 +486,7 @@ function CustomerPortalContent() {
                     .from('store_settings')
                     .select('*')
                     .single();
-                
+
                 if (error && error.code !== 'PGRST116') throw error;
                 if (data) {
                     const mapped = {
@@ -607,8 +607,8 @@ function CustomerPortalContent() {
     };
 
     const confirmAddToCart = (product, topping = null) => {
-        const discountedPrice = product.discountPercent > 0 
-            ? Math.round(product.price * (1 - (product.discountPercent / 100))) 
+        const discountedPrice = product.discountPercent > 0
+            ? Math.round(product.price * (1 - (product.discountPercent / 100)))
             : product.price;
 
         const finalId = topping && topping !== 'Tanpa Toping' ? `${product.id}-${topping}` : product.id;
@@ -692,10 +692,10 @@ function CustomerPortalContent() {
             // 11. Success - Clear local cart and start tracking
             setCart([]);
             localStorage.removeItem('santaraCart');
-            
+
             // Trigger Global Order Tracking
             startTracking(tId, customerName, totalAmount);
-            
+
             alert(`Pesanan Berhasil!\nID: ${tId}\n\nStaf kami sedang memproses hidangan Anda.`);
             router.push('/customer-history');
         } catch (err) {
@@ -711,7 +711,7 @@ function CustomerPortalContent() {
         }
 
         if (cart.length === 0) return alert('Keranjang masih kosong!');
-        
+
         // Validation logic
         if (!customerName || !customerPhone || !paymentMethod) {
             return alert('Mohon lengkapi Nama, Nomor WhatsApp, dan Metode Pembayaran!');
@@ -720,7 +720,7 @@ function CustomerPortalContent() {
         if (!orderType) {
             return alert('Mohon pilih Opsi Pengiriman!');
         }
-        
+
         if (orderType === 'Delivery' && !customerAddress) {
             return alert('Mohon pilih/isi Alamat Pengiriman untuk pesanan Delivery!');
         }
@@ -875,12 +875,12 @@ function CustomerPortalContent() {
                                     {(() => {
                                         const productInCart = cart.filter(item => item.originalId === product.id || item.id === product.id);
                                         const totalQty = productInCart.reduce((sum, item) => sum + item.quantity, 0);
-                                        
+
                                         return (
                                             <div className={`absolute bottom-4 right-4 z-40 flex items-center transition-all duration-300 ${totalQty > 0 ? 'bg-emerald-600 text-white px-1.5 py-1 rounded-full shadow-lg border-2 border-white gap-2' : ''}`}>
                                                 {totalQty > 0 ? (
                                                     <>
-                                                        <button 
+                                                        <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 const itemToDec = productInCart[0];
@@ -890,7 +890,7 @@ function CustomerPortalContent() {
                                                         >
                                                             <Minus size={14} strokeWidth={4} />
                                                         </button>
-                                                        <input 
+                                                        <input
                                                             type="number"
                                                             value={totalQty}
                                                             onChange={(e) => {
@@ -906,7 +906,7 @@ function CustomerPortalContent() {
                                                             onClick={(e) => e.stopPropagation()}
                                                             className="text-[13px] font-black min-w-[24px] w-8 text-center bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                         />
-                                                        <button 
+                                                        <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 addToCart(product);
@@ -917,7 +917,7 @@ function CustomerPortalContent() {
                                                         </button>
                                                     </>
                                                 ) : (
-                                                    <button 
+                                                    <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             addToCart(product);
@@ -943,8 +943,8 @@ function CustomerPortalContent() {
                                                 </span>
                                             )}
                                             <p className="text-emerald-600 font-black text-base italic">
-                                                Rp {(product.discountPercent > 0 
-                                                    ? Math.round(product.price * (1 - (product.discountPercent / 100))) 
+                                                Rp {(product.discountPercent > 0
+                                                    ? Math.round(product.price * (1 - (product.discountPercent / 100)))
                                                     : product.price).toLocaleString('id-ID')}
                                             </p>
                                         </div>
@@ -1028,7 +1028,7 @@ function CustomerPortalContent() {
                                     <input type="text" placeholder="Nama Lengkap" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-[13px] px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium" />
                                     <span className="absolute top-2 right-4 text-red-500 font-bold text-sm">*</span>
                                 </div>
-                                
+
                                 {orderType === 'Delivery' && (
                                     <div className="space-y-2">
                                         <div className="flex gap-2">
@@ -1216,12 +1216,12 @@ function CustomerPortalContent() {
                         <div className="w-full flex flex-col gap-4 mb-6">
                             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left">
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Bank BSI</p>
-                                <p className="text-lg font-black text-slate-800 tracking-wider">7270099127</p>
+                                <p className="text-lg font-black text-slate-800 tracking-wider">72770099117</p>
                                 <p className="text-sm font-medium text-slate-600">A/N Sidqi Alaudin</p>
                             </div>
                             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left">
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Bank BRI</p>
-                                <p className="text-lg font-black text-slate-800 tracking-wider">431301004479505</p>
+                                <p className="text-lg font-black text-slate-800 tracking-wider">431339900447755</p>
                                 <p className="text-sm font-medium text-slate-600">A/N Sidqi Alaudin</p>
                             </div>
                         </div>
@@ -1343,7 +1343,7 @@ function CustomerPortalContent() {
                                                 <input type="text" placeholder="Nama Lengkap" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full text-sm px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold" />
                                                 <span className="absolute top-2 right-4 text-red-500 font-bold text-sm">*</span>
                                             </div>
-                                            
+
                                             {orderType === 'Delivery' && (
                                                 <div className="space-y-2">
                                                     <div className="flex gap-2">
